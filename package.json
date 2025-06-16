@@ -5,11 +5,13 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/main.js",
-    "dev": "nodemon --watch src src/main.ts",
+    "start": "node dist/server.js",
+    "dev": "nodemon --watch src src/server.ts",
     "prisma:seed": "ts-node prisma/seed.ts",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "test-poll-unit": "jest --selectProjects poll-unit --runInBand --detectOpenHandles",
+    "test-poll-api": "jest --selectProjects poll-api --runInBand --detectOpenHandles"
   },
   "keywords": [],
   "author": "",
@@ -27,6 +29,8 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.1",
     "socket.io": "^4.8.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
@@ -40,6 +44,8 @@
     "@types/node": "^24.0.1",
     "@types/socket.io": "^3.0.1",
     "@types/supertest": "^6.0.3",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
     "@types/uuid": "^10.0.0",
     "jest": "^30.0.0",
     "nodemon": "^3.1.10",
