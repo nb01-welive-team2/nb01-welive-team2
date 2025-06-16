@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/main.js",
-    "dev": "nodemon --watch src src/main.ts",
+    "start": "node dist/server.js",
+    "dev": "nodemon --watch src src/server.ts",
     "prisma:seed": "ts-node prisma/seed.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
