@@ -216,6 +216,7 @@ enum NOTICE_CATEGORY {
   ETC
 }
 
+//한글값은 나중에 프론트서버 나오면 어떤 값을 사용하는지 확인해서 변경
 enum NOTIFICATION_TYPE {
   COMPLAINT_RESOLVED
   민원_등록

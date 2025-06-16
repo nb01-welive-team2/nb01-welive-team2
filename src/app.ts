@@ -6,7 +6,7 @@ import path from "path";
 import cookieParser from "cookie-parser";
 // import { UPLOAD_FOLDER, STATIC_PATH } from './config/constants';
 // import usersRouter from './routers/userRouter';
-import pollsRouter from "./routes/pollsRouter";
+import pollsRouter from "./routes/pollRouter";
 // import commentsRouter from './routers/commentRouter';
 // import imagesRouter from './routers/imageRouter';
 // import notificationsRouter from './routers/notificationRouter';

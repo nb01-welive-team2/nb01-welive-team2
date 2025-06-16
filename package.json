@@ -9,7 +9,9 @@
     "dev": "nodemon --watch src src/main.ts",
     "prisma:seed": "ts-node prisma/seed.ts",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "test-poll-unit": "jest --selectProjects poll-unit --runInBand --detectOpenHandles",
+    "test-poll-api": "jest --selectProjects poll-api --runInBand --detectOpenHandles"
   },
   "keywords": [],
   "author": "",
