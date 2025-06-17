@@ -23,7 +23,8 @@ export const login = async (data: LoginRequestDTO) => {
   }
 
   const userId = user.id;
-  const { accessToken, refreshToken } = generateTokens(userId);
+  const role = user.role;
+  const { accessToken, refreshToken } = generateTokens(userId, role);
 
   return {
     accessToken,
