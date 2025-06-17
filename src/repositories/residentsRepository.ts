@@ -31,10 +31,15 @@ export async function getResidentById(id: string) {
 }
 
 // 입주민 정보 수정 (관리자)
-export async function patchResidentInfo(id: string, data: Partial<Residents>) {
+export async function updateResidentInfo(id: string, data: Partial<Residents>) {
   const resident = await prisma.residents.update({
     where: { id },
     data,
   });
   return resident;
+}
+
+// 입주민 정보 삭제 (관리자)
+export async function deleteResident(id: string) {
+  return await prisma.residents.delete({ where: { id } });
 }

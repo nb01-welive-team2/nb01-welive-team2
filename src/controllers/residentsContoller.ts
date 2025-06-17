@@ -1,5 +1,9 @@
 import { Request, Response } from "express";
-import { getResidentsList, getResident } from "../services/residentsService";
+import {
+  getResidentsList,
+  getResident,
+  removeResident,
+} from "../services/residentsService";
 import { updateResidentInfo } from "../repositories/residentsRepository";
 
 // 입주민 목록 조회
@@ -44,5 +48,17 @@ export async function updateResidentInfoController(
   } catch (error) {
     console.log(error);
     res.status(400).json({ message: "입주민 정보 수정 실패" });
+  }
+}
+
+// 입주민 정보 삭제
+export async function deleteResidentController(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    await removeResident(id);
+    res.status(200).json({ message: "입주민 정보 삭제 성공" });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ message: "입주민 정보 삭제 실패" });
   }
 }

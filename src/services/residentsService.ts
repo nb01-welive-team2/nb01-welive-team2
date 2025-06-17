@@ -3,6 +3,7 @@ import {
   getResidentsFiltered,
   getResidentById,
   updateResidentInfo,
+  deleteResident,
 } from "../repositories/residentsRepository";
 import { ResidentsFilter } from "../types/residents";
 
@@ -22,4 +23,9 @@ export async function getResident(id: string) {
 export async function patchResident(id: string, data: Partial<Residents>) {
   const resident = await updateResidentInfo(id, data);
   return resident;
+}
+
+// 입주민 정보 삭제
+export async function removeResident(id: string) {
+  return await deleteResident(id);
 }
