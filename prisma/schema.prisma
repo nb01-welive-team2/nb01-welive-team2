@@ -30,6 +30,8 @@ model Users {
   articles      Articles[]
   votes         Votes[]
   notifications Notifications[]
+
+  NoticeComments NoticeComments[]
 }
 
 model ApartmentInfo {
@@ -104,6 +106,8 @@ model Articles {
   content   String
   startDate DateTime @default(now())
   endDate   DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
   boardId   BOARD_ID
 
   user    Users     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -150,6 +154,19 @@ model Notices {
 
   article       Articles        @relation(fields: [articleId], references: [id], onDelete: Cascade)
   notifications Notifications[]
+
+  NoticeComments NoticeComments[]
+}
+
+model NoticeComments {
+  id        String   @id @default(uuid())
+  noticeId  String
+  userId    String
+  content   String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+
+  notice Notices @relation(fields: [noticeId], references: [id], onDelete: Cascade)
+  user   Users   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Notifications {

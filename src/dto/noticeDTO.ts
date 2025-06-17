@@ -1,38 +1,53 @@
-// import { Notices, Users } from '@prisma/client';
+import { Articles, Notices } from "@prisma/client";
 
-// export class ResponseNoticeDTO {
-//   id: number;
-//   noticeName: string;
-//   noticeCode: string;
-//   userCount: number;
-//   constructor(notice: Notices & { _count?: { users: number } }) {
-//     this.id = notice.id;
-//     this.noticeName = notice.noticeName;
-//     this.noticeCode = notice.noticeCode;
-//     this.userCount = notice._count?.users ?? 0;
-//   }
-// }
+import { NOTICE_CATEGORY } from "@prisma/client";
 
-// export class ResponseNoticeListDTO {
-//   currentPage: number;
-//   totalPages: number;
-//   totalItemCount: number;
-//   data: ResponseNoticeDTO[];
+export class ResponseNoticeDTO {
+  noticeId: string;
+  userId: string;
+  category: NOTICE_CATEGORY;
+  title: string;
+  writerName: string;
+  createdAt: Date;
+  updatedAt: Date;
+  viewCount: number;
+  commentCount: number;
+  isPinned: boolean;
 
-//   constructor(
-//     page: number,
-//     pageSize: number,
-//     result: {
-//       totalItemCount: number;
-//       companies: (Notices & { _count?: { users: number } })[];
-//     },
-//   ) {
-//     this.currentPage = page;
-//     this.totalPages = Math.ceil(result.totalItemCount / pageSize);
-//     this.totalItemCount = result.totalItemCount;
-//     this.data = result.companies.map((notice) => new ResponseNoticeDTO(notice));
-//   }
-// }
+  constructor(
+    notice: Notices & { article: Articles & { user: { name: string } } } & {
+      _count?: { NoticeComments: number };
+    }
+  ) {
+    this.noticeId = notice.id;
+    this.userId = notice.article.userId;
+    this.category = notice.category;
+    this.title = notice.article.title;
+    this.writerName = notice.article.user.name;
+    this.createdAt = notice.article.createdAt;
+    this.updatedAt = notice.article.updatedAt;
+    this.viewCount = notice.viewCount;
+    this.commentCount = notice._count?.NoticeComments ?? 0;
+    this.isPinned = notice.isPinned;
+  }
+}
+
+export class ResponseNoticeListDTO {
+  totalCount: number;
+  notices: ResponseNoticeDTO[];
+
+  constructor(result: {
+    totalCount: number;
+    notices: (Notices & { article: Articles & { user: { name: string } } } & {
+      _count?: { NoticeComments: number };
+    })[];
+  }) {
+    this.totalCount = result.totalCount;
+    this.notices = result.notices.map(
+      (notice) => new ResponseNoticeDTO(notice)
+    );
+  }
+}
 
 // class ResponseNoticeUserDTO {
 //   id: number;

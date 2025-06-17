@@ -1,7 +1,9 @@
 import noticeRepository from "../repositories/noticeRepository";
 import { CreateNoticeBodyType } from "../structs/noticeStructs";
 import articleRepository from "../repositories/articleRepository";
-import { BOARD_ID } from "@prisma/client";
+import { BOARD_ID, USER_ROLE } from "@prisma/client";
+import { PageParamsType } from "../structs/commonStructs";
+import { buildSearchCondition } from "../lib/searchCondition";
 
 async function createNotice(notice: CreateNoticeBodyType, userId: string) {
   const createdArticle = await articleRepository.create({
@@ -17,6 +19,22 @@ async function createNotice(notice: CreateNoticeBodyType, userId: string) {
   });
 }
 
+async function getNotices(
+  userId: string,
+  role: USER_ROLE,
+  params: PageParamsType
+) {
+  const searchCondition = await buildSearchCondition(params, { userId, role });
+
+  const totalCount = await noticeRepository.getCount(
+    searchCondition.whereCondition
+  );
+
+  const notices = await noticeRepository.getList(searchCondition.bothCondition);
+
+  return { notices, totalCount };
+}
+
 // async function updateNotice(noticeId: number, body: PatchNoticeBodyType) {
 //   const updatedNotice = await noticeRepository.update(noticeId, body);
 //   return new ResponseNoticeDTO(updatedNotice);
@@ -30,28 +48,6 @@ async function createNotice(notice: CreateNoticeBodyType, userId: string) {
 //   return notice;
 // }
 
-// async function getCompanies(params: PageParamsType) {
-//   const searchCondition = buildSearchCondition(params, [
-//     "noticeName",
-//     "noticeCode",
-//   ]);
-//   const where = searchCondition.whereCondition;
-//   const prismaParams = {
-//     ...searchCondition.pageCondition,
-//     where,
-//   };
-
-//   const companies = await noticeRepository.getList(prismaParams);
-//   const totalItemCount = await noticeRepository.getCount({
-//     where,
-//   });
-
-//   return {
-//     totalItemCount,
-//     companies,
-//   };
-// }
-
 // async function deleteNotice(noticeId: number) {
 //   return await noticeRepository.deleteById(noticeId);
 // }
@@ -60,6 +56,6 @@ export default {
   createNotice,
   // updateNotice,
   // getByName,
-  // getCompanies,
+  getNotices,
   // deleteNotice,
 };

@@ -29,13 +29,13 @@ export const integerString = coerce(integer(), string(), (value) =>
 
 // const urlRegExp = /^(https?:\/\/)/;
 
-// export const PageParamsStruct = object({
-//   page: defaulted(integerString, 1),
-//   pageSize: defaulted(integerString, 10),
-//   searchBy: optional(string()),
-//   keyword: optional(string()),
-// });
-// export type PageParamsType = Infer<typeof PageParamsStruct>;
+export const PageParamsStruct = object({
+  page: defaulted(integerString, 1),
+  limit: defaulted(integerString, 11),
+  // searchBy: optional(string()),
+  // keyword: optional(string()),
+});
+export type PageParamsType = Infer<typeof PageParamsStruct>;
 
 // export const SearchParamsStruct = object({
 //   searchBy: nonempty(string()),

@@ -29,22 +29,33 @@ async function create(notice: Prisma.NoticesCreateInput) {
 //   });
 // }
 
-// async function getList(params: Prisma.NoticesFindManyArgs) {
-//   return await prisma.notices.findMany({
-//     ...params,
-//     include: {
-//       _count: {
-//         select: { users: true },
-//       },
-//     },
-//   });
-// }
+async function getList(params: Prisma.NoticesFindManyArgs) {
+  return await prisma.notices.findMany({
+    ...params,
+    include: {
+      article: {
+        include: {
+          user: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+      _count: {
+        select: {
+          NoticeComments: true,
+        },
+      },
+    },
+  });
+}
 
-// async function getCount(params: Prisma.NoticesCountArgs) {
-//   return await prisma.notices.count({
-//     ...params,
-//   });
-// }
+async function getCount(params: Prisma.NoticesCountArgs) {
+  return await prisma.notices.count({
+    ...params,
+  });
+}
 
 // async function deleteById(noticeId: number) {
 //   return await prisma.notices.delete({
@@ -58,7 +69,7 @@ export default {
   create,
   // update,
   // findByName,
-  // getList,
-  // getCount,
+  getList,
+  getCount,
   // deleteById,
 };

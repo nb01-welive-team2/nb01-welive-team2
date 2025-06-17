@@ -6,6 +6,8 @@ import UnauthError from "../errors/UnauthError";
 import noticeService from "../services/noticeService";
 import { randomUUID } from "crypto";
 import registerSuccessMessage from "../lib/responseJson/registerSuccess";
+import { PageParamsStruct } from "../structs/commonStructs";
+import { ResponseNoticeListDTO } from "../dto/noticeDTO";
 
 /**
  * @openapi
@@ -69,50 +71,53 @@ export async function createNotice(req: Request, res: Response) {
   res.status(201).send(new registerSuccessMessage());
 }
 
-// /**
-//  * @openapi
-//  * /companies:
-//  *   get:
-//  *     summary: 회사 목록 조회
-//  *     description: 회사 목록을 페이지 단위로 조회합니다. 관리자의 권한을 가진 사용자만 접근할 수 있습니다.
-//  *     tags:
-//  *       - Company
-//  *     parameters:
-//  *       - in: query
-//  *         name: page
-//  *         schema:
-//  *           type: integer
-//  *           default: 1
-//  *         description: 페이지 번호
-//  *       - in: query
-//  *         name: pageSize
-//  *         schema:
-//  *           type: integer
-//  *           default: 10
-//  *         description: 페이지 크기
-//  *     responses:
-//  *       200:
-//  *         description: 회사 목록이 성공적으로 반환되었습니다.
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               $ref: '#/components/schemas/ResponseCompanyListDTO'
-//  *       400:
-//  *         description: 잘못된 요청입니다. 유효하지 않은 페이지 번호 또는 페이지 크기일 수 있습니다.
-//  *       401:
-//  *         description: 관리자 권한이 없는 사용자입니다.
-//  *       500:
-//  *         description: 서버 오류가 발생했습니다.
-//  */
-// export const getCompanyList: RequestHandler = async (req, res) => {
-//   const reqUser = req.user as OmittedUser;
-//   if (reqUser.role !== USER_ROLE.ADMIN) {
-//     throw new UnauthError();
-//   }
-//   const data = create(req.query, PageParamsStruct);
-//   const result = await companyService.getCompanies(data);
-//   res.send(new ResponseCompanyListDTO(data.page, data.pageSize, result));
-// };
+/**
+ * @openapi
+ * /notices:
+ *   get:
+ *     summary: 공지사항 목록 조회
+ *     description: 사용자 권한에 따라 공지사항 목록을 페이지 단위로 조회합니다.
+ *                  SUPER_ADMIN 권한 사용자는 접근이 제한됩니다.
+ *     tags:
+ *       - Notices
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: 페이지 번호 기본값 1
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *           default: 11
+ *         description: 페이지 크기 기본값 11
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: 공지사항 목록이 성공적으로 반환되었습니다.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ResponseNoticeListDTO'
+ *       401:
+ *         description: 권한이 없는 사용자입니다. (예: SUPER_ADMIN 접근 제한)
+ *       400:
+ *         description: 잘못된 요청입니다. 유효하지 않은 페이지 번호 또는 페이지 크기일 수 있습니다.
+ *       500:
+ *         description: 서버 오류가 발생했습니다.
+ */
+export async function getNoticeList(req: Request, res: Response) {
+  const reqUser = { id: randomUUID(), role: USER_ROLE.USER }; // Assuming you get the user ID from the request, replace with actual logic
+  if ((reqUser.role as string) === USER_ROLE.SUPER_ADMIN) {
+    throw new UnauthError();
+  }
+  const data = create(req.query, PageParamsStruct);
+  const result = await noticeService.getNotices(reqUser.id, reqUser.role, data);
+  res.send(new ResponseNoticeListDTO(result));
+}
 
 // /**
 //  * @openapi

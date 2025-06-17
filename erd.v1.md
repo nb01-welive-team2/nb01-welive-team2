@@ -116,6 +116,14 @@ Notices {
 %% NOTICE_CATEGORY : MAINTENANCE, EMERGENCY, COMMUNITY, RESIDENT_VOTE, ETC
 %% viewCount @default(0)
 
+NoticeComments {
+  UUID id PK
+  UUID noticeId FK
+  UUID userId FK
+  Varchar content
+  Datetime createdAt
+}
+
 Notifications {
   UUID id PK
   UUID userId FK
@@ -143,6 +151,8 @@ Polls ||--|{ PollOptions : "투표 선택지"
 Users ||--o{ Votes : "투표"
 PollOptions ||--o{ Votes : "투표 결과"
 Articles ||--o{ Notices : "공지 등록"
+Notices ||--o{ NoticeComments : "공지 댓글"
+Users ||--o{ NoticeComments : "작성한 공지 댓글"
 Users ||--o{ Notifications : "알림 수신"
 Complaints ||--o{ Notifications : "민원 알림"
 Notices ||--o{ Notifications : "공지 알림"
