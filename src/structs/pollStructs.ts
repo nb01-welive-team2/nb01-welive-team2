@@ -10,8 +10,8 @@ export const createPollSchema = object({
   options: array(string()),
   buildingPermission: number(),
   status: optional(string()),
-});
+}); // 생성 요청 유효성 검사
 
 export const pollIdParamSchema = object({
   pollId: string(),
-});
+}); // 삭제 요청 유효성 검사
