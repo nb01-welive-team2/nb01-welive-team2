@@ -123,9 +123,9 @@ model Polls {
 }
 
 model PollOptions {
-  id      String @id @default(uuid())
-  pollId  String
-  content String @db.VarChar(100)
+  id     String @id @default(uuid())
+  pollId String
+  title  String @db.VarChar(100)
 
   poll  Polls   @relation(fields: [pollId], references: [id], onDelete: Cascade)
   votes Votes[]
