@@ -21,13 +21,33 @@ async function create(notice: Prisma.NoticesCreateInput) {
 //   });
 // }
 
-// async function findByName(noticeName: string) {
-//   return await prisma.notices.findUnique({
-//     where: {
-//       noticeName,
-//     },
-//   });
-// }
+async function findById(noticeId: string) {
+  return await prisma.notices.findUnique({
+    where: {
+      id: noticeId,
+    },
+    include: {
+      article: {
+        include: {
+          user: {
+            select: {
+              username: true,
+            },
+          },
+        },
+      },
+      NoticeComments: {
+        include: {
+          user: {
+            select: {
+              username: true,
+            },
+          },
+        },
+      },
+    },
+  });
+}
 
 async function getList(params: Prisma.NoticesFindManyArgs) {
   return await prisma.notices.findMany({
@@ -37,7 +57,7 @@ async function getList(params: Prisma.NoticesFindManyArgs) {
         include: {
           user: {
             select: {
-              name: true,
+              username: true,
             },
           },
         },
@@ -68,7 +88,7 @@ async function getCount(params: Prisma.NoticesCountArgs) {
 export default {
   create,
   // update,
-  // findByName,
+  findById,
   getList,
   getCount,
   // deleteById,

@@ -19,7 +19,7 @@ async function createNotice(notice: CreateNoticeBodyType, userId: string) {
   });
 }
 
-async function getNotices(
+async function getNoticeList(
   userId: string,
   role: USER_ROLE,
   params: PageParamsType
@@ -33,6 +33,10 @@ async function getNotices(
   const notices = await noticeRepository.getList(searchCondition.bothCondition);
 
   return { notices, totalCount };
+}
+
+async function getNotice(noticeId: string) {
+  return await noticeRepository.findById(noticeId);
 }
 
 // async function updateNotice(noticeId: number, body: PatchNoticeBodyType) {
@@ -55,7 +59,7 @@ async function getNotices(
 export default {
   createNotice,
   // updateNotice,
-  // getByName,
-  getNotices,
+  getNotice,
+  getNoticeList,
   // deleteNotice,
 };

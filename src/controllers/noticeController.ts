@@ -1,13 +1,20 @@
 import { create } from "superstruct";
 import { Request, Response } from "express";
 import { USER_ROLE } from "@prisma/client";
-import { CreateNoticeBodyStruct } from "../structs/noticeStructs";
+import {
+  CreateNoticeBodyStruct,
+  NoticeIdParamStruct,
+} from "../structs/noticeStructs";
 import UnauthError from "../errors/UnauthError";
 import noticeService from "../services/noticeService";
 import { randomUUID } from "crypto";
 import registerSuccessMessage from "../lib/responseJson/registerSuccess";
 import { PageParamsStruct } from "../structs/commonStructs";
-import { ResponseNoticeListDTO } from "../dto/noticeDTO";
+import {
+  ResponseNoticeCommentDTO,
+  ResponseNoticeListDTO,
+} from "../dto/noticeDTO";
+import NotFoundError from "../errors/NotFoundError";
 
 /**
  * @openapi
@@ -115,61 +122,27 @@ export async function getNoticeList(req: Request, res: Response) {
     throw new UnauthError();
   }
   const data = create(req.query, PageParamsStruct);
-  const result = await noticeService.getNotices(reqUser.id, reqUser.role, data);
+  const result = await noticeService.getNoticeList(
+    reqUser.id,
+    reqUser.role,
+    data
+  );
   res.send(new ResponseNoticeListDTO(result));
 }
 
-// /**
-//  * @openapi
-//  * /companies/users:
-//  *   get:
-//  *     summary: 회사의 사용자 목록 조회
-//  *     description: 모든 회사의 사용자 목록을 페이지 단위로 조회합니다. 관리자의 권한을 가진 사용자만 접근할 수 있습니다.
-//  *     tags:
-//  *       - Company
-//  *     parameters:
-//  *       - in: query
-//  *         name: page
-//  *         schema:
-//  *           type: integer
-//  *           default: 1
-//  *         description: 페이지 번호
-//  *       - in: query
-//  *         name: pageSize
-//  *         schema:
-//  *           type: integer
-//  *           default: 10
-//  *         description: 페이지 크기
-//  *     responses:
-//  *       200:
-//  *         description: 회사의 사용자 목록이 성공적으로 반환되었습니다.
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               $ref: '#/components/schemas/ResponseCompanyUserListDTO'
-//  *       400:
-//  *         description: 잘못된 요청입니다. 유효하지 않은 페이지 번호 또는 페이지 크기일 수 있습니다.
-//  *       401:
-//  *         description: 관리자 권한이 없는 사용자입니다.
-//  *       500:
-//  *         description: 서버 오류가 발생했습니다.
-//  */
-// export const getCompanyUsers: RequestHandler = async (req, res) => {
-//   const reqUser = req.user as OmittedUser;
-//   if (reqUser.role !== USER_ROLE.ADMIN) {
-//     throw new UnauthError();
-//   }
-//   const pageParams = create(req.query, PageParamsStruct);
-//   const result = await userService.getCompanyUsers(pageParams);
-//   res.send(
-//     new ResponseCompanyUserListDTO(
-//       pageParams.page,
-//       pageParams.pageSize,
-//       result.users,
-//       result.totalItemCount
-//     )
-//   );
-// };
+export async function getNotice(req: Request, res: Response) {
+  const reqUser = { id: randomUUID(), role: USER_ROLE.USER }; // Assuming you get the user ID from the request, replace with actual logic
+  if ((reqUser.role as string) === USER_ROLE.SUPER_ADMIN) {
+    throw new UnauthError();
+  }
+  const data = create(req.params, NoticeIdParamStruct);
+  const result = await noticeService.getNotice(data.noticeId);
+  if (!result) {
+    res.send(new NotFoundError("Notice", data.noticeId));
+    return;
+  }
+  res.send(new ResponseNoticeCommentDTO(result));
+}
 
 // /**
 //  * @openapi
