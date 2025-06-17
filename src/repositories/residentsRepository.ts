@@ -1,3 +1,4 @@
+import { Residents } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 import { ResidentsFilter } from "../types/residents";
 
@@ -25,6 +26,15 @@ export async function getResidentsFiltered(filters: ResidentsFilter) {
 export async function getResidentById(id: string) {
   const resident = await prisma.residents.findUnique({
     where: { id },
+  });
+  return resident;
+}
+
+// 입주민 정보 수정 (관리자)
+export async function patchResidentInfo(id: string, data: Partial<Residents>) {
+  const resident = await prisma.residents.update({
+    where: { id },
+    data,
   });
   return resident;
 }
