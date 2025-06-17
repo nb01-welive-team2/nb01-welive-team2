@@ -27,7 +27,8 @@ model Users {
   apartmentInfo ApartmentInfo[]
   userInfo      UserInfo[]
   complaints    Complaints[]
-  articles      Articles[]
+  polls         Polls[]
+  notices       Notices[]
   votes         Votes[]
   notifications Notifications[]
 }
@@ -97,29 +98,19 @@ model Complaints {
   notifications Notifications[]
 }
 
-model Articles {
-  id        String   @id @default(uuid())
-  userId    String
-  title     String   @db.VarChar(100)
-  content   String
-  startDate DateTime @default(now())
-  endDate   DateTime @default(now())
-  boardId   BOARD_ID
-
-  user    Users     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  polls   Polls[]
-  notices Notices[]
-}
-
 model Polls {
-  id                 String      @id @default(uuid())
+  id                 String          @id @default(uuid())
   articleId          String
   status             POLL_STATUS
   buildingPermission Int
-
-  article       Articles        @relation(fields: [articleId], references: [id], onDelete: Cascade)
-  pollOptions   PollOptions[]
-  notifications Notifications[]
+  userId             String
+  title              String          @db.VarChar(100)
+  content            String
+  startDate          DateTime        @default(now())
+  endDate            DateTime        @default(now())
+  user               Users           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pollOptions        PollOptions[]
+  notifications      Notifications[]
 }
 
 model PollOptions {
@@ -147,8 +138,13 @@ model Notices {
   isPinned  Boolean
   category  NOTICE_CATEGORY
   viewCount Int             @default(0)
+  userId    String
+  title     String          @db.VarChar(100)
+  content   String
+  startDate DateTime        @default(now())
+  endDate   DateTime        @default(now())
 
-  article       Articles        @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  user          Users           @relation(fields: [userId], references: [id], onDelete: Cascade)
   notifications Notifications[]
 }
 
