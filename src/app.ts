@@ -7,7 +7,7 @@ import {
   defaultNotFoundHandler,
   globalErrorHandler,
 } from "./controllers/errorController";
-import { getResidentsListFiltered } from "./controllers/residentsContoller";
+import residentsRouter from "./routes/residentsRouter";
 
 const app = express();
 
@@ -15,7 +15,7 @@ app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
-app.use("/residents", getResidentsListFiltered);
+app.use("/residents", residentsRouter);
 app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use(defaultNotFoundHandler);

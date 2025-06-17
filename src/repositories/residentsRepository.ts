@@ -20,3 +20,11 @@ export async function getResidentsFiltered(filters: ResidentsFilter) {
     },
   });
 }
+
+// 입주민 상세 조회 (관리자)
+export async function getResidentById(id: string) {
+  const resident = await prisma.residents.findUnique({
+    where: { id },
+  });
+  return resident;
+}

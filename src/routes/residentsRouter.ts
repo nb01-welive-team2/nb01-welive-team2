@@ -1,8 +1,12 @@
 import { Router } from "express";
-import { getResidentsListFiltered } from "../controllers/residentsContoller";
+import {
+  getResidentsListFilteredController,
+  getResidentByIdController,
+} from "../controllers/residentsContoller";
 
 const residentsRouter = Router();
 
-residentsRouter.get("/", getResidentsListFiltered);
+residentsRouter.get("/", getResidentsListFilteredController);
+residentsRouter.get("/:id", getResidentByIdController);
 
 export default residentsRouter;
