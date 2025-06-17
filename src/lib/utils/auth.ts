@@ -22,3 +22,8 @@ export function setTokenCookies(
     path: "/auth/refresh",
   });
 }
+
+export function clearTokenCookies(res: Response) {
+  res.clearCookie(ACCESS_TOKEN_COOKIE_NAME);
+  res.clearCookie(REFRESH_TOKEN_COOKIE_NAME);
+}
