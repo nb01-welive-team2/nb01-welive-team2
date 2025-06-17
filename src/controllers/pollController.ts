@@ -3,6 +3,8 @@ import * as pollService from "../services/pollService";
 import { getPagination } from "../utils/pagination";
 import AccessDeniedError from "../errors/AccessDeniedError";
 import UnauthError from "../errors/UnauthError";
+import { createPollSchema, pollIdParamSchema } from "../structs/pollStructs";
+import { validate } from "superstruct";
 
 // 투표 등록
 export const createPoll = async (req: Request, res: Response) => {
@@ -12,6 +14,8 @@ export const createPoll = async (req: Request, res: Response) => {
   if (!userId) throw new UnauthError();
   if (role !== "ADMIN")
     throw new AccessDeniedError("투표는 관리자만 생성할 수 있습니다.");
+
+  validate(req.body, createPollSchema);
 
   res.status(201).json(await pollService.createPoll(req.body, userId));
 };
@@ -53,6 +57,8 @@ export const editPoll = async (req: Request, res: Response) => {
   const role = req.user?.role;
   if (!userId) throw new UnauthError();
 
+  validate(req.body, createPollSchema);
+
   res
     .status(200)
     .json(
@@ -64,6 +70,8 @@ export const editPoll = async (req: Request, res: Response) => {
 export const removePoll = async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) throw new UnauthError();
+
+  validate({ pollId: req.params.pollId }, pollIdParamSchema);
 
   await pollService.removePoll(req.params.pollId, userId);
   res.status(204).send();
