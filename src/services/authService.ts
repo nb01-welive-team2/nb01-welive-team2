@@ -1,9 +1,8 @@
 import BadRequestError from "../errors/BadRequestError";
-import { getUserByUsername } from "../repositories/userRepository";
+import { getUserByUsername, getUserId } from "../repositories/userRepository";
 import bcrypt from "bcrypt";
-import { generateTokens } from "../lib/utils/token";
+import { generateTokens, verifyRefreshToken } from "../lib/utils/token";
 import { LoginRequestDTO } from "../dto/authDTO";
-import { UserType } from "../types/User";
 
 // export const register = async(data: Omit<UserType, 'id'> )
 
@@ -29,5 +28,27 @@ export const login = async (data: LoginRequestDTO) => {
   return {
     accessToken,
     refreshToken,
+  };
+};
+
+export const refreshToken = async (refreshToken?: string) => {
+  if (!refreshToken) {
+    throw new BadRequestError("Invalid refresh token");
+  }
+
+  const { userId } = verifyRefreshToken(refreshToken);
+  const user = await getUserId(userId);
+  if (!user) {
+    throw new BadRequestError("Invalid refresh token");
+  }
+  const role = user.role;
+
+  const { accessToken, refreshToken: newRefreshToken } = generateTokens(
+    userId,
+    role
+  );
+  return {
+    accessToken,
+    refreshToken: newRefreshToken,
   };
 };
