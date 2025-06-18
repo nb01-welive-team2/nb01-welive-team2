@@ -12,7 +12,8 @@
     "prisma:migrate": "prisma migrate dev",
     "test-poll-unit": "jest --selectProjects poll-unit --runInBand --detectOpenHandles",
     "test-poll-api": "jest --selectProjects poll-api --runInBand --detectOpenHandles",
-    "test-auth-unit": "jest --selectProjects auth-unit --runInBand --detectOpenHandles"
+    "test-auth-unit": "jest --selectProjects auth-unit --runInBand --detectOpenHandles",
+    "test-auth-api": "jest --selectProjects auth-api --runInBand --detectOpenHandles"
   },
   "keywords": [],
   "author": "",
