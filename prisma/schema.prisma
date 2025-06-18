@@ -102,7 +102,6 @@ model Complaints {
 
 model Polls {
   id                 String          @id @default(uuid())
-  articleId          String
   status             POLL_STATUS
   buildingPermission Int
   userId             String
@@ -136,7 +135,6 @@ model Votes {
 
 model Notices {
   id        String          @id @default(uuid())
-  articleId String
   isPinned  Boolean
   category  NOTICE_CATEGORY
   viewCount Int             @default(0)

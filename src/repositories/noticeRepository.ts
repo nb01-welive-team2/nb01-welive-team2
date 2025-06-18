@@ -27,13 +27,9 @@ async function findById(noticeId: string) {
       id: noticeId,
     },
     include: {
-      article: {
-        include: {
-          user: {
-            select: {
-              username: true,
-            },
-          },
+      user: {
+        select: {
+          username: true,
         },
       },
       NoticeComments: {
@@ -53,13 +49,9 @@ async function getList(params: Prisma.NoticesFindManyArgs) {
   return await prisma.notices.findMany({
     ...params,
     include: {
-      article: {
-        include: {
-          user: {
-            select: {
-              username: true,
-            },
-          },
+      user: {
+        select: {
+          username: true,
         },
       },
       _count: {
