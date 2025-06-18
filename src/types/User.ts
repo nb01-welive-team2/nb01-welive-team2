@@ -1,6 +1,4 @@
-export type USER_ROLE = "SUPER_ADMIN" | "ADMIN" | "USER";
-type JOIN_STATUS = "APPROVED" | "PENDING" | "REJECTED";
-type APPROVAL_STATUS = "APPROVED" | "PENDING" | "REJECTED";
+import { APPROVAL_STATUS, JOIN_STATUS, USER_ROLE } from "@prisma/client";
 
 interface BaseUser {
   id: string;
