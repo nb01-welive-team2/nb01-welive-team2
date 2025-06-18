@@ -12,5 +12,11 @@ module.exports = {
       testEnvironment: "node",
       testMatch: ["**/integration/**/poll*.test.ts"],
     },
+    {
+      displayName: "auth-unit",
+      preset: "ts-jest",
+      testEnvironment: "node",
+      testMatch: ["**/unitTest/authTest/auth*.test.ts"],
+    },
   ],
 };
