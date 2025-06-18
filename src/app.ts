@@ -8,6 +8,7 @@ import {
   globalErrorHandler,
 } from "./controllers/errorController";
 import residentsRouter from "./routes/residentsRouter";
+import authRouter from "./routes/authRoute";
 
 const app = express();
 
@@ -15,7 +16,9 @@ app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
+app.use("/auth", authRouter);
 app.use("/residents", residentsRouter);
+
 app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use(defaultNotFoundHandler);

@@ -1,11 +1,20 @@
-import { Residents } from "@prisma/client";
-import { Prisma } from "@prisma/client";
-import { ResidentsFilter } from "../types/residents";
+import {
+  APPROVAL_STATUS,
+  HOUSEHOLDER_STATUS,
+  RESIDENCE_STATUS,
+  Residents,
+} from "@prisma/client";
+import { ResidentsFilter, ResidentUploadInput } from "../types/residents";
 import residentsRepository from "../repositories/residentsRepository";
 
 // 입주민 정보 개별 등록
-async function uploadResident(data: Prisma.ResidentsCreateInput) {
-  const resident = await residentsRepository.createResident(data);
+async function uploadResident(data: ResidentUploadInput) {
+  const resident = await residentsRepository.createResident({
+    ...data,
+    residenceStatus: RESIDENCE_STATUS.RESIDENCE,
+    isRegistered: false,
+    approvalStatus: APPROVAL_STATUS.PENDING,
+  });
   return resident;
 }
 

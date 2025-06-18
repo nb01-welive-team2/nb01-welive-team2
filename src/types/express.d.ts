@@ -5,6 +5,7 @@ declare global {
     interface Request {
       user?: {
         userId: number;
+        apartmentId: string;
       };
     }
   }

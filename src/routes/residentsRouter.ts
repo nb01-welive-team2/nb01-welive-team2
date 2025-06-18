@@ -6,13 +6,14 @@ import {
   deleteResidentController,
   uploadResidentController,
 } from "../controllers/residentsContoller";
+import { withAsync } from "../lib/withAsync";
 
 const residentsRouter = Router();
 
-residentsRouter.post("/register", uploadResidentController);
-residentsRouter.get("/:id", getResidentByIdController);
-residentsRouter.patch("/:id", updateResidentInfoController);
-residentsRouter.delete("/:id", deleteResidentController);
-residentsRouter.get("/", getResidentsListFilteredController);
+residentsRouter.post("/register", withAsync(uploadResidentController));
+residentsRouter.get("/:id", withAsync(getResidentByIdController));
+residentsRouter.patch("/:id", withAsync(updateResidentInfoController));
+residentsRouter.delete("/:id", withAsync(deleteResidentController));
+residentsRouter.get("/", withAsync(getResidentsListFilteredController));
 
 export default residentsRouter;
