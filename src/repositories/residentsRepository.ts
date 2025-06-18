@@ -1,6 +1,15 @@
 import { Residents } from "@prisma/client";
 import { prisma } from "../lib/prisma";
+import { Prisma } from "@prisma/client";
 import { ResidentsFilter } from "../types/residents";
+
+// 입주민 명부 개별 등록 (관리자)
+export async function createResident(data: Prisma.ResidentsCreateInput) {
+  const resident = await prisma.residents.create({
+    data,
+  });
+  return resident;
+}
 
 // 입주민 목록 조회 (관리자)
 export async function getResidentsFiltered(filters: ResidentsFilter) {

@@ -1,11 +1,19 @@
 import { Residents } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import {
   getResidentsFiltered,
   getResidentById,
   updateResidentInfo,
   deleteResident,
+  createResident,
 } from "../repositories/residentsRepository";
 import { ResidentsFilter } from "../types/residents";
+
+// 입주민 정보 개별 등록
+export async function uploadResident(data: Prisma.ResidentsCreateInput) {
+  const resident = await createResident(data);
+  return resident;
+}
 
 // 입주민 목록 조회
 export async function getResidentsList(query: ResidentsFilter) {
