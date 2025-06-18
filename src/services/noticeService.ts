@@ -1,5 +1,8 @@
 import noticeRepository from "../repositories/noticeRepository";
-import { CreateNoticeBodyType } from "../structs/noticeStructs";
+import {
+  CreateNoticeBodyType,
+  PatchNoticeBodyType,
+} from "../structs/noticeStructs";
 import { BOARD_ID, USER_ROLE } from "@prisma/client";
 import { PageParamsType } from "../structs/commonStructs";
 import { buildSearchCondition } from "../lib/searchCondition";
@@ -34,10 +37,9 @@ async function getNotice(noticeId: string) {
   return await noticeRepository.findById(noticeId);
 }
 
-// async function updateNotice(noticeId: number, body: PatchNoticeBodyType) {
-//   const updatedNotice = await noticeRepository.update(noticeId, body);
-//   return new ResponseNoticeDTO(updatedNotice);
-// }
+async function updateNotice(noticeId: string, body: PatchNoticeBodyType) {
+  return await noticeRepository.update(noticeId, body);
+}
 
 // async function getByName(noticeName: string) {
 //   const notice = await noticeRepository.findByName(noticeName);
@@ -53,7 +55,7 @@ async function getNotice(noticeId: string) {
 
 export default {
   createNotice,
-  // updateNotice,
+  updateNotice,
   getNotice,
   getNoticeList,
   // deleteNotice,

@@ -4,6 +4,7 @@ import { USER_ROLE } from "@prisma/client";
 import {
   CreateNoticeBodyStruct,
   NoticeIdParamStruct,
+  PatchNoticeBodyStruct,
 } from "../structs/noticeStructs";
 import UnauthError from "../errors/UnauthError";
 import noticeService from "../services/noticeService";
@@ -12,6 +13,7 @@ import registerSuccessMessage from "../lib/responseJson/registerSuccess";
 import { PageParamsStruct } from "../structs/commonStructs";
 import {
   ResponseNoticeCommentDTO,
+  ResponseNoticeDTO,
   ResponseNoticeListDTO,
 } from "../dto/noticeDTO";
 import NotFoundError from "../errors/NotFoundError";
@@ -144,93 +146,92 @@ export async function getNotice(req: Request, res: Response) {
   res.send(new ResponseNoticeCommentDTO(result));
 }
 
-// /**
-//  * @openapi
-//  * /companies/{companyId}:
-//  *   patch:
-//  *     summary: 회사 정보 수정
-//  *     description: 지정된 회사의 정보를 수정합니다. 관리자의 권한을 가진 사용자만 접근할 수 있습니다.
-//  *     tags:
-//  *       - Company
-//  *     parameters:
-//  *       - in: path
-//  *         name: companyId
-//  *         required: true
-//  *         schema:
-//  *           type: integer
-//  *         description: 수정할 회사 ID
-//  *     requestBody:
-//  *       required: true
-//  *       content:
-//  *         application/json:
-//  *           schema:
-//  *             type: object
-//  *             properties:
-//  *               companyName:
-//  *                 type: string
-//  *                 description: 수정할 회사 이름
-//  *                 example: 햇살카 수정
-//  *               companyCode:
-//  *                 type: string
-//  *                 description: 수정할 회사 코드
-//  *                 example: HS-001
-//  *     responses:
-//  *       200:
-//  *         description: 회사 정보가 성공적으로 수정되었습니다.
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               $ref: '#/components/schemas/ResponseCompanyDTO'
-//  *       400:
-//  *         description: 잘못된 요청입니다. 필수 필드가 누락되었거나 잘못된 형식일 수 있습니다.
-//  *       401:
-//  *         description: 관리자 권한이 없는 사용자입니다.
-//  *       500:
-//  *         description: 서버 오류가 발생했습니다.
-//  */
+/**
+ * @openapi
+ * /companies/{companyId}:
+ *   patch:
+ *     summary: 회사 정보 수정
+ *     description: 지정된 회사의 정보를 수정합니다. 관리자의 권한을 가진 사용자만 접근할 수 있습니다.
+ *     tags:
+ *       - Company
+ *     parameters:
+ *       - in: path
+ *         name: companyId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: 수정할 회사 ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               companyName:
+ *                 type: string
+ *                 description: 수정할 회사 이름
+ *                 example: 햇살카 수정
+ *               companyCode:
+ *                 type: string
+ *                 description: 수정할 회사 코드
+ *                 example: HS-001
+ *     responses:
+ *       200:
+ *         description: 회사 정보가 성공적으로 수정되었습니다.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ResponseCompanyDTO'
+ *       400:
+ *         description: 잘못된 요청입니다. 필수 필드가 누락되었거나 잘못된 형식일 수 있습니다.
+ *       401:
+ *         description: 관리자 권한이 없는 사용자입니다.
+ *       500:
+ *         description: 서버 오류가 발생했습니다.
+ */
+export async function editNotice(req: Request, res: Response) {
+  const reqUser = { id: randomUUID(), role: USER_ROLE.ADMIN }; // Assuming you get the user ID from the request, replace with actual logic
+  if (reqUser.role !== USER_ROLE.ADMIN) {
+    throw new UnauthError();
+  }
+  const data = create(req.body, PatchNoticeBodyStruct);
+  const { noticeId } = create(req.params, NoticeIdParamStruct);
+  const notice = await noticeService.updateNotice(noticeId, data);
+  res.status(200).send(new ResponseNoticeDTO(notice));
+}
 
-// export const patchCompany: RequestHandler = async (req, res) => {
-//   const reqUser = req.user as OmittedUser;
-//   if (reqUser.role !== USER_ROLE.ADMIN) {
-//     throw new UnauthError();
-//   }
-//   const { companyId } = create(req.params, CompanyIdParamStruct);
-//   const data = create(req.body, PatchCompanyBodyStruct);
-//   const company = await companyService.updateCompany(companyId, data);
-//   res.send(company);
-// };
-
-// /**
-//  * @openapi
-//  * /companies/{companyId}:
-//  *   delete:
-//  *     summary: 회사 삭제
-//  *     description: 지정된 회사의 정보를 삭제합니다. 관리자의 권한을 가진 사용자만 접근할 수 있습니다.
-//  *     tags:
-//  *       - Company
-//  *     parameters:
-//  *       - in: path
-//  *         name: companyId
-//  *         required: true
-//  *         schema:
-//  *           type: integer
-//  *         description: 삭제할 회사 ID
-//  *     responses:
-//  *       200:
-//  *         description: 회사가 성공적으로 삭제되었습니다.
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               type: object
-//  *               properties:
-//  *                 message:
-//  *                   type: string
-//  *                   example: "회사 삭제 성공"
-//  *       401:
-//  *         description: 관리자 권한이 없는 사용자입니다.
-//  *       500:
-//  *         description: 서버 오류가 발생했습니다.
-//  */
+/**
+ * @openapi
+ * /companies/{companyId}:
+ *   delete:
+ *     summary: 회사 삭제
+ *     description: 지정된 회사의 정보를 삭제합니다. 관리자의 권한을 가진 사용자만 접근할 수 있습니다.
+ *     tags:
+ *       - Company
+ *     parameters:
+ *       - in: path
+ *         name: companyId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: 삭제할 회사 ID
+ *     responses:
+ *       200:
+ *         description: 회사가 성공적으로 삭제되었습니다.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "회사 삭제 성공"
+ *       401:
+ *         description: 관리자 권한이 없는 사용자입니다.
+ *       500:
+ *         description: 서버 오류가 발생했습니다.
+ */
 // export const deleteCompany: RequestHandler = async (req, res, next) => {
 //   const reqUser = req.user as OmittedUser;
 //   if (reqUser.role !== USER_ROLE.ADMIN) {

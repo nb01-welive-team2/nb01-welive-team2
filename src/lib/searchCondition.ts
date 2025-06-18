@@ -23,10 +23,8 @@ export async function buildSearchCondition(
   if (args && "userId" in args && "role" in args) {
     if (args.role === "ADMIN") {
       whereCondition = {
-        article: {
-          user: {
-            id: args.userId,
-          },
+        user: {
+          id: args.userId,
         },
       };
     } else if (args.role === "USER") {
@@ -47,10 +45,8 @@ export async function buildSearchCondition(
         },
       });
       whereCondition = {
-        article: {
-          user: {
-            id: adminId,
-          },
+        user: {
+          id: adminId,
         },
       };
     }

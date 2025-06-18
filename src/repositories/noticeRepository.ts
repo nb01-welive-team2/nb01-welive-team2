@@ -7,19 +7,26 @@ async function create(notice: Prisma.NoticesCreateInput) {
   });
 }
 
-// async function update(noticeId: number, data: Prisma.NoticesUpdateInput) {
-//   return await prisma.notices.update({
-//     data,
-//     where: {
-//       id: noticeId,
-//     },
-//     include: {
-//       _count: {
-//         select: { users: true },
-//       },
-//     },
-//   });
-// }
+async function update(noticeId: string, data: Prisma.NoticesUpdateInput) {
+  return await prisma.notices.update({
+    data,
+    where: {
+      id: noticeId,
+    },
+    include: {
+      user: {
+        select: {
+          username: true,
+        },
+      },
+      _count: {
+        select: {
+          NoticeComments: true,
+        },
+      },
+    },
+  });
+}
 
 async function findById(noticeId: string) {
   return await prisma.notices.findUnique({
@@ -79,7 +86,7 @@ async function getCount(params: Prisma.NoticesCountArgs) {
 
 export default {
   create,
-  // update,
+  update,
   findById,
   getList,
   getCount,
