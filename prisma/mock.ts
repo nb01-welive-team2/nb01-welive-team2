@@ -74,19 +74,13 @@ interface Complaints {
   approvalStatus: APPROVAL_STATUS;
 }
 
-interface Articles {
+interface Polls {
   id: string;
   userId: string;
   title: string;
   content: string;
   startDate: Date;
   endDate: Date;
-  boardId: BOARD_ID;
-}
-
-interface Polls {
-  id: string;
-  articleId: string;
   status: POLL_STATUS;
   buildingPermission: number;
 }
@@ -104,7 +98,11 @@ interface Votes {
 
 interface Notices {
   id: string;
-  articleId: string;
+  userId: string;
+  title: string;
+  content: string;
+  startDate: Date;
+  endDate: Date;
   isPinned: boolean;
   category: NOTICE_CATEGORY;
   viewCount: number;
@@ -209,31 +207,14 @@ const mockComplaints: Complaints[] = [
   },
 ];
 
-const mockArticles: Articles[] = [
+const mockPolls: Polls[] = [
   {
-    id: "a7ba7093-7204-49b9-a63e-7f061320a03a",
-    userId: "18c35b60-b56c-470d-8713-73446c585859",
-    title: "Community Meeting",
-    content: "Next community meeting is on May 1st.",
-    startDate: new Date("2024-04-25T00:00:00Z"),
-    endDate: new Date("2024-05-01T00:00:00Z"),
-    boardId: BOARD_ID.NOTICE,
-  },
-  {
-    id: "5dc7f49d-4999-45e8-a774-8f4e98949009",
+    id: "8b83f903-5ede-476d-86a4-a4e20f9c99ac",
     userId: "0f9e7654-dfbb-46df-b93c-cc491ff9f5bd",
     title: "Vote on new playground",
     content: "Please vote for the playground location.",
     startDate: new Date("2024-04-20T00:00:00Z"),
     endDate: new Date("2024-04-30T00:00:00Z"),
-    boardId: BOARD_ID.POLL,
-  },
-];
-
-const mockPolls: Polls[] = [
-  {
-    id: "8b83f903-5ede-476d-86a4-a4e20f9c99ac",
-    articleId: "5dc7f49d-4999-45e8-a774-8f4e98949009",
     status: POLL_STATUS.IN_PROGRESS,
     buildingPermission: 1,
   },
@@ -262,7 +243,11 @@ const mockVotes: Votes[] = [
 const mockNotices: Notices[] = [
   {
     id: "f1c531ea-8f03-4f12-a8bb-7899148354df",
-    articleId: "a7ba7093-7204-49b9-a63e-7f061320a03a",
+    userId: "18c35b60-b56c-470d-8713-73446c585859",
+    title: "Community Meeting",
+    content: "Next community meeting is on May 1st.",
+    startDate: new Date("2024-04-25T00:00:00Z"),
+    endDate: new Date("2024-05-01T00:00:00Z"),
     isPinned: true,
     category: NOTICE_CATEGORY.COMMUNITY,
     viewCount: 50,
@@ -300,7 +285,6 @@ export {
   mockUserInfo,
   mockResidents,
   mockComplaints,
-  mockArticles,
   mockPolls,
   mockPollOptions,
   mockVotes,
