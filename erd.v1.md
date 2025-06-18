@@ -74,21 +74,13 @@ Complaints {
 }
 %% viewCount @default(0)
 
-Articles {
+Polls {
   UUID id PK
   UUID userId FK
   Varchar title
   Varchar content
   Datetime startDate
   Datetime endDate
-  BOARD_ID boardId
-}
-%% BOARD_ID : NOTICE, POLL
-%% startDate, endDate @default(now())
-
-Polls {
-  UUID id PK
-  UUID articleId FK
   POLL_STATUS status
   Int buildingPermission
 }
@@ -108,7 +100,11 @@ Votes {
 
 Notices {
   UUID id PK
-  UUID articleId FK
+  UUID userId FK
+  Varchar title
+  Varchar content
+  Datetime startDate
+  Datetime endDate
   Bool isPinned
   NOTICE_CATEGORY category
   Int viewCount
@@ -137,12 +133,11 @@ Users ||--o{ UserInfo : "입주민 계정"
 ApartmentInfo ||--o{ UserInfo : "아파트의 입주민 계정"
 ApartmentInfo ||--o| Residents : "입주민 목록"
 Users ||--o{ Complaints : "민원"
-Users ||--o{ Articles : "공지, 투표"
-Articles ||--o{ Polls : "투표 등록"
+Users ||--o{ Polls : "투표 등록"
 Polls ||--|{ PollOptions : "투표 선택지"
 Users ||--o{ Votes : "투표"
 PollOptions ||--o{ Votes : "투표 결과"
-Articles ||--o{ Notices : "공지 등록"
+Users ||--o{ Notices : "공지"
 Users ||--o{ Notifications : "알림 수신"
 Complaints ||--o{ Notifications : "민원 알림"
 Notices ||--o{ Notifications : "공지 알림"
