@@ -1,12 +1,12 @@
-import * as authService from "../../../src/services/authService";
-import * as userRepository from "../../../src/repositories/userRepository";
-import * as tokenUtils from "../../../src/lib/utils/token";
+import * as authService from "@/services/authService";
+import * as userRepository from "@/repositories/userRepository";
+import * as tokenUtils from "@/lib/utils/token";
 import bcrypt from "bcrypt";
-import { LoginRequestDTO } from "../../../src/structs/userStruct";
-import BadRequestError from "../../../src/errors/BadRequestError";
+import { LoginRequestDTO } from "@/structs/userStruct";
+import BadRequestError from "@/errors/BadRequestError";
 
-jest.mock("../../../src/repositories/userRepository");
-jest.mock("../../../src/lib/utils/token");
+jest.mock("@/repositories/userRepository");
+jest.mock("@/lib/utils/token");
 jest.mock("bcrypt");
 
 describe("authService", () => {

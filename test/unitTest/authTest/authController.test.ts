@@ -1,18 +1,14 @@
-import {
-  login,
-  logout,
-  refreshToken,
-} from "../../../src/controllers/authController";
-import * as authService from "../../../src/services/authService";
-import * as authUtil from "../../../src/lib/utils/auth";
+import { login, logout, refreshToken } from "@/controllers/authController";
+import * as authService from "@/services/authService";
+import * as authUtil from "@/lib/utils/auth";
 import {
   ACCESS_TOKEN_COOKIE_NAME,
   REFRESH_TOKEN_COOKIE_NAME,
-} from "../../../src/lib/constance";
+} from "@/lib/constance";
 import { Request, Response } from "express";
 
-jest.mock("../../../src/services/authService");
-jest.mock("../../../src/lib/utils/auth");
+jest.mock("@/services/authService");
+jest.mock("@/lib/utils/auth");
 
 describe("authContoroller", () => {
   let req: Partial<Request>;
