@@ -1,13 +1,20 @@
-import { NextFunction, Request, Response } from "express";
+import { create } from "superstruct";
+import { Request, Response } from "express";
 import residentsService from "../services/residentsService";
+import CommonError from "../errors/CommonError";
+import {
+  createResidentBodyStruct,
+  UpdateResidentBodyStruct,
+} from "../structs/residentStruct";
 
 // 입주민 명부 개별 등록
 export async function uploadResidentController(req: Request, res: Response) {
   const apartmentId = req.user?.apartmentId;
-  const data = req.body;
+  const data = create(req.body, createResidentBodyStruct);
 
   const residents = await residentsService.uploadResident({
     ...data,
+    email: data.email ?? "",
     apartmentInfo: {
       connect: { id: apartmentId },
     },
@@ -30,7 +37,7 @@ export async function getResidentByIdController(req: Request, res: Response) {
   const { id } = req.params;
   const resident = await residentsService.getResident(id);
   if (!resident) {
-    throw new Error("해당 입주민의 정보를 찾을 수 없습니다.");
+    throw new CommonError("입주민 정보 없음", 404);
   }
   res.status(200).json(resident);
 }
@@ -41,7 +48,7 @@ export async function updateResidentInfoController(
   res: Response
 ) {
   const { id } = req.params;
-  const { data } = req.body;
+  const data = create(req.body.data, UpdateResidentBodyStruct);
   const resident = await residentsService.patchResident(id, data);
   res.status(200).json(resident);
 }
