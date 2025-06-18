@@ -1,4 +1,4 @@
-import { Articles, NoticeComments, Notices } from "@prisma/client";
+import { NoticeComments, Notices } from "@prisma/client";
 
 import { NOTICE_CATEGORY } from "@prisma/client";
 
@@ -15,17 +15,17 @@ export class ResponseNoticeDTO {
   isPinned: boolean;
 
   constructor(
-    notice: Notices & { article: Articles & { user: { username: string } } } & {
+    notice: Notices & { user: { username: string } } & {
       _count?: { NoticeComments: number };
     }
   ) {
     this.noticeId = notice.id;
-    this.userId = notice.article.userId;
+    this.userId = notice.userId;
     this.category = notice.category;
-    this.title = notice.article.title;
-    this.writerName = notice.article.user.username;
-    this.createdAt = notice.article.createdAt;
-    this.updatedAt = notice.article.updatedAt;
+    this.title = notice.title;
+    this.writerName = notice.user.username;
+    this.createdAt = notice.createdAt;
+    this.updatedAt = notice.updatedAt;
     this.viewCount = notice.viewCount;
     this.commentCount = notice._count?.NoticeComments ?? 0;
     this.isPinned = notice.isPinned;
@@ -38,9 +38,7 @@ export class ResponseNoticeListDTO {
 
   constructor(result: {
     totalCount: number;
-    notices: (Notices & {
-      article: Articles & { user: { username: string } };
-    } & {
+    notices: (Notices & { user: { username: string } } & {
       _count?: { NoticeComments: number };
     })[];
   }) {
@@ -73,21 +71,21 @@ export class ResponseNoticeCommentDTO {
     writerName: string;
   }[];
   constructor(
-    notice: Notices & { article: Articles & { user: { username: string } } } & {
+    notice: Notices & { user: { username: string } } & {
       NoticeComments: (NoticeComments & { user: { username: string } })[];
     }
   ) {
     this.noticeId = notice.id;
-    this.userId = notice.article.userId;
+    this.userId = notice.userId;
     this.category = notice.category;
-    this.title = notice.article.title;
-    this.writerName = notice.article.user.username;
-    this.createdAt = notice.article.createdAt;
-    this.updatedAt = notice.article.updatedAt;
+    this.title = notice.title;
+    this.writerName = notice.user.username;
+    this.createdAt = notice.createdAt;
+    this.updatedAt = notice.updatedAt;
     this.viewsCount = notice.viewCount;
     this.commentsCount = notice.NoticeComments.length;
     this.isPinned = notice.isPinned;
-    this.content = notice.article.content;
+    this.content = notice.content;
     this.boardName = "공지사항";
     this.comments = notice.NoticeComments.map((comment) => ({
       id: comment.id,

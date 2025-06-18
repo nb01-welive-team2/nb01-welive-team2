@@ -1,19 +1,14 @@
 import noticeRepository from "../repositories/noticeRepository";
 import { CreateNoticeBodyType } from "../structs/noticeStructs";
-import articleRepository from "../repositories/articleRepository";
 import { BOARD_ID, USER_ROLE } from "@prisma/client";
 import { PageParamsType } from "../structs/commonStructs";
 import { buildSearchCondition } from "../lib/searchCondition";
 
 async function createNotice(notice: CreateNoticeBodyType, userId: string) {
-  const createdArticle = await articleRepository.create({
+  await noticeRepository.create({
     user: { connect: { id: userId } },
     title: notice.title,
     content: notice.content,
-    boardId: BOARD_ID.NOTICE,
-  });
-  await noticeRepository.create({
-    article: { connect: { id: createdArticle.id } },
     isPinned: notice.isPinned,
     category: notice.category,
   });

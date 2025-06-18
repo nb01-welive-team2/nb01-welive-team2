@@ -109,6 +109,8 @@ model Polls {
   content            String
   startDate          DateTime        @default(now())
   endDate            DateTime        @default(now())
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @default(now()) @updatedAt
   user               Users           @relation(fields: [userId], references: [id], onDelete: Cascade)
   pollOptions        PollOptions[]
   notifications      Notifications[]
@@ -143,6 +145,8 @@ model Notices {
   content   String
   startDate DateTime        @default(now())
   endDate   DateTime        @default(now())
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @default(now()) @updatedAt
 
   user          Users           @relation(fields: [userId], references: [id], onDelete: Cascade)
   notifications Notifications[]
