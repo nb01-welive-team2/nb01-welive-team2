@@ -4,8 +4,8 @@ import {
   getResident,
   removeResident,
   uploadResident,
+  patchResident,
 } from "../services/residentsService";
-import { updateResidentInfo } from "../repositories/residentsRepository";
 
 // 입주민 명부 개별 등록
 export async function uploadResidentController(
@@ -14,6 +14,7 @@ export async function uploadResidentController(
   next: NextFunction
 ) {
   try {
+    // payload에 아파트id추가되면 수정
     const data = req.body;
     console.log(data);
     const residents = await uploadResident(data);
@@ -64,7 +65,7 @@ export async function updateResidentInfoController(
   try {
     const { id } = req.params;
     const { data } = req.body;
-    const resident = await updateResidentInfo(id, data);
+    const resident = await patchResident(id, data);
     res.status(200).json(resident);
   } catch (error) {
     next(error);
