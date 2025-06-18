@@ -1,7 +1,10 @@
+import { $Enums } from "@prisma/client";
+
 export interface CreatePollRequestDto {
+  articleId: string;
   title: string;
   description?: string;
-  status: string;
+  status: $Enums.POLL_STATUS;
   startDate: string;
   endDate: string;
   options: string[];
@@ -11,15 +14,13 @@ export interface CreatePollRequestDto {
 export interface PollResponseDto {
   id: string;
   title: string;
-  author?: string;
-  status?: string;
-  buildingPermission?: number;
-  description?: string;
+  author: string;
+  status: string;
+  buildingPermission: number;
+  description: string;
   startDate: string;
   endDate: string;
   options: string[];
-  createdAt: string;
-  updatedAt: string;
 } // 생성된 투표의 응답 데이터
 
 export interface PollOptionResultDto {
@@ -30,12 +31,10 @@ export interface PollOptionResultDto {
 export interface PollDetailResponseDto {
   id: string;
   title: string;
-  description?: string;
+  description: string;
   startDate: string;
   endDate: string;
   options: PollOptionResultDto[];
-  createdAt: string;
-  updatedAt: string;
   canVote: boolean;
   showResult: boolean;
   isEligible: boolean;

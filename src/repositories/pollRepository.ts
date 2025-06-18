@@ -36,6 +36,9 @@ export const createPollEntry = async (data: {
       status: $Enums.POLL_STATUS.IN_PROGRESS,
       userId: data.userId,
     },
+    include: {
+      user: true,
+    },
   });
 };
 
@@ -140,6 +143,9 @@ export const updatePoll = async (
       endDate: data.endDate,
       buildingPermission: data.buildingPermission,
       status: data.status,
+    },
+    include: {
+      user: true,
     },
   });
 };
