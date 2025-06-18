@@ -9,10 +9,10 @@ import {
 
 const residentsRouter = Router();
 
-residentsRouter.get("/", getResidentsListFilteredController);
+residentsRouter.post("/register", uploadResidentController);
 residentsRouter.get("/:id", getResidentByIdController);
 residentsRouter.patch("/:id", updateResidentInfoController);
 residentsRouter.delete("/:id", deleteResidentController);
-residentsRouter.post("/register", uploadResidentController);
+residentsRouter.get("/", getResidentsListFilteredController);
 
 export default residentsRouter;
