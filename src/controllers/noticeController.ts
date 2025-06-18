@@ -17,6 +17,7 @@ import {
   ResponseNoticeListDTO,
 } from "../dto/noticeDTO";
 import NotFoundError from "../errors/NotFoundError";
+import removeSuccessMessage from "../lib/responseJson/removeSuccess";
 
 /**
  * @openapi
@@ -137,10 +138,10 @@ export async function getNotice(req: Request, res: Response) {
   if ((reqUser.role as string) === USER_ROLE.SUPER_ADMIN) {
     throw new UnauthError();
   }
-  const data = create(req.params, NoticeIdParamStruct);
-  const result = await noticeService.getNotice(data.noticeId);
+  const { noticeId } = create(req.params, NoticeIdParamStruct);
+  const result = await noticeService.getNotice(noticeId);
   if (!result) {
-    res.send(new NotFoundError("Notice", data.noticeId));
+    res.send(new NotFoundError("Notice", noticeId));
     return;
   }
   res.send(new ResponseNoticeCommentDTO(result));
@@ -232,12 +233,12 @@ export async function editNotice(req: Request, res: Response) {
  *       500:
  *         description: 서버 오류가 발생했습니다.
  */
-// export const deleteCompany: RequestHandler = async (req, res, next) => {
-//   const reqUser = req.user as OmittedUser;
-//   if (reqUser.role !== USER_ROLE.ADMIN) {
-//     throw new UnauthError();
-//   }
-//   const companyId = parseInt(req.params.companyId as string, 10);
-//   await companyService.deleteCompany(companyId);
-//   res.status(200).send({ message: "회사 삭제 성공" });
-// };
+export async function removeNotice(req: Request, res: Response) {
+  const reqUser = { id: randomUUID(), role: USER_ROLE.ADMIN }; // Assuming you get the user ID from the request, replace with actual logic
+  if (reqUser.role !== USER_ROLE.ADMIN) {
+    throw new UnauthError();
+  }
+  const { noticeId } = create(req.params, NoticeIdParamStruct);
+  await noticeService.removeNotice(noticeId);
+  res.status(200).send(new removeSuccessMessage());
+}

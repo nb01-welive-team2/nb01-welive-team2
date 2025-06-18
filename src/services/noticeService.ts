@@ -49,14 +49,14 @@ async function updateNotice(noticeId: string, body: PatchNoticeBodyType) {
 //   return notice;
 // }
 
-// async function deleteNotice(noticeId: number) {
-//   return await noticeRepository.deleteById(noticeId);
-// }
+async function removeNotice(noticeId: string) {
+  return await noticeRepository.deleteById(noticeId);
+}
 
 export default {
   createNotice,
   updateNotice,
   getNotice,
   getNoticeList,
-  // deleteNotice,
+  removeNotice,
 };

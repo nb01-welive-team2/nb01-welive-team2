@@ -76,13 +76,13 @@ async function getCount(params: Prisma.NoticesCountArgs) {
   });
 }
 
-// async function deleteById(noticeId: number) {
-//   return await prisma.notices.delete({
-//     where: {
-//       id: noticeId,
-//     },
-//   });
-// }
+async function deleteById(noticeId: string) {
+  return await prisma.notices.delete({
+    where: {
+      id: noticeId,
+    },
+  });
+}
 
 export default {
   create,
@@ -90,5 +90,5 @@ export default {
   findById,
   getList,
   getCount,
-  // deleteById,
+  deleteById,
 };

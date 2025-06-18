@@ -5,12 +5,13 @@ import {
   editNotice,
   getNotice,
   getNoticeList,
+  removeNotice,
 } from "../controllers/noticeController";
 
 const noticesRouter = express.Router();
 noticesRouter.get("/:noticeId", withAsync(getNotice));
 noticesRouter.put("/:noticeId", withAsync(editNotice));
-// noticesRouter.delete("/:noticeId", withAsync(removeNotice));
+noticesRouter.delete("/:noticeId", withAsync(removeNotice));
 noticesRouter.post("/", withAsync(createNotice));
 noticesRouter.get("/", withAsync(getNoticeList));
 
