@@ -41,14 +41,6 @@ async function updateNotice(noticeId: string, body: PatchNoticeBodyType) {
   return await noticeRepository.update(noticeId, body);
 }
 
-// async function getByName(noticeName: string) {
-//   const notice = await noticeRepository.findByName(noticeName);
-//   if (!notice) {
-//     throw new NotFoundError("Notice", noticeName);
-//   }
-//   return notice;
-// }
-
 async function removeNotice(noticeId: string) {
   return await noticeRepository.deleteById(noticeId);
 }
