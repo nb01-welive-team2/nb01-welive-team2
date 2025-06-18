@@ -24,8 +24,8 @@ model Users {
   joinStatus        JOIN_STATUS
   profileImage      String?     @db.VarChar(255)
 
-  apartmentInfo ApartmentInfo[]
-  userInfo      UserInfo[]
+  apartmentInfo ApartmentInfo?
+  userInfo      UserInfo?
   complaints    Complaints[]
   polls         Polls[]
   notices       Notices[]
@@ -37,7 +37,7 @@ model Users {
 
 model ApartmentInfo {
   id                        String          @id @default(uuid())
-  userId                    String
+  userId                    String          @unique
   approvalStatus            APPROVAL_STATUS
   apartmentName             String          @db.VarChar(100)
   apartmentAddress          String          @db.VarChar(255)
@@ -60,7 +60,7 @@ model ApartmentInfo {
 
 model UserInfo {
   id            String @id @default(uuid())
-  userId        String
+  userId        String @unique
   apartmentId   String
   apartmentName String @db.VarChar(100)
   apartmentDong Int

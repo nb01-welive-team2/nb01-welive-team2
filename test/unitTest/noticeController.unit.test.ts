@@ -1,104 +1,170 @@
-import { createNotice } from "@/controllers/noticeController";
+import {
+  createNotice,
+  getNoticeList,
+  getNotice,
+  editNotice,
+  removeNotice,
+} from "@/controllers/noticeController";
 import noticeService from "@/services/noticeService";
-
-import UnauthError from "@/errors/UnauthError";
+import { USER_ROLE } from "@prisma/client";
+import ForbiddenError from "@/errors/ForbiddenError";
+import * as struct from "superstruct";
 import registerSuccessMessage from "@/lib/responseJson/registerSuccess";
-import { CreateNoticeBodyStruct } from "@/structs/noticeStructs";
-import { create } from "superstruct";
-import { randomUUID } from "crypto";
-import { NOTICE_CATEGORY, USER_ROLE } from "@prisma/client";
+import removeSuccessMessage from "@/lib/responseJson/removeSuccess";
+import {
+  ResponseNoticeDTO,
+  ResponseNoticeCommentDTO,
+  ResponseNoticeListDTO,
+} from "@/dto/noticeDTO";
 
-jest.mock("@/services/noticeService");
-jest.mock("@/lib/message", () => ({
-  registerSuccessMessage: jest.fn(() => ({ message: "등록 성공" })),
-}));
+jest.mock("../services/noticeService");
+jest.mock("superstruct");
+jest.mock("../lib/responseJson/registerSuccess");
+jest.mock("../lib/responseJson/removeSuccess");
 
-describe("createNotice", () => {
-  const mockReq = (body: any) =>
-    ({
-      body,
-    }) as any;
+const mockResponse = () => {
+  const res: any = {};
+  res.status = jest.fn().mockReturnValue(res);
+  res.send = jest.fn().mockReturnValue(res);
+  return res;
+};
 
-  const mockRes = () => {
-    const res: any = {};
-    res.status = jest.fn().mockReturnValue(res);
-    res.send = jest.fn();
-    return res;
-  };
+const mockUser = (role: USER_ROLE, userId = 1) => ({
+  user: {
+    role,
+    userId,
+  },
+});
 
+describe("Notice Controller", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("✅ 관리자인 경우 공지 생성 성공", async () => {
-    // given
-    const req = mockReq({
-      body: {
-        title: "Community Meeting2",
-        content: "Next community meeting is on May 1st.",
-        isPinned: true,
-        category: NOTICE_CATEGORY.COMMUNITY,
-      },
-      user: {
-        id: randomUUID(),
-        role: USER_ROLE.ADMIN,
-      },
-    });
-    const res = mockRes();
+  describe("createNotice", () => {
+    it("should create notice if user is admin", async () => {
+      (struct.create as jest.Mock).mockReturnValue({
+        title: "test",
+        content: "test",
+      });
+      const req: any = { body: {}, ...mockUser(USER_ROLE.ADMIN) };
+      const res = mockResponse();
 
-    // mocking
-    (create as any) = jest.fn().mockReturnValue(req.body); // superstruct의 create 결과 mocking
-    (noticeService.createNotice as jest.Mock).mockResolvedValue(undefined);
+      await createNotice(req, res);
 
-    // when
-    await createNotice(req, res);
-
-    // then
-    expect(create).toHaveBeenCalledWith(req.body, CreateNoticeBodyStruct);
-    expect(noticeService.createNotice).toHaveBeenCalledWith(
-      req.body,
-      expect.any(String)
-    );
-    expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.send).toHaveBeenCalledWith(expect.any(Object));
-  });
-
-  it("❌ 관리자가 아닌 경우 UnauthError 발생", async () => {
-    const req = mockReq({ title: "공지", content: "내용" });
-    const res = mockRes();
-
-    // reqUser를 고정값으로 설정하지 않고, 실제 코드에서는 이걸 꺼낸다고 가정
-    const originalUUID = randomUUID;
-    (randomUUID as any) = jest.fn().mockReturnValue("user-id");
-
-    // 사용자 권한을 변경 (관리자가 아님)
-    const USER_ROLE_ORIGINAL = USER_ROLE.ADMIN;
-    USER_ROLE.ADMIN = "NOT_ADMIN"; // 일부러 일치하지 않게 설정
-
-    // when
-    const run = () => createNotice(req, res);
-
-    // then
-    await expect(run()).rejects.toThrow(UnauthError);
-    expect(noticeService.createNotice).not.toHaveBeenCalled();
-
-    // cleanup
-    USER_ROLE.ADMIN = USER_ROLE_ORIGINAL;
-    (randomUUID as any) = originalUUID;
-  });
-
-  it("❌ 유효하지 않은 데이터일 경우 예외 발생", async () => {
-    const req = mockReq({}); // 필수 필드 없음
-    const res = mockRes();
-
-    (create as any) = jest.fn(() => {
-      throw new Error("Validation failed");
+      expect(noticeService.createNotice).toHaveBeenCalledWith(
+        { title: "test", content: "test" },
+        1
+      );
+      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.send).toHaveBeenCalledWith(expect.any(registerSuccessMessage));
     });
 
-    const run = () => createNotice(req, res);
+    it("should throw ForbiddenError if not admin", async () => {
+      const req: any = { body: {}, ...mockUser(USER_ROLE.USER) };
+      await expect(createNotice(req, mockResponse())).rejects.toThrow(
+        ForbiddenError
+      );
+    });
+  });
 
-    await expect(run()).rejects.toThrow("Validation failed");
-    expect(noticeService.createNotice).not.toHaveBeenCalled();
-    expect(res.status).not.toHaveBeenCalled();
+  describe("getNoticeList", () => {
+    it("should return notice list if not SUPER_ADMIN", async () => {
+      (struct.create as jest.Mock).mockReturnValue({ page: 1 });
+      (noticeService.getNoticeList as jest.Mock).mockResolvedValue(
+        "mockedResult"
+      );
+
+      const req: any = { query: {}, ...mockUser(USER_ROLE.ADMIN) };
+      const res = mockResponse();
+
+      await getNoticeList(req, res);
+
+      expect(res.send).toHaveBeenCalledWith(expect.any(ResponseNoticeListDTO));
+    });
+
+    it("should throw ForbiddenError if SUPER_ADMIN", async () => {
+      const req: any = { query: {}, ...mockUser(USER_ROLE.SUPER_ADMIN) };
+      await expect(getNoticeList(req, mockResponse())).rejects.toThrow(
+        ForbiddenError
+      );
+    });
+  });
+
+  describe("getNotice", () => {
+    it("should return notice if not SUPER_ADMIN", async () => {
+      (struct.create as jest.Mock).mockReturnValue({ noticeId: 123 });
+      (noticeService.getNotice as jest.Mock).mockResolvedValue("noticeContent");
+
+      const req: any = { params: {}, ...mockUser(USER_ROLE.USER) };
+      const res = mockResponse();
+
+      await getNotice(req, res);
+
+      expect(res.send).toHaveBeenCalledWith(
+        expect.any(ResponseNoticeCommentDTO)
+      );
+    });
+
+    it("should throw ForbiddenError if SUPER_ADMIN", async () => {
+      const req: any = { params: {}, ...mockUser(USER_ROLE.SUPER_ADMIN) };
+      await expect(getNotice(req, mockResponse())).rejects.toThrow(
+        ForbiddenError
+      );
+    });
+  });
+
+  describe("editNotice", () => {
+    it("should edit notice if admin", async () => {
+      (struct.create as jest.Mock).mockImplementationOnce(() => ({
+        title: "updated",
+      }));
+      (struct.create as jest.Mock).mockImplementationOnce(() => ({
+        noticeId: 5,
+      }));
+      (noticeService.updateNotice as jest.Mock).mockResolvedValue(
+        "updatedNotice"
+      );
+
+      const req: any = { body: {}, params: {}, ...mockUser(USER_ROLE.ADMIN) };
+      const res = mockResponse();
+
+      await editNotice(req, res);
+
+      expect(noticeService.updateNotice).toHaveBeenCalledWith(5, {
+        title: "updated",
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith(expect.any(ResponseNoticeDTO));
+    });
+
+    it("should throw ForbiddenError if not admin", async () => {
+      const req: any = { body: {}, params: {}, ...mockUser(USER_ROLE.USER) };
+      await expect(editNotice(req, mockResponse())).rejects.toThrow(
+        ForbiddenError
+      );
+    });
+  });
+
+  describe("removeNotice", () => {
+    it("should remove notice if admin", async () => {
+      (struct.create as jest.Mock).mockReturnValue({ noticeId: 7 });
+
+      const req: any = { params: {}, ...mockUser(USER_ROLE.ADMIN) };
+      const res = mockResponse();
+
+      await removeNotice(req, res);
+
+      expect(noticeService.removeNotice).toHaveBeenCalledWith(7);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith(expect.any(removeSuccessMessage));
+    });
+
+    it("should throw ForbiddenError if not admin", async () => {
+      const req: any = { params: {}, ...mockUser(USER_ROLE.USER) };
+      await expect(removeNotice(req, mockResponse())).rejects.toThrow(
+        ForbiddenError
+      );
+    });
   });
 });

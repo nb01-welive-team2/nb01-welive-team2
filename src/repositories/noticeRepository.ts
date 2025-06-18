@@ -38,6 +38,13 @@ async function findById(noticeId: string) {
         select: {
           username: true,
         },
+        include: {
+          apartmentInfo: {
+            select: {
+              id: true,
+            },
+          },
+        },
       },
       NoticeComments: {
         include: {

@@ -137,7 +137,7 @@ Notifications {
 %% nullable : complaintId, noticeId, pollId
 
 Users ||--o| ApartmentInfo : "관리자 계정"
-Users ||--o{ UserInfo : "입주민 계정"
+Users ||--o| UserInfo : "입주민 계정"
 ApartmentInfo ||--o{ UserInfo : "아파트의 입주민 계정"
 ApartmentInfo ||--o| Residents : "입주민 목록"
 Users ||--o{ Complaints : "민원"

@@ -6,9 +6,7 @@ import {
   NoticeIdParamStruct,
   PatchNoticeBodyStruct,
 } from "../structs/noticeStructs";
-import UnauthError from "../errors/UnauthError";
 import noticeService from "../services/noticeService";
-import { randomUUID } from "crypto";
 import registerSuccessMessage from "../lib/responseJson/registerSuccess";
 import { PageParamsStruct } from "../structs/commonStructs";
 import {
@@ -16,8 +14,9 @@ import {
   ResponseNoticeDTO,
   ResponseNoticeListDTO,
 } from "../dto/noticeDTO";
-import NotFoundError from "../errors/NotFoundError";
 import removeSuccessMessage from "../lib/responseJson/removeSuccess";
+import { AuthenticatedRequest } from "@/types/express";
+import ForbiddenError from "@/errors/ForbiddenError";
 
 /**
  * @openapi
@@ -69,14 +68,14 @@ import removeSuccessMessage from "../lib/responseJson/removeSuccess";
  *         description: 인증되지 않음. 관리자만 공지사항을 생성할 수 있습니다.
  */
 export async function createNotice(req: Request, res: Response) {
-  const reqUser = { id: randomUUID(), role: USER_ROLE.ADMIN }; // Assuming you get the user ID from the request, replace with actual logic
+  const reqWithPayload = req as AuthenticatedRequest;
   const data = create(req.body, CreateNoticeBodyStruct);
 
-  if (reqUser.role !== USER_ROLE.ADMIN) {
-    throw new UnauthError();
+  if (reqWithPayload.user.role !== USER_ROLE.ADMIN) {
+    throw new ForbiddenError();
   }
 
-  await noticeService.createNotice(data, reqUser.id);
+  await noticeService.createNotice(data, reqWithPayload.user.userId);
 
   res.status(201).send(new registerSuccessMessage());
 }
@@ -120,30 +119,29 @@ export async function createNotice(req: Request, res: Response) {
  *         description: 서버 오류가 발생했습니다.
  */
 export async function getNoticeList(req: Request, res: Response) {
-  const reqUser = { id: randomUUID(), role: USER_ROLE.USER }; // Assuming you get the user ID from the request, replace with actual logic
-  if ((reqUser.role as string) === USER_ROLE.SUPER_ADMIN) {
-    throw new UnauthError();
+  const reqWithPayload = req as AuthenticatedRequest;
+  if ((reqWithPayload.user.role as string) === USER_ROLE.SUPER_ADMIN) {
+    throw new ForbiddenError();
   }
   const data = create(req.query, PageParamsStruct);
   const result = await noticeService.getNoticeList(
-    reqUser.id,
-    reqUser.role,
+    reqWithPayload.user.userId,
+    reqWithPayload.user.role as USER_ROLE,
     data
   );
   res.send(new ResponseNoticeListDTO(result));
 }
 
 export async function getNotice(req: Request, res: Response) {
-  const reqUser = { id: randomUUID(), role: USER_ROLE.USER }; // Assuming you get the user ID from the request, replace with actual logic
-  if ((reqUser.role as string) === USER_ROLE.SUPER_ADMIN) {
-    throw new UnauthError();
+  const reqWithPayload = req as AuthenticatedRequest;
+  if ((reqWithPayload.user.role as string) === USER_ROLE.SUPER_ADMIN) {
+    throw new ForbiddenError();
   }
   const { noticeId } = create(req.params, NoticeIdParamStruct);
-  const result = await noticeService.getNotice(noticeId);
-  if (!result) {
-    res.send(new NotFoundError("Notice", noticeId));
-    return;
-  }
+  const result = await noticeService.getNotice(
+    noticeId,
+    reqWithPayload.user.userId
+  );
   res.send(new ResponseNoticeCommentDTO(result));
 }
 
@@ -192,9 +190,9 @@ export async function getNotice(req: Request, res: Response) {
  *         description: 서버 오류가 발생했습니다.
  */
 export async function editNotice(req: Request, res: Response) {
-  const reqUser = { id: randomUUID(), role: USER_ROLE.ADMIN }; // Assuming you get the user ID from the request, replace with actual logic
-  if (reqUser.role !== USER_ROLE.ADMIN) {
-    throw new UnauthError();
+  const reqWithPayload = req as AuthenticatedRequest;
+  if (reqWithPayload.user.role !== USER_ROLE.ADMIN) {
+    throw new ForbiddenError();
   }
   const data = create(req.body, PatchNoticeBodyStruct);
   const { noticeId } = create(req.params, NoticeIdParamStruct);
@@ -234,9 +232,9 @@ export async function editNotice(req: Request, res: Response) {
  *         description: 서버 오류가 발생했습니다.
  */
 export async function removeNotice(req: Request, res: Response) {
-  const reqUser = { id: randomUUID(), role: USER_ROLE.ADMIN }; // Assuming you get the user ID from the request, replace with actual logic
-  if (reqUser.role !== USER_ROLE.ADMIN) {
-    throw new UnauthError();
+  const reqWithPayload = req as AuthenticatedRequest;
+  if (reqWithPayload.user.role !== USER_ROLE.ADMIN) {
+    throw new ForbiddenError();
   }
   const { noticeId } = create(req.params, NoticeIdParamStruct);
   await noticeService.removeNotice(noticeId);
