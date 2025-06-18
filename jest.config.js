@@ -12,5 +12,11 @@ module.exports = {
       testEnvironment: "node",
       testMatch: ["**/integration/**/poll*.test.ts"],
     },
+    {
+      displayName: "residents-api",
+      preset: "ts-jest",
+      testEnvironment: "node",
+      testMatch: ["**/integrationTest/**/residents*.test.ts"],
+    },
   ],
 };

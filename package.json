@@ -11,7 +11,8 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "test-poll-unit": "jest --selectProjects poll-unit --runInBand --detectOpenHandles",
-    "test-poll-api": "jest --selectProjects poll-api --runInBand --detectOpenHandles"
+    "test-poll-api": "jest --selectProjects poll-api --runInBand --detectOpenHandles",
+    "test-residents-api": "jest --selectProjects residents-api --runInBand --detectOpenHandles"
   },
   "keywords": [],
   "author": "",
