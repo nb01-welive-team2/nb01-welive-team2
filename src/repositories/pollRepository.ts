@@ -1,46 +1,40 @@
 import { prisma } from "../lib/prisma";
+import { $Enums } from "@prisma/client";
 
 export const findPolls = async (where: any, skip: number, take: number) => {
   return await prisma.polls.findMany({
     where,
     include: {
-      article: {
-        include: {
-          user: true, // ← 작성자 이름을 가져오기 위해 포함
-        },
-      },
       pollOptions: true,
+      user: true,
     },
     skip,
     take,
     orderBy: {
-      article: {
-        createdAt: "desc",
-      },
+      startDate: "desc",
     },
   });
 };
 
-export const createPollArticle = async (data: {
+export const createPollEntry = async (data: {
+  articleId: string;
   title: string;
-  content: string;
+  description?: string;
   startDate: Date;
   endDate: Date;
-  boardId: string;
+  buildingPermission: number;
   userId: string;
 }) => {
-  return await prisma.articles.create({ data });
-};
-
-export const createPollEntry = async (
-  articleId: string,
-  buildingPermission: number
-) => {
   return await prisma.polls.create({
     data: {
-      articleId,
-      status: "IN_PROGRESS",
-      buildingPermission,
+      articleId: data.articleId,
+      title: data.title,
+      content: data.description || "",
+      startDate: data.startDate,
+      endDate: data.endDate,
+      buildingPermission: data.buildingPermission,
+      status: $Enums.POLL_STATUS.IN_PROGRESS,
+      userId: data.userId,
     },
   });
 };
@@ -62,8 +56,8 @@ export const findPollById = async (pollId: string) => {
   return await prisma.polls.findUnique({
     where: { id: pollId },
     include: {
-      article: true,
       pollOptions: true,
+      user: true,
     },
   });
 };
@@ -74,21 +68,16 @@ export const getApartmentIdByPollId = async (
   const poll = await prisma.polls.findUnique({
     where: { id: pollId },
     include: {
-      article: {
+      user: {
         include: {
-          user: {
-            include: {
-              userInfo: true,
-            },
-          },
+          userInfo: true,
         },
       },
     },
   });
 
-  const apartmentId = poll?.article?.user?.userInfo[0]?.apartmentId ?? null;
-  return apartmentId;
-}; // 작성자의 apartmentId 조회
+  return poll?.user?.userInfo[0]?.apartmentId ?? null;
+};
 
 export const isUserInApartment = async (
   userId: string,
@@ -102,16 +91,15 @@ export const isUserInApartment = async (
   });
 
   return !!userInfo;
-}; // 유저가 해당 아파트 구성원인지 확인
+};
 
 export const findPollByIdWithVotes = async (pollId: string) => {
   return await prisma.polls.findUnique({
     where: { id: pollId },
     include: {
-      article: true,
       pollOptions: {
         include: {
-          votes: true, // 선택한 옵션의 투표 수 조회
+          votes: true,
         },
       },
     },
@@ -126,69 +114,51 @@ export const getUserDongNumber = async (
   });
 
   return userInfo?.apartmentDong ?? null;
-}; // 아파트 동 정보 조회
+};
 
 export const findPollForEdit = async (pollId: string) => {
   return await prisma.polls.findUnique({
     where: { id: pollId },
-    include: {
-      article: true,
-    },
   });
 };
 
-export const updatePollAndArticle = async (
+export const updatePoll = async (
   pollId: string,
   data: {
     title: string;
-    description?: string;
     startDate: Date;
     endDate: Date;
     buildingPermission: number;
-    status: string;
+    status: $Enums.POLL_STATUS;
   }
 ) => {
-  const poll = await prisma.polls.update({
+  return await prisma.polls.update({
     where: { id: pollId },
     data: {
+      title: data.title,
+      startDate: data.startDate,
+      endDate: data.endDate,
       buildingPermission: data.buildingPermission,
-      article: {
-        update: {
-          title: data.title,
-          content: data.description ?? "",
-          startDate: data.startDate,
-          endDate: data.endDate,
-        },
-      },
-    },
-    include: {
-      article: true,
+      status: data.status,
     },
   });
-
-  return poll;
 };
 
 export const replacePollOptions = async (pollId: string, options: string[]) => {
   await prisma.pollOptions.deleteMany({ where: { pollId } });
-  await Promise.all(
-    options.map((opt) =>
-      prisma.pollOptions.create({ data: { pollId, content: opt } })
-    )
-  );
+  await createPollOptions(pollId, options);
 };
 
 export const findPollWithAuthor = async (pollId: string) => {
   return await prisma.polls.findUnique({
     where: { id: pollId },
     include: {
-      article: true,
+      user: true,
     },
   });
 };
 
 export const deletePollById = async (pollId: string) => {
-  return await prisma.polls.delete({
-    where: { id: pollId },
-  });
+  await prisma.pollOptions.deleteMany({ where: { pollId } });
+  await prisma.polls.delete({ where: { id: pollId } });
 };
