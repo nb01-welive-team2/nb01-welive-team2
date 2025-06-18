@@ -5,7 +5,6 @@ import {
   mockUserInfo,
   mockResidents,
   mockComplaints,
-  mockArticles,
   mockPolls,
   mockPollOptions,
   mockVotes,
@@ -22,7 +21,6 @@ export async function seedDatabase(): Promise<void> {
   await prisma.pollOptions.deleteMany();
   await prisma.polls.deleteMany();
   await prisma.notices.deleteMany();
-  await prisma.articles.deleteMany();
   await prisma.complaints.deleteMany();
   await prisma.userInfo.deleteMany();
   await prisma.residents.deleteMany();
@@ -45,10 +43,6 @@ export async function seedDatabase(): Promise<void> {
   });
   await prisma.complaints.createMany({
     data: mockComplaints,
-    skipDuplicates: false,
-  });
-  await prisma.articles.createMany({
-    data: mockArticles,
     skipDuplicates: false,
   });
   await prisma.polls.createMany({ data: mockPolls, skipDuplicates: false });
