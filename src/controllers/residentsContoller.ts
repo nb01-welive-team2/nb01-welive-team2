@@ -1,11 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import {
-  getResidentsList,
-  getResident,
-  removeResident,
-  uploadResident,
-  patchResident,
-} from "../services/residentsService";
+import residentsService from "../services/residentsService";
 
 // 입주민 명부 개별 등록
 export async function uploadResidentController(
@@ -17,7 +11,7 @@ export async function uploadResidentController(
     // payload에 아파트id추가되면 수정
     const data = req.body;
     console.log(data);
-    const residents = await uploadResident(data);
+    const residents = await residentsService.uploadResident(data);
     res.status(201).json(residents);
   } catch (error) {
     next(error);
@@ -31,7 +25,7 @@ export async function getResidentsListFilteredController(
   next: NextFunction
 ) {
   try {
-    const residents = await getResidentsList(req.query);
+    const residents = await residentsService.getResidentsList(req.query);
     res.status(200).json(residents);
   } catch (error) {
     next(error);
@@ -46,7 +40,7 @@ export async function getResidentByIdController(
 ) {
   try {
     const { id } = req.params;
-    const resident = await getResident(id);
+    const resident = await residentsService.getResident(id);
     if (!resident) {
       throw new Error("해당 입주민의 정보를 찾을 수 없습니다.");
     }
@@ -65,7 +59,7 @@ export async function updateResidentInfoController(
   try {
     const { id } = req.params;
     const { data } = req.body;
-    const resident = await patchResident(id, data);
+    const resident = await residentsService.patchResident(id, data);
     res.status(200).json(resident);
   } catch (error) {
     next(error);
@@ -80,7 +74,7 @@ export async function deleteResidentController(
 ) {
   try {
     const { id } = req.params;
-    await removeResident(id);
+    await residentsService.removeResident(id);
     res.status(200).json({ message: "입주민 정보 삭제 성공" });
   } catch (error) {
     next(error);

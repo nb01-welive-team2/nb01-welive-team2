@@ -4,7 +4,7 @@ import { Prisma } from "@prisma/client";
 import { ResidentsFilter } from "../types/residents";
 
 // 입주민 명부 개별 등록 (관리자)
-export async function createResident(data: Prisma.ResidentsCreateInput) {
+async function createResident(data: Prisma.ResidentsCreateInput) {
   const resident = await prisma.residents.create({
     data,
   });
@@ -12,7 +12,7 @@ export async function createResident(data: Prisma.ResidentsCreateInput) {
 }
 
 // 입주민 목록 조회 (관리자)
-export async function getResidentsFiltered(filters: ResidentsFilter) {
+async function getResidentsFiltered(filters: ResidentsFilter) {
   const { building, unitNumber, residenceStatus, isRegistered, name, contact } =
     filters;
 
@@ -32,7 +32,7 @@ export async function getResidentsFiltered(filters: ResidentsFilter) {
 }
 
 // 입주민 상세 조회 (관리자)
-export async function getResidentById(id: string) {
+async function getResidentById(id: string) {
   const resident = await prisma.residents.findUnique({
     where: { id },
   });
@@ -40,7 +40,7 @@ export async function getResidentById(id: string) {
 }
 
 // 입주민 정보 수정 (관리자)
-export async function updateResidentInfo(id: string, data: Partial<Residents>) {
+async function updateResidentInfo(id: string, data: Partial<Residents>) {
   const resident = await prisma.residents.update({
     where: { id },
     data,
@@ -49,6 +49,14 @@ export async function updateResidentInfo(id: string, data: Partial<Residents>) {
 }
 
 // 입주민 정보 삭제 (관리자)
-export async function deleteResident(id: string) {
+async function deleteResident(id: string) {
   return await prisma.residents.delete({ where: { id } });
 }
+
+export default {
+  deleteResident,
+  updateResidentInfo,
+  getResidentById,
+  getResidentsFiltered,
+  createResident,
+};
