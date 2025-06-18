@@ -15,6 +15,7 @@ import {
   defaultNotFoundHandler,
   globalErrorHandler,
 } from "./controllers/errorController";
+import authRouter from "./routes/authRoute";
 // import { renderHtmlWithUrl } from './lib/htmlRenderer';
 
 // const seedPath = path.resolve(__dirname, '../prisma/seed');
@@ -26,6 +27,7 @@ app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
+app.use("/auth", authRouter);
 // app.use('/users', usersRouter);
 
 // app.use("/api/polls", pollsRouter);

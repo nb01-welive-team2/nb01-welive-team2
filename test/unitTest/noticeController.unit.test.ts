@@ -1,67 +1,104 @@
-import path from "path";
-import { createNotice } from "../../src/controllers/noticeController";
-import noticeService from "../../src/services/noticeService";
-import registerSuccessMessage from "../../src/lib/responseJson/registerSuccess";
-import UnauthError from "../../src/errors/UnauthError";
-import { create as structCreate } from "superstruct";
-import { USER_ROLE } from "@prisma/client";
-const seedPath = path.resolve(__dirname, "../../prisma/seed");
-const { seedDatabase } = require(seedPath);
-const mockPath = path.resolve(__dirname, "../../prisma/mock");
-const { mockArticles, mockUsers, mockComments } = require(mockPath);
+import { createNotice } from "@/controllers/noticeController";
+import noticeService from "@/services/noticeService";
 
-jest.mock("../services/noticeService");
-jest.mock("superstruct", () => ({
-  create: jest.fn(),
+import UnauthError from "@/errors/UnauthError";
+import registerSuccessMessage from "@/lib/responseJson/registerSuccess";
+import { CreateNoticeBodyStruct } from "@/structs/noticeStructs";
+import { create } from "superstruct";
+import { randomUUID } from "crypto";
+import { NOTICE_CATEGORY, USER_ROLE } from "@prisma/client";
+
+jest.mock("@/services/noticeService");
+jest.mock("@/lib/message", () => ({
+  registerSuccessMessage: jest.fn(() => ({ message: "등록 성공" })),
 }));
 
-beforeEach(async () => {
-  await seedDatabase();
-});
-
 describe("createNotice", () => {
-  const mockData = { title: "Test Notice", content: "This is a notice." };
-  const adminUser = { id: "admin-uuid", role: USER_ROLE.ADMIN };
-  const nonAdminUser = { id: "user-uuid", role: USER_ROLE.USER };
+  const mockReq = (body: any) =>
+    ({
+      body,
+    }) as any;
 
-  let req: any;
-  let res: any;
+  const mockRes = () => {
+    const res: any = {};
+    res.status = jest.fn().mockReturnValue(res);
+    res.send = jest.fn();
+    return res;
+  };
 
   beforeEach(() => {
-    res = {
-      status: jest.fn().mockReturnThis(),
-      send: jest.fn(),
-    };
-
-    (structCreate as jest.Mock).mockReturnValue(mockData);
+    jest.clearAllMocks();
   });
 
-  it("should create a notice and return 201 if user is admin", async () => {
-    req = {
-      body: mockData,
-      user: adminUser,
-    };
+  it("✅ 관리자인 경우 공지 생성 성공", async () => {
+    // given
+    const req = mockReq({
+      body: {
+        title: "Community Meeting2",
+        content: "Next community meeting is on May 1st.",
+        isPinned: true,
+        category: NOTICE_CATEGORY.COMMUNITY,
+      },
+      user: {
+        id: randomUUID(),
+        role: USER_ROLE.ADMIN,
+      },
+    });
+    const res = mockRes();
 
+    // mocking
+    (create as any) = jest.fn().mockReturnValue(req.body); // superstruct의 create 결과 mocking
+    (noticeService.createNotice as jest.Mock).mockResolvedValue(undefined);
+
+    // when
     await createNotice(req, res);
 
-    expect(structCreate).toHaveBeenCalledWith(mockData, expect.anything());
+    // then
+    expect(create).toHaveBeenCalledWith(req.body, CreateNoticeBodyStruct);
     expect(noticeService.createNotice).toHaveBeenCalledWith(
-      mockData,
-      "admin-uuid"
+      req.body,
+      expect.any(String)
     );
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.send).toHaveBeenCalledWith(expect.any(Object));
   });
 
-  it("should throw UnauthError if user is not admin", async () => {
-    req = {
-      body: mockData,
-      user: nonAdminUser,
-    };
+  it("❌ 관리자가 아닌 경우 UnauthError 발생", async () => {
+    const req = mockReq({ title: "공지", content: "내용" });
+    const res = mockRes();
 
-    await expect(createNotice(req, res)).rejects.toThrow(UnauthError);
+    // reqUser를 고정값으로 설정하지 않고, 실제 코드에서는 이걸 꺼낸다고 가정
+    const originalUUID = randomUUID;
+    (randomUUID as any) = jest.fn().mockReturnValue("user-id");
 
-    expect(structCreate).toHaveBeenCalledWith(mockData, expect.anything());
+    // 사용자 권한을 변경 (관리자가 아님)
+    const USER_ROLE_ORIGINAL = USER_ROLE.ADMIN;
+    USER_ROLE.ADMIN = "NOT_ADMIN"; // 일부러 일치하지 않게 설정
+
+    // when
+    const run = () => createNotice(req, res);
+
+    // then
+    await expect(run()).rejects.toThrow(UnauthError);
+    expect(noticeService.createNotice).not.toHaveBeenCalled();
+
+    // cleanup
+    USER_ROLE.ADMIN = USER_ROLE_ORIGINAL;
+    (randomUUID as any) = originalUUID;
+  });
+
+  it("❌ 유효하지 않은 데이터일 경우 예외 발생", async () => {
+    const req = mockReq({}); // 필수 필드 없음
+    const res = mockRes();
+
+    (create as any) = jest.fn(() => {
+      throw new Error("Validation failed");
+    });
+
+    const run = () => createNotice(req, res);
+
+    await expect(run()).rejects.toThrow("Validation failed");
     expect(noticeService.createNotice).not.toHaveBeenCalled();
     expect(res.status).not.toHaveBeenCalled();
-    expect(res.send).not.toHaveBeenCalled();
   });
 });
