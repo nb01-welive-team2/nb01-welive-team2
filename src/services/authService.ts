@@ -23,7 +23,13 @@ export const login = async (data: LoginRequestDTO) => {
 
   const userId = user.id;
   const role = user.role;
-  const { accessToken, refreshToken } = generateTokens(userId, role);
+  const apartmentId = user.apartmentInfo[0]?.id;
+
+  const { accessToken, refreshToken } = generateTokens(
+    userId,
+    role,
+    apartmentId
+  );
 
   return {
     accessToken,
@@ -42,11 +48,14 @@ export const refreshToken = async (refreshToken?: string) => {
     throw new BadRequestError("Invalid refresh token");
   }
   const role = user.role;
+  const apartmentId = user.apartmentInfo[0]?.id;
 
   const { accessToken, refreshToken: newRefreshToken } = generateTokens(
     userId,
-    role
+    role,
+    apartmentId
   );
+
   return {
     accessToken,
     refreshToken: newRefreshToken,

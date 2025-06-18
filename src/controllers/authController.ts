@@ -2,9 +2,11 @@ import { Request, Response } from "express";
 import * as authService from "../services/authService";
 import { clearTokenCookies, setTokenCookies } from "../lib/utils/auth";
 import { REFRESH_TOKEN_COOKIE_NAME } from "../lib/constance";
+import { loginBodyStruct } from "../structs/userStruct";
+import { create } from "superstruct";
 
 export const login = async (req: Request, res: Response): Promise<void> => {
-  const data = req.body;
+  const data = create(req.body, loginBodyStruct);
   const { accessToken, refreshToken } = await authService.login(data);
   setTokenCookies(res, accessToken, refreshToken);
   res.status(200).send();

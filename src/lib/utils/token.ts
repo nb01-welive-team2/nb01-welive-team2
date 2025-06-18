@@ -4,14 +4,22 @@ import {
   JWT_REFRESH_TOKEN_SECRET,
 } from "../constance";
 import UnauthError from "../../errors/UnauthError";
-import { USER_ROLE } from "../../types/User";
+import { USER_ROLE } from "@prisma/client";
 
-export function generateTokens(userId: string, role: USER_ROLE) {
-  const accessToken = jwt.sign({ id: userId, role }, JWT_ACCESS_TOKEN_SECRET, {
-    expiresIn: "1h",
-  });
+export function generateTokens(
+  userId: string,
+  role: USER_ROLE,
+  apartmentId: string
+) {
+  const accessToken = jwt.sign(
+    { id: userId, role, apartmentId },
+    JWT_ACCESS_TOKEN_SECRET,
+    {
+      expiresIn: "1h",
+    }
+  );
   const refreshToken = jwt.sign(
-    { id: userId, role },
+    { id: userId, role, apartmentId },
     JWT_REFRESH_TOKEN_SECRET,
     {
       expiresIn: "7d",
