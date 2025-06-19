@@ -30,17 +30,33 @@ export function generateTokens(
 }
 
 export function verifyAccessToken(token: string) {
-  const decoded = jwt.verify(token, JWT_ACCESS_TOKEN_SECRET);
-  if (typeof decoded === "string") {
+  try {
+    const decoded = jwt.verify(token, JWT_ACCESS_TOKEN_SECRET);
+    if (typeof decoded === "string") {
+      throw new UnauthError();
+    }
+    return {
+      userId: decoded.id,
+      role: decoded.role,
+      apartmentId: decoded.apartmentId,
+    };
+  } catch (error) {
     throw new UnauthError();
   }
-  return { userId: decoded.id };
 }
 
 export function verifyRefreshToken(token: string) {
-  const decoded = jwt.verify(token, JWT_REFRESH_TOKEN_SECRET);
-  if (typeof decoded === "string") {
+  try {
+    const decoded = jwt.verify(token, JWT_REFRESH_TOKEN_SECRET);
+    if (typeof decoded === "string") {
+      throw new UnauthError();
+    }
+    return {
+      userId: decoded.id,
+      role: decoded.role,
+      apartmentId: decoded.apartmentId,
+    };
+  } catch (error) {
     throw new UnauthError();
   }
-  return { userId: decoded.id };
 }
