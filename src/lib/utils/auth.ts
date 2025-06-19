@@ -19,7 +19,7 @@ export function setTokenCookies(
     httpOnly: true,
     secure: NODE_ENV === "production",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    path: "/auth/refresh",
+    path: "/api/auth/refresh",
   });
 }
 
@@ -31,6 +31,6 @@ export function clearTokenCookies(res: Response) {
   res.clearCookie(REFRESH_TOKEN_COOKIE_NAME, {
     httpOnly: true,
     secure: NODE_ENV === "production",
-    path: "/auth/refresh",
+    path: "/api/auth/refresh",
   });
 }
