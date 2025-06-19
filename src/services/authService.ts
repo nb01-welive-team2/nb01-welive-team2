@@ -1,4 +1,4 @@
-import BadRequestError from "@/errors/BadRequestError";
+import BadRequestError from "../errors/BadRequestError";
 import { getUserByUsername, getUserId } from "../repositories/userRepository";
 import bcrypt from "bcrypt";
 import { generateTokens, verifyRefreshToken } from "../lib/utils/token";
