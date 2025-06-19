@@ -4,3 +4,5 @@ node_modules
 *.http
 .vscode 
 /dist 
+.env.test
+prisma/migrations/

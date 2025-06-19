@@ -24,18 +24,20 @@ model Users {
   joinStatus        JOIN_STATUS
   profileImage      String?     @db.VarChar(255)
 
-  apartmentInfo ApartmentInfo[]
-  userInfo      UserInfo[]
+  apartmentInfo ApartmentInfo?
+  userInfo      UserInfo?
   complaints    Complaints[]
   polls         Polls[]
   notices       Notices[]
   votes         Votes[]
   notifications Notifications[]
+
+  NoticeComments NoticeComments[]
 }
 
 model ApartmentInfo {
   id                        String          @id @default(uuid())
-  userId                    String
+  userId                    String          @unique
   approvalStatus            APPROVAL_STATUS
   apartmentName             String          @db.VarChar(100)
   apartmentAddress          String          @db.VarChar(255)
@@ -58,7 +60,7 @@ model ApartmentInfo {
 
 model UserInfo {
   id            String @id @default(uuid())
-  userId        String
+  userId        String @unique
   apartmentId   String
   apartmentName String @db.VarChar(100)
   apartmentDong Int
@@ -100,7 +102,6 @@ model Complaints {
 
 model Polls {
   id                 String          @id @default(uuid())
-  articleId          String
   status             POLL_STATUS
   buildingPermission Int
   userId             String
@@ -108,6 +109,8 @@ model Polls {
   content            String
   startDate          DateTime        @default(now())
   endDate            DateTime        @default(now())
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @default(now()) @updatedAt
   user               Users           @relation(fields: [userId], references: [id], onDelete: Cascade)
   pollOptions        PollOptions[]
   notifications      Notifications[]
@@ -134,7 +137,6 @@ model Votes {
 
 model Notices {
   id        String          @id @default(uuid())
-  articleId String
   isPinned  Boolean
   category  NOTICE_CATEGORY
   viewCount Int             @default(0)
@@ -143,9 +145,25 @@ model Notices {
   content   String
   startDate DateTime        @default(now())
   endDate   DateTime        @default(now())
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @default(now()) @updatedAt
 
   user          Users           @relation(fields: [userId], references: [id], onDelete: Cascade)
   notifications Notifications[]
+
+  NoticeComments NoticeComments[]
+}
+
+model NoticeComments {
+  id        String   @id @default(uuid())
+  noticeId  String
+  userId    String
+  content   String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  notice Notices @relation(fields: [noticeId], references: [id], onDelete: Cascade)
+  user   Users   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Notifications {
