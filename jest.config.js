@@ -1,15 +1,21 @@
+const commonConfig = {
+  preset: "ts-jest",
+  testEnvironment: "node",
+  moduleNameMapper: {
+    "^@/(.*)$": "<rootDir>/src/$1",
+  },
+};
+
 module.exports = {
   projects: [
     {
       displayName: "poll-unit",
-      preset: "ts-jest",
-      testEnvironment: "node",
+      ...commonConfig,
       testMatch: ["**/unit/**/poll*.test.ts"],
     },
     {
       displayName: "poll-api",
-      preset: "ts-jest",
-      testEnvironment: "node",
+      ...commonConfig,
       testMatch: ["**/integration/**/poll*.test.ts"],
     },
     {
@@ -23,6 +29,19 @@ module.exports = {
       preset: "ts-jest",
       testEnvironment: "node",
       testMatch: ["**/unitTest/**/residents*.unit.test.ts"],
+      displayName: "notice-unit",
+      ...commonConfig,
+      testMatch: ["**/unitTest/noticeTest/notice*.test.ts"],
+    },
+    {
+      displayName: "auth-unit",
+      ...commonConfig,
+      testMatch: ["**/unitTest/authTest/auth*.test.ts"],
+    },
+    {
+      displayName: "auth-api",
+      ...commonConfig,
+      testMatch: ["**/integrationTest/auth*.test.ts"],
     },
   ],
 };
