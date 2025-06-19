@@ -7,12 +7,17 @@ import {
   getComplaintList,
   removeComplaint,
 } from "../controllers/complaintController";
+import authenticate from "@/middlewares/authenticate";
 
 const complaintsRouter = express.Router();
-complaintsRouter.get("/:complaintId", withAsync(getComplaint));
-complaintsRouter.put("/:complaintId", withAsync(editComplaint));
-complaintsRouter.delete("/:complaintId", withAsync(removeComplaint));
-complaintsRouter.post("/", withAsync(createComplaint));
-complaintsRouter.get("/", withAsync(getComplaintList));
+complaintsRouter.get("/:complaintId", authenticate(), withAsync(getComplaint));
+complaintsRouter.put("/:complaintId", authenticate(), withAsync(editComplaint));
+complaintsRouter.delete(
+  "/:complaintId",
+  authenticate(),
+  withAsync(removeComplaint)
+);
+complaintsRouter.post("/", authenticate(), withAsync(createComplaint));
+complaintsRouter.get("/", authenticate(), withAsync(getComplaintList));
 
 export default complaintsRouter;

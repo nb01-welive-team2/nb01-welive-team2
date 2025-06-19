@@ -69,13 +69,20 @@ import ForbiddenError from "@/errors/ForbiddenError";
  */
 export async function createComplaint(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
+  console.log("payload", reqWithPayload.user);
   const data = create(req.body, CreateComplaintBodyStruct);
 
   if (reqWithPayload.user.role !== USER_ROLE.USER) {
     throw new ForbiddenError();
   }
+  console.log("data", data);
 
-  await complaintService.createComplaint(data, reqWithPayload.user.userId);
+  await complaintService.createComplaint(
+    data,
+    reqWithPayload.user.userId,
+    reqWithPayload.user.apartmentId
+  );
+  console.log("complaint created");
 
   res.status(201).send(new registerSuccessMessage());
 }
@@ -112,7 +119,7 @@ export async function createComplaint(req: Request, res: Response) {
  *             schema:
  *               $ref: '#/components/schemas/ResponseComplaintListDTO'
  *       401:
- *         description: 권한이 없는 사용자입니다. 예: SUPER_ADMIN 접근 제한
+ *         description: 권한이 없는 사용자입니다.
  *       400:
  *         description: 잘못된 요청입니다. 유효하지 않은 페이지 번호 또는 페이지 크기일 수 있습니다.
  *       500:

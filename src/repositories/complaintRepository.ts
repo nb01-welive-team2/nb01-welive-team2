@@ -15,9 +15,6 @@ async function update(complaintId: string, data: Prisma.ComplaintsUpdateInput) {
     },
     include: {
       user: {
-        select: {
-          username: true,
-        },
         include: {
           userInfo: {
             select: {
@@ -44,9 +41,6 @@ async function findById(complaintId: string) {
     },
     include: {
       user: {
-        select: {
-          username: true,
-        },
         include: {
           userInfo: {
             select: {
@@ -75,9 +69,6 @@ async function getList(params: Prisma.ComplaintsFindManyArgs) {
     ...params,
     include: {
       user: {
-        select: {
-          username: true,
-        },
         include: {
           userInfo: {
             select: {

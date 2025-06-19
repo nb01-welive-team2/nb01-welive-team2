@@ -15,6 +15,7 @@
     "test-poll-api": "jest --selectProjects poll-api --runInBand --detectOpenHandles",
     "test-notice-unit": "jest --selectProjects notice-unit --runInBand --detectOpenHandles --coverage",
     "test-complaint-unit": "jest --selectProjects complaint-unit --runInBand --detectOpenHandles --coverage",
+    "test-complaint-int": "jest --selectProjects complaint-integration --runInBand --detectOpenHandles --coverage",
     "test-auth-unit": "jest --selectProjects auth-unit --runInBand --detectOpenHandles",
     "test-auth-api": "jest --selectProjects auth-api --runInBand --detectOpenHandles"
   },

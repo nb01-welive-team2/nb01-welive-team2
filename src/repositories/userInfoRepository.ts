@@ -9,6 +9,11 @@ async function findByUserId(userId: string) {
   });
 }
 
+async function findUnique(params: Prisma.UserInfoFindUniqueArgs) {
+  return await prisma.userInfo.findUnique({ ...params });
+}
+
 export default {
   findByUserId,
+  findUnique,
 };

@@ -21,8 +21,13 @@ describe("complaintService", () => {
     it("should call complaintRepository.create with correct params", async () => {
       const mockComplaint = { title: "t", content: "c", isPublic: true };
       const userId = "user-1";
+      const apartmentId = "apt-1";
 
-      await complaintService.createComplaint(mockComplaint, userId);
+      await complaintService.createComplaint(
+        mockComplaint,
+        userId,
+        apartmentId
+      );
 
       expect(complaintRepository.create).toHaveBeenCalledWith({
         user: { connect: { id: userId } },

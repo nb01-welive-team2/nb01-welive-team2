@@ -29,13 +29,13 @@ app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
-app.use("/auth", authRouter);
+app.use("/api/auth", authRouter);
 // app.use('/users', usersRouter);
 
 // app.use("/api/polls", pollsRouter);
 app.use("/api/notices", noticesRouter);
 // app.use("/api/polls", pollsRouter);
-app.use("/complaints", complaintsRouter);
+app.use("/api/complaints", complaintsRouter);
 // app.use("/api/notices", noticesRouter);
 
 // app.use('/comments', commentsRouter);

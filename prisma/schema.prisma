@@ -20,9 +20,12 @@ model Users {
   contact           String      @unique @db.VarChar(20)
   name              String      @db.VarChar(50)
   email             String      @unique @db.VarChar(320)
+  residentId        String?
   role              USER_ROLE
   joinStatus        JOIN_STATUS
   profileImage      String?     @db.VarChar(255)
+
+  residents Residents? @relation(fields: [residentId], references: [id], onDelete: Cascade)
 
   apartmentInfo ApartmentInfo?
   userInfo      UserInfo?
@@ -43,9 +46,9 @@ model ApartmentInfo {
   apartmentName             String          @db.VarChar(100)
   apartmentAddress          String          @db.VarChar(255)
   apartmentManagementNumber String          @db.VarChar(100)
-  description               String?
-  startComplexNumber        Int?
-  endComplexNumber          Int?
+  description               String
+  startComplexNumber        Int
+  endComplexNumber          Int
   startDongNumber           Int
   endDongNumber             Int
   startFloorNumber          Int
@@ -54,9 +57,12 @@ model ApartmentInfo {
   endHoNumber               Int
   createdAt                 DateTime        @default(now())
 
-  user      Users       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userInfo  UserInfo[]
-  residents Residents[]
+  user       Users        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userInfo   UserInfo[]
+  residents  Residents[]
+  notices    Notices[]
+  complaints Complaints[]
+  polls      Polls[]
 }
 
 model UserInfo {
@@ -85,6 +91,7 @@ model Residents {
   approvalStatus  APPROVAL_STATUS
 
   apartmentInfo ApartmentInfo @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  Users         Users[]
 }
 
 model Complaints {
@@ -102,6 +109,8 @@ model Complaints {
   notifications Notifications[]
 
   ComplaintComments ComplaintComments[]
+  ApartmentInfo     ApartmentInfo       @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  apartmentId       String
 }
 
 model ComplaintComments {
@@ -130,6 +139,8 @@ model Polls {
   user               Users           @relation(fields: [userId], references: [id], onDelete: Cascade)
   pollOptions        PollOptions[]
   notifications      Notifications[]
+  ApartmentInfo      ApartmentInfo   @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  apartmentId        String
 }
 
 model PollOptions {
@@ -168,6 +179,8 @@ model Notices {
   notifications Notifications[]
 
   NoticeComments NoticeComments[]
+  ApartmentInfo  ApartmentInfo    @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  apartmentId    String
 }
 
 model NoticeComments {

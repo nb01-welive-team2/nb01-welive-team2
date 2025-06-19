@@ -11,9 +11,14 @@ import { getUserId } from "@/repositories/userRepository";
 import NotFoundError from "@/errors/NotFoundError";
 import ForbiddenError from "@/errors/ForbiddenError";
 
-async function createNotice(notice: CreateNoticeBodyType, userId: string) {
+async function createNotice(
+  notice: CreateNoticeBodyType,
+  userId: string,
+  apartmentId: string
+) {
   await noticeRepository.create({
     user: { connect: { id: userId } },
+    ApartmentInfo: { connect: { id: apartmentId } },
     title: notice.title,
     content: notice.content,
     isPinned: notice.isPinned,

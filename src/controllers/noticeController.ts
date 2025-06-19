@@ -75,7 +75,11 @@ export async function createNotice(req: Request, res: Response) {
     throw new ForbiddenError();
   }
 
-  await noticeService.createNotice(data, reqWithPayload.user.userId);
+  await noticeService.createNotice(
+    data,
+    reqWithPayload.user.userId,
+    reqWithPayload.user.apartmentId
+  );
 
   res.status(201).send(new registerSuccessMessage());
 }
@@ -112,7 +116,7 @@ export async function createNotice(req: Request, res: Response) {
  *             schema:
  *               $ref: '#/components/schemas/ResponseNoticeListDTO'
  *       401:
- *         description: 권한이 없는 사용자입니다. 예: SUPER_ADMIN 접근 제한
+ *         description: 권한이 없는 사용자입니다.
  *       400:
  *         description: 잘못된 요청입니다. 유효하지 않은 페이지 번호 또는 페이지 크기일 수 있습니다.
  *       500:

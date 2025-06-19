@@ -35,9 +35,6 @@ async function findById(noticeId: string) {
     },
     include: {
       user: {
-        select: {
-          username: true,
-        },
         include: {
           apartmentInfo: {
             select: {

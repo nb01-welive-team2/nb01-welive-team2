@@ -23,6 +23,7 @@ describe("complaintRepository", () => {
     it("should call prisma.complaints.create with correct data", async () => {
       const data = {
         user: { connect: { id: "user-123" } },
+        ApartmentInfo: { connect: { id: "apt-456" } },
         title: "불편사항 제목",
         content: "불편사항 내용",
         isPublic: true,

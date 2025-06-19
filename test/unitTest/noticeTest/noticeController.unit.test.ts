@@ -29,10 +29,11 @@ const mockResponse = () => {
   return res;
 };
 
-const mockUser = (role: USER_ROLE, userId = 1) => ({
+const mockUser = (role: USER_ROLE, userId = 1, apartmentId = 2) => ({
   user: {
     role,
     userId,
+    apartmentId,
   },
 });
 
@@ -54,7 +55,8 @@ describe("Notice Controller", () => {
 
       expect(noticeService.createNotice).toHaveBeenCalledWith(
         { title: "test", content: "test" },
-        1
+        1,
+        2
       );
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.send).toHaveBeenCalledWith(expect.any(registerSuccessMessage));

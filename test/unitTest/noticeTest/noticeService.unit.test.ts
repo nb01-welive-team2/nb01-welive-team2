@@ -26,13 +26,15 @@ describe("noticeService", () => {
         category: NOTICE_CATEGORY.MAINTENANCE,
       };
       const userId = "user-uuid";
+      const apartmentId = "apt-uuid";
 
       (noticeRepository.create as jest.Mock).mockResolvedValue(undefined);
 
-      await noticeService.createNotice(mockNotice, userId);
+      await noticeService.createNotice(mockNotice, userId, apartmentId);
 
       expect(noticeRepository.create).toHaveBeenCalledWith({
         user: { connect: { id: userId } },
+        ApartmentInfo: { connect: { id: apartmentId } },
         title: mockNotice.title,
         content: mockNotice.content,
         isPinned: mockNotice.isPinned,

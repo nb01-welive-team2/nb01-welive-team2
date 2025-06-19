@@ -35,7 +35,6 @@ ApartmentInfo {
   Datetime createdAt
 }
 %% APPROVAL_STATUS : UNRECEIVED, PENDING, APPROVED
-%% nullable : startComplexNumber, endComplexNumber
 
 UserInfo {
   UUID id PK
@@ -65,6 +64,7 @@ Residents {
 Complaints {
   UUID id PK
   UUID userId FK
+  UUID apartmentId FK
   Varchar title
   Varchar content
   Datetime createdAt
@@ -74,9 +74,19 @@ Complaints {
 }
 %% viewCount @default(0)
 
+ComplaintComments {
+  UUID id PK
+  UUID complaintId FK
+  UUID userId FK
+  Varchar content
+  Datetime createdAt
+  Datetime updatedAt
+}
+
 Polls {
   UUID id PK
   UUID userId FK
+  UUID apartmentId FK
   Varchar title
   Varchar content
   Datetime startDate
@@ -101,6 +111,7 @@ Votes {
 Notices {
   UUID id PK
   UUID userId FK
+  UUID apartmentId FK
   Varchar title
   Varchar content
   Datetime startDate
@@ -118,6 +129,7 @@ NoticeComments {
   UUID userId FK
   Varchar content
   Datetime createdAt
+  Datetime updatedAt
 }
 
 Notifications {
@@ -138,9 +150,14 @@ Notifications {
 
 Users ||--o| ApartmentInfo : "관리자 계정"
 Users ||--o| UserInfo : "입주민 계정"
+Users ||--o| Residents : "입주민 목록의 입주민"
 ApartmentInfo ||--o{ UserInfo : "아파트의 입주민 계정"
 ApartmentInfo ||--o| Residents : "입주민 목록"
 Users ||--o{ Complaints : "민원"
+Complaints ||--o{ ComplaintComments : "민원 댓글"
+ApartmentInfo ||--o{ Complaints : "아파트 민원"
+ApartmentInfo ||--o{ Polls : "아파트 투표"
+ApartmentInfo ||--o{ Notices : "아파트 공지"
 Users ||--o{ Polls : "투표 등록"
 Polls ||--|{ PollOptions : "투표 선택지"
 Users ||--o{ Votes : "투표"

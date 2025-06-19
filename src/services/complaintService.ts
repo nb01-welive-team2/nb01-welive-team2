@@ -13,10 +13,12 @@ import { getUserId } from "@/repositories/userRepository";
 
 async function createComplaint(
   complaint: CreateComplaintBodyType,
-  userId: string
+  userId: string,
+  apartmentId: string
 ) {
   await complaintRepository.create({
     user: { connect: { id: userId } },
+    ApartmentInfo: { connect: { id: apartmentId } },
     title: complaint.title,
     content: complaint.content,
     isPublic: complaint.isPublic,
@@ -29,10 +31,10 @@ async function getComplaintList(
   params: PageParamsType
 ) {
   const searchCondition = await buildSearchCondition(params, { userId, role });
-
-  const totalCount = await complaintRepository.getCount(
-    searchCondition.whereCondition
-  );
+  console.log(searchCondition);
+  const totalCount = await complaintRepository.getCount({
+    where: searchCondition.whereCondition,
+  });
 
   const complaints = await complaintRepository.getList(
     searchCondition.bothCondition
