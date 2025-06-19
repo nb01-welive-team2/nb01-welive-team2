@@ -140,7 +140,8 @@ export async function getNotice(req: Request, res: Response) {
   const { noticeId } = create(req.params, NoticeIdParamStruct);
   const result = await noticeService.getNotice(
     noticeId,
-    reqWithPayload.user.userId
+    reqWithPayload.user.userId,
+    reqWithPayload.user.role as USER_ROLE
   );
   res.send(new ResponseNoticeCommentDTO(result));
 }
