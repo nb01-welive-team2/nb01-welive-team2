@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import {
   CreatePollRequestDto,
   PollResponseDto,
@@ -130,10 +129,10 @@ export const editPoll = async (
   const poll = await pollRepo.findPollForEdit(pollId);
   if (!poll) throw new NotFoundError("Poll", "투표를 찾을 수 없습니다.");
   if (poll.userId !== userId && role !== "ADMIN") {
-    throw new ForbiddenError("Poll", Number(pollId), Number(userId));
+    throw new ForbiddenError();
   }
   if (poll.startDate <= new Date()) {
-    throw new ForbiddenError("Poll", Number(pollId), Number(userId));
+    throw new ForbiddenError("이미 시작된 투표는 수정할 수 없습니다.");
   }
 
   const updated = await pollRepo.updatePoll(pollId, {
@@ -164,10 +163,10 @@ export const removePoll = async (pollId: string, userId: string) => {
   const poll = await pollRepo.findPollWithAuthor(pollId);
   if (!poll) throw new NotFoundError("Poll", "해당 투표를 찾을 수 없습니다.");
   if (poll.userId !== userId) {
-    throw new ForbiddenError("Poll", Number(pollId), Number(userId));
+    throw new ForbiddenError();
   }
   if (poll.startDate <= new Date()) {
-    throw new ForbiddenError("Poll", Number(pollId), Number(userId));
+    throw new ForbiddenError("이미 시작된 투표는 삭제할 수 없습니다.");
   }
   await pollRepo.deletePollById(pollId);
 };

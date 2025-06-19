@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import * as pollService from "../services/pollService";
 import { getPagination } from "../utils/pagination";
-import AccessDeniedError from "../errors/AccessDeniedError";
 import UnauthError from "../errors/UnauthError";
+import ForbiddenError from "../errors/ForbiddenError";
 import { createPollSchema, pollIdParamSchema } from "../structs/pollStructs";
 import { validate } from "superstruct";
 
@@ -12,8 +12,7 @@ export const createPoll = async (req: Request, res: Response) => {
   const role = req.user?.role;
 
   if (!userId || !role) throw new UnauthError();
-  if (role !== "ADMIN")
-    throw new AccessDeniedError("투표는 관리자만 생성할 수 있습니다.");
+  if (role !== "ADMIN") throw new ForbiddenError();
 
   validate(req.body, createPollSchema);
   res.status(201).json(await pollService.createPoll(req.body, userId));
