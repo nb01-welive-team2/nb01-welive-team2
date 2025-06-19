@@ -32,7 +32,8 @@ model Users {
   votes         Votes[]
   notifications Notifications[]
 
-  NoticeComments NoticeComments[]
+  NoticeComments    NoticeComments[]
+  ComplaintComments ComplaintComments[]
 }
 
 model ApartmentInfo {
@@ -92,12 +93,27 @@ model Complaints {
   title          String          @db.VarChar(100)
   content        String
   createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @default(now()) @updatedAt
   isPublic       Boolean
-  approvalStatus APPROVAL_STATUS
+  approvalStatus APPROVAL_STATUS @default(PENDING)
   viewCount      Int             @default(0)
 
   user          Users           @relation(fields: [userId], references: [id], onDelete: Cascade)
   notifications Notifications[]
+
+  ComplaintComments ComplaintComments[]
+}
+
+model ComplaintComments {
+  id          String   @id @default(uuid())
+  complaintId String
+  userId      String
+  content     String   @db.VarChar(255)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  complaint Complaints @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  user      Users      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Polls {
@@ -196,9 +212,9 @@ enum JOIN_STATUS {
 }
 
 enum APPROVAL_STATUS {
-  UNRECEIVED
   PENDING
-  APPROVED
+  IN_PROGRESS
+  CLOSED
 }
 
 enum RESIDENCE_STATUS {

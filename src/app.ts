@@ -9,6 +9,7 @@ import cookieParser from "cookie-parser";
 // import pollsRouter from "./routes/pollRouter";
 import noticesRouter from "./routes/noticeRouter";
 // import pollsRouter from "./routes/pollRouter";
+import complaintsRouter from "./routes/complaintRouter";
 // import commentsRouter from './routers/commentRouter';
 // import imagesRouter from './routers/imageRouter';
 // import notificationsRouter from './routers/notificationRouter';
@@ -34,6 +35,7 @@ app.use("/auth", authRouter);
 // app.use("/api/polls", pollsRouter);
 app.use("/api/notices", noticesRouter);
 // app.use("/api/polls", pollsRouter);
+app.use("/complaints", complaintsRouter);
 // app.use("/api/notices", noticesRouter);
 
 // app.use('/comments', commentsRouter);
