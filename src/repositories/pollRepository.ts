@@ -27,7 +27,6 @@ export const createPollEntry = async (data: {
 }) => {
   return await prisma.polls.create({
     data: {
-      articleId: data.articleId,
       title: data.title,
       content: data.description || "",
       startDate: data.startDate,
@@ -79,7 +78,7 @@ export const getApartmentIdByPollId = async (
     },
   });
 
-  return poll?.user?.userInfo[0]?.apartmentId ?? null;
+  return poll?.user?.userInfo?.apartmentId ?? null;
 };
 
 export const isUserInApartment = async (
