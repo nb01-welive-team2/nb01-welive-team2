@@ -1,7 +1,7 @@
 import { Admin, ResidentUser, SuperAdmin, UserType } from "@/types/User";
 import { USER_ROLE } from "@prisma/client";
 
-export interface SignupUserRequestDTO {
+export interface userRequestDTO {
   username: string;
   password: string;
   contact: string;
@@ -9,9 +9,27 @@ export interface SignupUserRequestDTO {
   email: string;
   role: USER_ROLE;
   profileImage: string | null;
+}
+
+export interface SignupUserRequestDTO extends userRequestDTO {
   apartmentName: string;
   apartmentDong: number;
   apartmentHo: number;
+}
+
+export interface SignupAdminRequestDTO extends userRequestDTO {
+  description: string;
+  startComplexNumber: number;
+  endComplexNumber: number;
+  startDongNumber: number;
+  endDongNumber: number;
+  startFloorNumber: number;
+  endFloorNumber: number;
+  startHoNumber: number;
+  endHoNumber: number;
+  apartmentName: string;
+  apartmentAddress: string;
+  apartmentManagementNumber: string;
 }
 
 export const userResponseDTO = (user: UserType) => {
@@ -27,9 +45,12 @@ export const userResponseDTO = (user: UserType) => {
   if (user.role === "ADMIN") {
     const { encryptedPassword, joinStatus, apartmentInfo, ...rest } =
       user as Admin;
+
+    const { ...flattenedApt } = apartmentInfo || {};
+
     return {
       ...rest,
-      ...(apartmentInfo || {}),
+      ...flattenedApt,
     };
   }
 

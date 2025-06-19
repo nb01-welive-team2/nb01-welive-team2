@@ -12,3 +12,13 @@ export const signupUser = async (
 
   res.status(200).json(userResponseDTO(user as UserType));
 };
+
+export const signupAdmin = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const data = req.body;
+  const user = await userService.signupAdmin(data);
+
+  res.status(200).json(userResponseDTO(user as UserType));
+};

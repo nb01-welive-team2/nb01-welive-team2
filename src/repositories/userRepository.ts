@@ -1,7 +1,7 @@
 import { UserType } from "@/types/User";
 import { prisma } from "../lib/prisma";
 import BadRequestError from "@/errors/BadRequestError";
-import { SignupUserRequestDTO } from "@/dto/userDTO";
+import { SignupAdminRequestDTO, SignupUserRequestDTO } from "@/dto/userDTO";
 
 export const getUserByUsername = async (username: string) => {
   const user = await prisma.users.findUnique({
@@ -67,6 +67,69 @@ export const createUser = async (input: SignupUserRequestDTO) => {
           apartmentName: true,
           apartmentDong: true,
           apartmentHo: true,
+        },
+      },
+    },
+  });
+
+  return user;
+};
+
+export const createAdmin = async (input: SignupAdminRequestDTO) => {
+  const apartment = await findApartment(input.apartmentName); // TODO: 프로젝트 합친 후 apartment관련 리포지토리 있으면 거기에 맞춰 수정
+  if (!apartment) throw new BadRequestError("존재하지 않는 아파트입니다.");
+
+  const user = await prisma.users.create({
+    data: {
+      username: input.username,
+      encryptedPassword: input.password,
+      contact: input.contact,
+      name: input.name,
+      email: input.email,
+      role: "ADMIN",
+      profileImage: input.profileImage,
+      joinStatus: "PENDING",
+      apartmentInfo: {
+        create: {
+          description: input.description,
+          startComplexNumber: input.startComplexNumber,
+          endComplexNumber: input.endComplexNumber,
+          startDongNumber: input.startDongNumber,
+          endDongNumber: input.endDongNumber,
+          startFloorNumber: input.startFloorNumber,
+          endFloorNumber: input.endFloorNumber,
+          startHoNumber: input.startHoNumber,
+          endHoNumber: input.endHoNumber,
+          apartmentName: input.apartmentName,
+          apartmentAddress: input.apartmentAddress,
+          apartmentManagementNumber: input.apartmentManagementNumber,
+          approvalStatus: "PENDING",
+        },
+      },
+    },
+    select: {
+      username: true,
+      encryptedPassword: true,
+      contact: true,
+      name: true,
+      email: true,
+      role: true,
+      profileImage: true,
+      joinStatus: true,
+      apartmentInfo: {
+        select: {
+          description: true,
+          startComplexNumber: true,
+          endComplexNumber: true,
+          startDongNumber: true,
+          endDongNumber: true,
+          startFloorNumber: true,
+          endFloorNumber: true,
+          startHoNumber: true,
+          endHoNumber: true,
+          apartmentName: true,
+          apartmentAddress: true,
+          apartmentManagementNumber: true,
         },
       },
     },
