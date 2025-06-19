@@ -1,5 +1,5 @@
 import request from "supertest";
-import app from "../app";
+import app from "@/app";
 import path from "path";
 const seedPath = path.resolve(__dirname, "../../prisma/seed");
 const { seedDatabase } = require(seedPath);
