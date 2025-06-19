@@ -88,7 +88,7 @@ interface Polls {
 interface PollOptions {
   id: string;
   pollId: string;
-  content: string;
+  title: string;
 }
 
 interface Votes {
@@ -224,12 +224,12 @@ const mockPollOptions: PollOptions[] = [
   {
     id: "33ec83f9-fd3c-4596-9825-65774f4b06fe",
     pollId: "8b83f903-5ede-476d-86a4-a4e20f9c99ac",
-    content: "Playground near building A",
+    title: "Playground near building A",
   },
   {
     id: "4a7f589e-cfae-42f6-a63f-ab68d719f446",
     pollId: "8b83f903-5ede-476d-86a4-a4e20f9c99ac",
-    content: "Playground near building B",
+    title: "Playground near building B",
   },
 ];
 
