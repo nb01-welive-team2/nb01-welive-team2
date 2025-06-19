@@ -3,7 +3,7 @@ import {
   CreateNoticeBodyType,
   PatchNoticeBodyType,
 } from "../structs/noticeStructs";
-import { BOARD_ID, USER_ROLE } from "@prisma/client";
+import { USER_ROLE } from "@prisma/client";
 import { PageParamsType } from "../structs/commonStructs";
 import { buildSearchCondition } from "../lib/searchCondition";
 import userInfoRepository from "@/repositories/userInfoRepository";

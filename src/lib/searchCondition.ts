@@ -1,6 +1,7 @@
 import { PageParamsType } from "../structs/commonStructs";
 import { prisma } from "./prisma";
 
+//TODO : 현재 프론트와 명세의 검색상황이 다르기 때문에, 추후 명세가 명확해지면 유닛테스트 작성
 export async function buildSearchCondition(
   params: PageParamsType,
   args?: Record<string, any>
