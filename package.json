@@ -11,7 +11,9 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "test-poll-unit": "jest --selectProjects poll-unit --runInBand --detectOpenHandles",
-    "test-poll-api": "jest --selectProjects poll-api --runInBand --detectOpenHandles"
+    "test-poll-api": "jest --selectProjects poll-api --runInBand --detectOpenHandles",
+    "test-auth-unit": "jest --selectProjects auth-unit --runInBand --detectOpenHandles",
+    "test-auth-api": "jest --selectProjects auth-api --runInBand --detectOpenHandles"
   },
   "keywords": [],
   "author": "",
@@ -31,6 +33,7 @@
     "socket.io": "^4.8.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
+    "tsconfig-paths": "^4.2.0",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
