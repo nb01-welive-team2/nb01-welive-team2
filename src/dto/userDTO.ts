@@ -1,5 +1,5 @@
 import { Admin, ResidentUser, SuperAdmin, UserType } from "@/types/User";
-import { USER_ROLE } from "@prisma/client";
+import { JOIN_STATUS, USER_ROLE } from "@prisma/client";
 
 export interface userRequestDTO {
   username: string;
@@ -32,9 +32,13 @@ export interface SignupAdminRequestDTO extends userRequestDTO {
   apartmentManagementNumber: string;
 }
 
+export interface SignupSuperAdminRequestDTO extends userRequestDTO {
+  joinStatus: JOIN_STATUS;
+}
+
 export const userResponseDTO = (user: UserType) => {
   if (user.role === "USER") {
-    const { encryptedPassword, joinStatus, userInfo, ...rest } =
+    const { encryptedPassword, joinStatus, userInfo, profileImage, ...rest } =
       user as ResidentUser;
     return {
       ...rest,
@@ -43,8 +47,13 @@ export const userResponseDTO = (user: UserType) => {
   }
 
   if (user.role === "ADMIN") {
-    const { encryptedPassword, joinStatus, apartmentInfo, ...rest } =
-      user as Admin;
+    const {
+      encryptedPassword,
+      joinStatus,
+      apartmentInfo,
+      profileImage,
+      ...rest
+    } = user as Admin;
 
     const { ...flattenedApt } = apartmentInfo || {};
 
@@ -55,7 +64,7 @@ export const userResponseDTO = (user: UserType) => {
   }
 
   if (user.role === "SUPER_ADMIN") {
-    const { encryptedPassword, ...rest } = user as SuperAdmin;
+    const { encryptedPassword, profileImage, ...rest } = user as SuperAdmin;
     return {
       ...rest,
     };

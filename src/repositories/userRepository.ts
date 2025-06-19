@@ -1,7 +1,11 @@
 import { UserType } from "@/types/User";
 import { prisma } from "../lib/prisma";
 import BadRequestError from "@/errors/BadRequestError";
-import { SignupAdminRequestDTO, SignupUserRequestDTO } from "@/dto/userDTO";
+import {
+  SignupAdminRequestDTO,
+  SignupSuperAdminRequestDTO,
+  SignupUserRequestDTO,
+} from "@/dto/userDTO";
 
 export const getUserByUsername = async (username: string) => {
   const user = await prisma.users.findUnique({
@@ -138,13 +142,30 @@ export const createAdmin = async (input: SignupAdminRequestDTO) => {
   return user;
 };
 
-export const findUserEmail = async (email: string) => {
-  const data = await prisma.users.findUnique({
-    where: { email },
+export const createSuperAdmin = async (input: SignupSuperAdminRequestDTO) => {
+  const user = await prisma.users.create({
+    data: {
+      username: input.username,
+      encryptedPassword: input.password,
+      contact: input.contact,
+      name: input.name,
+      email: input.email,
+      role: "SUPER_ADMIN",
+      profileImage: input.profileImage,
+      joinStatus: "APPROVED",
+    },
   });
 
-  return data;
+  return user;
 };
+
+// export const findUserEmail = async (email: string) => {
+//   const data = await prisma.users.findUnique({
+//     where: { email },
+//   });
+
+//   return data;
+// };
 
 export const usersUniqueColums = async (
   username: string,

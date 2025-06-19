@@ -22,3 +22,13 @@ export const signupAdmin = async (
 
   res.status(200).json(userResponseDTO(user as UserType));
 };
+
+export const signupSuperAdmin = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const data = req.body;
+  const user = await userService.signupSuperAdmin(data);
+
+  res.status(200).json(userResponseDTO(user as UserType));
+};

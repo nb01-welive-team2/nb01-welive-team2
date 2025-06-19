@@ -1,8 +1,10 @@
-import { SignupAdminRequestDTO, SignupUserRequestDTO } from "@/dto/userDTO";
-import BadRequestError from "@/errors/BadRequestError";
+import {
+  SignupAdminRequestDTO,
+  SignupSuperAdminRequestDTO,
+  SignupUserRequestDTO,
+} from "@/dto/userDTO";
 import { hashPassword } from "@/lib/utils/hash";
 import * as userRepository from "@/repositories/userRepository";
-import { USER_ROLE } from "@prisma/client";
 
 export const signupUser = async (data: SignupUserRequestDTO) => {
   const { username, password, contact, email, apartmentDong, apartmentHo } =
@@ -57,4 +59,20 @@ export const signupAdmin = async (data: SignupAdminRequestDTO) => {
   const signupUser = await userRepository.createAdmin(user);
 
   return signupUser;
+};
+
+export const signupSuperAdmin = async (data: SignupSuperAdminRequestDTO) => {
+  const { username, contact, email, password } = data;
+
+  await userRepository.usersUniqueColums(username, contact, email);
+
+  const encryptedPassword = await hashPassword(password);
+  const user = {
+    ...data,
+    password: encryptedPassword,
+  };
+
+  const signupSuperAdmin = await userRepository.createSuperAdmin(user);
+
+  return signupSuperAdmin;
 };
