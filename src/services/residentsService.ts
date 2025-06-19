@@ -10,11 +10,22 @@ import residentsRepository from "../repositories/residentsRepository";
 // 입주민 정보 개별 등록
 async function uploadResident(data: ResidentUploadInput) {
   const resident = await residentsRepository.createResident({
-    ...data,
+    name: data.name,
+    email: data.email,
+    contact: data.contact,
+    building: data.building,
+    unitNumber: data.unitNumber,
+    isHouseholder: data.isHouseholder,
     residenceStatus: RESIDENCE_STATUS.RESIDENCE,
     isRegistered: false,
     approvalStatus: APPROVAL_STATUS.PENDING,
+    apartmentInfo: {
+      connect: {
+        id: data.apartmentId,
+      },
+    },
   });
+
   return resident;
 }
 

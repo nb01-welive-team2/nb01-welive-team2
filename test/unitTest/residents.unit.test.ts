@@ -31,7 +31,7 @@ describe("Residents Service", () => {
     name: "김찬호",
     email: "qmqmdisn123@example.com",
     isHouseholder: HOUSEHOLDER_STATUS.HOUSEHOLDER,
-    apartmentInfo: { connect: { id: "mock-apartment-id" } },
+    apartmentId: "1298as23-2892-463f-b3e7-awe1o2ja2a",
   };
 
   beforeEach(() => {
@@ -45,11 +45,18 @@ describe("Residents Service", () => {
         .mockResolvedValue(mockResidents);
       const result = await residentsService.uploadResident(mockResidentInput);
 
+      const { apartmentId, ...restInput } = mockResidentInput;
+
       expect(residentsRepository.createResident).toHaveBeenCalledWith({
-        ...mockResidentInput,
+        ...restInput,
         residenceStatus: RESIDENCE_STATUS.RESIDENCE,
         isRegistered: false,
         approvalStatus: APPROVAL_STATUS.PENDING,
+        apartmentInfo: {
+          connect: {
+            id: apartmentId,
+          },
+        },
       });
       expect(result).toEqual(mockResidents);
     });

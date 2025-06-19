@@ -8,7 +8,9 @@ import { LoginRequestDTO } from "@/structs/userStruct";
 
 export const login = async (data: LoginRequestDTO) => {
   const { username, password } = data;
+
   const user = await getUserByUsername(username);
+
   if (!user) {
     throw new BadRequestError("Invalid login information");
   }

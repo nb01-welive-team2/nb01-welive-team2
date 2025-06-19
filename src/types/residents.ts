@@ -17,5 +17,5 @@ export type ResidentUploadInput = {
   building: number;
   unitNumber: number;
   isHouseholder: Prisma.ResidentsCreateInput["isHouseholder"];
-  apartmentInfo: Prisma.ResidentsCreateInput["apartmentInfo"];
+  apartmentId: string;
 };

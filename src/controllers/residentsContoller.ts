@@ -9,15 +9,13 @@ import {
 
 // 입주민 명부 개별 등록
 export async function uploadResidentController(req: Request, res: Response) {
-  const apartmentId = req.user?.apartmentId;
+  const apartmentId = req.user!.apartmentId;
   const data = create(req.body, createResidentBodyStruct);
 
   const residents = await residentsService.uploadResident({
     ...data,
     email: data.email ?? "",
-    apartmentInfo: {
-      connect: { id: apartmentId },
-    },
+    apartmentId,
   });
 
   res.status(201).json(residents);
@@ -48,7 +46,7 @@ export async function updateResidentInfoController(
   res: Response
 ) {
   const { id } = req.params;
-  const data = create(req.body.data, UpdateResidentBodyStruct);
+  const data = create(req.body, UpdateResidentBodyStruct);
   const resident = await residentsService.patchResident(id, data);
   res.status(200).json(resident);
 }

@@ -20,18 +20,13 @@ module.exports = {
     },
     {
       displayName: "residents-api",
-      preset: "ts-jest",
-      testEnvironment: "node",
+      ...commonConfig,
       testMatch: ["**/integrationTest/**/residents*.test.ts"],
     },
     {
       displayName: "residents-unit",
-      preset: "ts-jest",
-      testEnvironment: "node",
-      testMatch: ["**/unitTest/**/residents*.unit.test.ts"],
-      displayName: "notice-unit",
       ...commonConfig,
-      testMatch: ["**/unitTest/noticeTest/notice*.test.ts"],
+      testMatch: ["**/unitTest/**/residents*.unit.test.ts"],
     },
     {
       displayName: "auth-unit",
