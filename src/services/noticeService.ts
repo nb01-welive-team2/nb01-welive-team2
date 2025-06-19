@@ -5,7 +5,7 @@ import {
 } from "../structs/noticeStructs";
 import { USER_ROLE } from "@prisma/client";
 import { PageParamsType } from "../structs/commonStructs";
-import { buildSearchCondition } from "../lib/searchCondition";
+import { buildPageSearchCondition } from "../lib/searchCondition";
 import userInfoRepository from "@/repositories/userInfoRepository";
 import NotFoundError from "@/errors/NotFoundError";
 import ForbiddenError from "@/errors/ForbiddenError";
@@ -25,7 +25,10 @@ async function getNoticeList(
   role: USER_ROLE,
   params: PageParamsType
 ) {
-  const searchCondition = await buildSearchCondition(params, { userId, role });
+  const searchCondition = await buildPageSearchCondition(params, {
+    userId,
+    role,
+  });
 
   const totalCount = await noticeRepository.getCount(
     searchCondition.whereCondition

@@ -1,7 +1,7 @@
 import noticeService from "@/services/noticeService";
 import noticeRepository from "@/repositories/noticeRepository";
 import userInfoRepository from "@/repositories/userInfoRepository";
-import { buildSearchCondition } from "@/lib/searchCondition";
+import { buildPageSearchCondition } from "@/lib/searchCondition";
 import NotFoundError from "@/errors/NotFoundError";
 import ForbiddenError from "@/errors/ForbiddenError";
 import { NOTICE_CATEGORY, USER_ROLE } from "@prisma/client";
@@ -54,7 +54,9 @@ describe("noticeService", () => {
         },
       };
 
-      (buildSearchCondition as jest.Mock).mockResolvedValue(searchCondition);
+      (buildPageSearchCondition as jest.Mock).mockResolvedValue(
+        searchCondition
+      );
       (noticeRepository.getCount as jest.Mock).mockResolvedValue(42);
       (noticeRepository.getList as jest.Mock).mockResolvedValue([
         { id: "notice1", title: "Notice 1" },
@@ -63,7 +65,7 @@ describe("noticeService", () => {
 
       const result = await noticeService.getNoticeList(userId, role, params);
 
-      expect(buildSearchCondition).toHaveBeenCalledWith(params, {
+      expect(buildPageSearchCondition).toHaveBeenCalledWith(params, {
         userId,
         role,
       });
