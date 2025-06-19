@@ -24,6 +24,11 @@ module.exports = {
       testMatch: ["**/unitTest/noticeTest/notice*.test.ts"],
     },
     {
+      displayName: "complaint-unit",
+      ...commonConfig,
+      testMatch: ["**/unitTest/complaintTest/complaint*.test.ts"],
+    },
+    {
       displayName: "auth-unit",
       ...commonConfig,
       testMatch: ["**/unitTest/authTest/auth*.test.ts"],

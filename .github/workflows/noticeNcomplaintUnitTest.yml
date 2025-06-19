@@ -1,4 +1,4 @@
-name: noticeUnitTest
+name: noticeNcomplaintUnitTest
 
 on:
   push:
@@ -68,3 +68,6 @@ jobs:
 
       - name: Run notice unit tests
         run: npm run test-notice-unit
+
+      - name: Run complaint unit tests
+        run: npm run test-complaint-unit
