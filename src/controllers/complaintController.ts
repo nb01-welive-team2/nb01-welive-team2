@@ -140,7 +140,8 @@ export async function getComplaint(req: Request, res: Response) {
   const { complaintId } = create(req.params, ComplaintIdParamStruct);
   const result = await complaintService.getComplaint(
     complaintId,
-    reqWithPayload.user.userId
+    reqWithPayload.user.userId,
+    reqWithPayload.user.role as USER_ROLE
   );
   res.send(new ResponseComplaintCommentDTO(result));
 }
@@ -191,7 +192,7 @@ export async function getComplaint(req: Request, res: Response) {
  */
 export async function editComplaint(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
-  if (reqWithPayload.user.role !== USER_ROLE.ADMIN) {
+  if (reqWithPayload.user.role !== USER_ROLE.USER) {
     throw new ForbiddenError();
   }
   const data = create(req.body, PatchComplaintBodyStruct);

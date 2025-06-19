@@ -18,6 +18,15 @@ async function update(complaintId: string, data: Prisma.ComplaintsUpdateInput) {
         select: {
           username: true,
         },
+        include: {
+          userInfo: {
+            select: {
+              apartmentId: true,
+              apartmentDong: true,
+              apartmentHo: true,
+            },
+          },
+        },
       },
       _count: {
         select: {
@@ -39,9 +48,11 @@ async function findById(complaintId: string) {
           username: true,
         },
         include: {
-          apartmentInfo: {
+          userInfo: {
             select: {
-              id: true,
+              apartmentId: true,
+              apartmentDong: true,
+              apartmentHo: true,
             },
           },
         },

@@ -88,15 +88,15 @@ model Residents {
 }
 
 model Complaints {
-  id             String          @id @default(uuid())
-  userId         String
-  title          String          @db.VarChar(100)
-  content        String
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @default(now()) @updatedAt
-  isPublic       Boolean
-  approvalStatus APPROVAL_STATUS @default(PENDING)
-  viewCount      Int             @default(0)
+  id              String           @id @default(uuid())
+  userId          String
+  title           String           @db.VarChar(100)
+  content         String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @default(now()) @updatedAt
+  isPublic        Boolean
+  complaintStatus COMPLAINT_STATUS @default(PENDING)
+  viewCount       Int              @default(0)
 
   user          Users           @relation(fields: [userId], references: [id], onDelete: Cascade)
   notifications Notifications[]
@@ -212,6 +212,12 @@ enum JOIN_STATUS {
 }
 
 enum APPROVAL_STATUS {
+  APPROVED
+  REJECTED
+  PENDING
+}
+
+enum COMPLAINT_STATUS {
   PENDING
   IN_PROGRESS
   CLOSED

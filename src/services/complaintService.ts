@@ -9,6 +9,7 @@ import { buildSearchCondition } from "../lib/searchCondition";
 import userInfoRepository from "@/repositories/userInfoRepository";
 import NotFoundError from "@/errors/NotFoundError";
 import ForbiddenError from "@/errors/ForbiddenError";
+import { getUserId } from "@/repositories/userRepository";
 
 async function createComplaint(
   complaint: CreateComplaintBodyType,
@@ -52,16 +53,32 @@ async function getComplaintList(
   };
 }
 
-async function getComplaint(complaintId: string, userId: string) {
-  const userInfo = await userInfoRepository.findByUserId(userId);
-  if (!userInfo) {
-    throw new NotFoundError("User", userId);
+async function getComplaint(
+  complaintId: string,
+  userId: string,
+  role: USER_ROLE
+) {
+  let apartmentId: string;
+  if (role === USER_ROLE.USER) {
+    const userInfo = await userInfoRepository.findByUserId(userId);
+    if (!userInfo) {
+      throw new NotFoundError("UserInto", userId);
+    }
+    apartmentId = userInfo.apartmentId;
+  } else {
+    const user = await getUserId(userId);
+    if (!user?.apartmentInfo?.id) {
+      throw new NotFoundError("ApartmentInfo", userId);
+    }
+    apartmentId = user.apartmentInfo.id;
   }
+
   const complaint = await complaintRepository.findById(complaintId);
-  if (!complaint) {
+  if (!complaint?.user.userInfo) {
     throw new NotFoundError("Complaint", complaintId);
   }
-  if (userInfo.apartmentId !== complaint.user.apartmentInfo?.id) {
+
+  if (apartmentId !== complaint.user.userInfo.apartmentId) {
     throw new ForbiddenError();
   }
   return complaint;

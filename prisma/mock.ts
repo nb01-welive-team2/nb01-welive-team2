@@ -4,7 +4,7 @@ import {
   APPROVAL_STATUS,
   RESIDENCE_STATUS,
   HOUSEHOLDER_STATUS,
-  BOARD_ID,
+  COMPLAINT_STATUS,
   POLL_STATUS,
   NOTICE_CATEGORY,
   NOTIFICATION_TYPE,
@@ -71,7 +71,7 @@ interface Complaints {
   content: string;
   createdAt: Date;
   isPublic: boolean;
-  approvalStatus: APPROVAL_STATUS;
+  complaintStatus: COMPLAINT_STATUS;
 }
 
 interface Polls {
@@ -203,7 +203,7 @@ const mockComplaints: Complaints[] = [
     content: "There is too much noise after 10 PM.",
     createdAt: new Date("2024-04-01T12:00:00Z"),
     isPublic: true,
-    approvalStatus: APPROVAL_STATUS.PENDING,
+    complaintStatus: COMPLAINT_STATUS.PENDING,
   },
 ];
 

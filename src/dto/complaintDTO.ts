@@ -1,4 +1,9 @@
-import { APPROVAL_STATUS, ComplaintComments, Complaints } from "@prisma/client";
+import CommonError from "@/errors/CommonError";
+import {
+  COMPLAINT_STATUS,
+  ComplaintComments,
+  Complaints,
+} from "@prisma/client";
 
 import { NOTICE_CATEGORY } from "@prisma/client";
 
@@ -6,13 +11,14 @@ export class ResponseComplaintDTO {
   complaintId: string;
   userId: string;
   title: string;
+  content: string;
   writerName: string;
   createdAt: Date;
   updatedAt: Date;
   isPublic: boolean;
   viewCount: number;
   commentCount: number;
-  status: APPROVAL_STATUS;
+  status: COMPLAINT_STATUS;
   dong: string;
   ho: string;
 
@@ -20,22 +26,29 @@ export class ResponseComplaintDTO {
     complaint: Complaints & {
       user: {
         username: string;
-        userInfo: { apartmentDong: number; apartmentHo: number };
+        userInfo: { apartmentDong: number; apartmentHo: number } | null;
       };
     } & {
       _count?: { ComplaintComments: number };
     }
   ) {
+    if (!complaint.user.userInfo) {
+      throw new CommonError(
+        "UserInfo is required for ResponseComplaintDTO",
+        500
+      );
+    }
     this.complaintId = complaint.id;
     this.userId = complaint.userId;
     this.title = complaint.title;
+    this.content = complaint.content;
     this.writerName = complaint.user.username;
     this.createdAt = complaint.createdAt;
     this.updatedAt = complaint.updatedAt;
     this.isPublic = complaint.isPublic;
     this.viewCount = complaint.viewCount;
     this.commentCount = complaint._count?.ComplaintComments ?? 0;
-    this.status = complaint.approvalStatus;
+    this.status = complaint.complaintStatus;
     this.dong = complaint.user.userInfo.apartmentDong.toString();
     this.ho = complaint.user.userInfo.apartmentHo.toString();
   }
@@ -66,15 +79,17 @@ export class ResponseComplaintListDTO {
 export class ResponseComplaintCommentDTO {
   complaintId: string;
   userId: string;
-  category: NOTICE_CATEGORY;
   title: string;
+  content: string;
   writerName: string;
   createdAt: Date;
   updatedAt: Date;
+  isPublic: boolean;
   viewsCount: number;
   commentsCount: number;
-  isPinned: boolean;
-  content: string;
+  status: COMPLAINT_STATUS;
+  // dong: string;
+  // ho: string;
   boardName: string; //"민원"
   comments: {
     id: string;
@@ -85,22 +100,29 @@ export class ResponseComplaintCommentDTO {
     writerName: string;
   }[];
   constructor(
-    complaint: Complaints & { user: { username: string } } & {
+    complaint: Complaints & {
+      user: {
+        username: string;
+        // userInfo: { apartmentDong: number; apartmentHo: number };
+      };
+    } & {
       ComplaintComments: (ComplaintComments & { user: { username: string } })[];
     }
   ) {
     this.complaintId = complaint.id;
     this.userId = complaint.userId;
-    this.category = complaint.category;
     this.title = complaint.title;
+    this.content = complaint.content;
     this.writerName = complaint.user.username;
     this.createdAt = complaint.createdAt;
     this.updatedAt = complaint.updatedAt;
+    this.isPublic = complaint.isPublic;
     this.viewsCount = complaint.viewCount;
     this.commentsCount = complaint.ComplaintComments.length;
-    this.isPinned = complaint.isPinned;
-    this.content = complaint.content;
-    this.boardName = "공지사항";
+    this.status = complaint.complaintStatus;
+    // this.dong = complaint.user.userInfo.apartmentDong.toString();
+    // this.ho = complaint.user.userInfo.apartmentHo.toString();
+    this.boardName = "민원";
     this.comments = complaint.ComplaintComments.map((comment) => ({
       id: comment.id,
       userId: comment.userId,
