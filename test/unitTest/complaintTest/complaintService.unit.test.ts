@@ -31,6 +31,7 @@ describe("complaintService", () => {
 
       expect(complaintRepository.create).toHaveBeenCalledWith({
         user: { connect: { id: userId } },
+        ApartmentInfo: { connect: { id: apartmentId } },
         title: mockComplaint.title,
         content: mockComplaint.content,
         isPublic: mockComplaint.isPublic,
@@ -81,9 +82,9 @@ describe("complaintService", () => {
         userId,
         role,
       });
-      expect(complaintRepository.getCount).toHaveBeenCalledWith(
-        mockSearchCondition.whereCondition
-      );
+      expect(complaintRepository.getCount).toHaveBeenCalledWith({
+        where: mockSearchCondition.whereCondition,
+      });
       expect(complaintRepository.getList).toHaveBeenCalledWith(
         mockSearchCondition.bothCondition
       );
@@ -126,13 +127,13 @@ describe("complaintService", () => {
         ).rejects.toThrow(NotFoundError);
       });
 
-      it("should throw NotFoundError if complaint.user.userInfo missing", async () => {
+      it("should throw NotFoundError if complaint not found", async () => {
         (userInfoRepository.findByUserId as jest.Mock).mockResolvedValue({
           apartmentId: "apt1",
         });
-        (complaintRepository.findById as jest.Mock).mockResolvedValue({
-          user: { userInfo: null },
-        });
+        (complaintRepository.findById as jest.Mock).mockResolvedValue(
+          undefined
+        );
 
         await expect(
           complaintService.getComplaint(complaintId, userId, USER_ROLE.USER)
@@ -144,7 +145,8 @@ describe("complaintService", () => {
           apartmentId: "apt1",
         });
         (complaintRepository.findById as jest.Mock).mockResolvedValue({
-          user: { userInfo: { apartmentId: "apt2" } },
+          id: complaintId,
+          apartmentId: "apt2",
         });
 
         await expect(
@@ -154,8 +156,8 @@ describe("complaintService", () => {
 
       it("should return complaint if all checks pass", async () => {
         const mockComplaint = {
-          user: { userInfo: { apartmentId: "apt1" } },
           id: complaintId,
+          apartmentId: "apt1",
         };
         (userInfoRepository.findByUserId as jest.Mock).mockResolvedValue({
           apartmentId: "apt1",
@@ -175,7 +177,7 @@ describe("complaintService", () => {
     });
 
     describe("when role is ADMIN or other", () => {
-      it("should throw NotFoundError if getUserId returns user without apartmentInfo", async () => {
+      it("should throw NotFoundError if user.apartmentInfo missing", async () => {
         (getUserId as jest.Mock).mockResolvedValue({ apartmentInfo: null });
 
         await expect(
@@ -183,13 +185,13 @@ describe("complaintService", () => {
         ).rejects.toThrow(NotFoundError);
       });
 
-      it("should throw NotFoundError if complaint.user.userInfo missing", async () => {
+      it("should throw NotFoundError if complaint not found", async () => {
         (getUserId as jest.Mock).mockResolvedValue({
           apartmentInfo: { id: "apt1" },
         });
-        (complaintRepository.findById as jest.Mock).mockResolvedValue({
-          user: { userInfo: null },
-        });
+        (complaintRepository.findById as jest.Mock).mockResolvedValue(
+          undefined
+        );
 
         await expect(
           complaintService.getComplaint(complaintId, userId, USER_ROLE.ADMIN)
@@ -201,7 +203,8 @@ describe("complaintService", () => {
           apartmentInfo: { id: "apt1" },
         });
         (complaintRepository.findById as jest.Mock).mockResolvedValue({
-          user: { userInfo: { apartmentId: "apt2" } },
+          id: complaintId,
+          apartmentId: "apt2",
         });
 
         await expect(
@@ -211,8 +214,8 @@ describe("complaintService", () => {
 
       it("should return complaint if all checks pass", async () => {
         const mockComplaint = {
-          user: { userInfo: { apartmentId: "apt1" } },
           id: complaintId,
+          apartmentId: "apt1",
         };
         (getUserId as jest.Mock).mockResolvedValue({
           apartmentInfo: { id: "apt1" },

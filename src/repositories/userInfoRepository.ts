@@ -4,7 +4,7 @@ import { prisma } from "../lib/prisma";
 async function findByUserId(userId: string) {
   return await prisma.userInfo.findUnique({
     where: {
-      id: userId,
+      userId: userId,
     },
   });
 }

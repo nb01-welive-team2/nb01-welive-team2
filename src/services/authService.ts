@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import { generateTokens, verifyRefreshToken } from "@/lib/utils/token";
 import { LoginRequestDTO } from "@/structs/userStruct";
 import { USER_ROLE } from "@prisma/client";
+import UnauthError from "@/errors/UnauthError";
 
 // export const register = async(data: Omit<UserType, 'id'> )
 
@@ -11,7 +12,7 @@ export const login = async (data: LoginRequestDTO) => {
   const { username, password } = data;
   const user = await getUserByUsername(username);
   if (!user) {
-    throw new BadRequestError("Invalid login information");
+    throw new UnauthError();
   }
 
   const isPasswordValid = await bcrypt.compare(
@@ -19,7 +20,7 @@ export const login = async (data: LoginRequestDTO) => {
     user.encryptedPassword
   );
   if (!isPasswordValid) {
-    throw new BadRequestError("Invalid login information");
+    throw new UnauthError();
   }
 
   const userId = user.id;
@@ -27,17 +28,14 @@ export const login = async (data: LoginRequestDTO) => {
 
   let apartmentId;
 
-  if (role === USER_ROLE.ADMIN) {
-    apartmentId = user.apartmentInfo?.id;
-  } else if (role === USER_ROLE.USER) {
-    const userInfo = await getUserByUsername(username);
-    apartmentId = user.userInfo?.apartmentId;
+  if (role === USER_ROLE.ADMIN && user.apartmentInfo) {
+    apartmentId = user.apartmentInfo.id;
+  } else if (role === USER_ROLE.USER && user.userInfo) {
+    apartmentId = user.userInfo.apartmentId;
   } else if (role === USER_ROLE.SUPER_ADMIN) {
     apartmentId = undefined;
-  }
-
-  if (role !== USER_ROLE.SUPER_ADMIN && !apartmentId) {
-    throw new BadRequestError("Invalid login information");
+  } else {
+    throw new UnauthError();
   }
 
   const { accessToken, refreshToken } = generateTokens(

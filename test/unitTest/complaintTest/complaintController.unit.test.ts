@@ -29,10 +29,15 @@ const mockResponse = () => {
   return res;
 };
 
-const mockUser = (role: USER_ROLE, userId = "user-1") => ({
+const mockUser = (
+  role: USER_ROLE,
+  userId = "user-1",
+  apartmentId = "apt-1"
+) => ({
   user: {
     role,
     userId,
+    apartmentId,
   },
 });
 
@@ -56,7 +61,8 @@ describe("Complaint Controller", () => {
 
       expect(complaintService.createComplaint).toHaveBeenCalledWith(
         { title: "title", content: "content", isPublic: true },
-        "user-1"
+        "user-1",
+        "apt-1"
       );
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.send).toHaveBeenCalledWith(expect.any(registerSuccessMessage));
