@@ -5,6 +5,7 @@ import {
   SignupAdminRequestDTO,
   SignupSuperAdminRequestDTO,
   SignupUserRequestDTO,
+  UpdateAdminDTO,
 } from "@/dto/userDTO";
 
 export const getUserByUsername = async (username: string) => {
@@ -184,6 +185,36 @@ export const usersUniqueColums = async (
 export const findApartment = async (apartmentName: string) => {
   const data = await prisma.apartmentInfo.findFirst({
     where: { apartmentName },
+  });
+
+  return data;
+};
+
+export const updateAdmin = async (data: UpdateAdminDTO) => {
+  const {
+    id,
+    contact,
+    name,
+    email,
+    description,
+    apartmentName,
+    apartmentAddress,
+    apartmentManagementNumber,
+  } = data;
+
+  await prisma.users.update({
+    where: { id },
+    data: { contact, name, email },
+  });
+
+  await prisma.apartmentInfo.updateMany({
+    where: { userId: id },
+    data: {
+      description,
+      apartmentName,
+      apartmentAddress,
+      apartmentManagementNumber,
+    },
   });
 
   return data;

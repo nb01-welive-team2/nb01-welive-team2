@@ -2,6 +2,7 @@ import {
   SignupAdminRequestDTO,
   SignupSuperAdminRequestDTO,
   SignupUserRequestDTO,
+  UpdateAdminDTO,
 } from "@/dto/userDTO";
 import { hashPassword } from "@/lib/utils/hash";
 import * as userRepository from "@/repositories/userRepository";
@@ -51,4 +52,12 @@ export const signupSuperAdmin = async (data: SignupSuperAdminRequestDTO) => {
   const signupSuperAdmin = await userRepository.createSuperAdmin(user);
 
   return signupSuperAdmin;
+};
+
+export const updateAdmin = async (
+  data: UpdateAdminDTO
+): Promise<UpdateAdminDTO> => {
+  const updatedAdmin = await userRepository.updateAdmin(data);
+
+  return updatedAdmin;
 };
