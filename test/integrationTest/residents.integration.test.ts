@@ -65,7 +65,7 @@ describe("입주민 API 통합 테스트", () => {
     residentId = testResident.id;
 
     await agent
-      .post("/auth/login")
+      .post("/api/auth/login")
       .send({ username: "adminUser", password: "bobpassword" })
       .expect(200);
   });
@@ -77,7 +77,7 @@ describe("입주민 API 통합 테스트", () => {
     await prisma.$disconnect();
   });
 
-  test("POST /residents/register 입주민 개별 등록 성공", async () => {
+  test("POST /api/residents/register 입주민 개별 등록 성공", async () => {
     const newResident = {
       building: 108,
       unitNumber: 1503,
@@ -86,7 +86,9 @@ describe("입주민 API 통합 테스트", () => {
       name: "테스트유저",
       isHouseholder: "HOUSEHOLDER",
     };
-    const response = await agent.post("/residents/register").send(newResident);
+    const response = await agent
+      .post("/api/residents/register")
+      .send(newResident);
 
     expect(response.status).toBe(201);
     expect(response.body).toMatchObject({
@@ -104,14 +106,14 @@ describe("입주민 API 통합 테스트", () => {
   });
 
   test("GET /residents 입주민 목록 조회", async () => {
-    const response = await agent.get("/residents");
+    const response = await agent.get("/api/residents");
     expect(response.status).toBe(200);
     expect(Array.isArray(response.body)).toBe(true);
     expect(response.body.length).toBeGreaterThan(0);
   });
 
   test("GET /residents 입주민 상세 조회", async () => {
-    const response = await agent.get(`/residents/${residentId}`);
+    const response = await agent.get(`/api/residents/${residentId}`);
     expect(response.status).toBe(200);
     expect(response.body).toMatchObject({
       id: residentId,
@@ -123,7 +125,7 @@ describe("입주민 API 통합 테스트", () => {
       name: "코드잇",
     };
     const response = await agent
-      .patch(`/residents/${residentId}`)
+      .patch(`/api/residents/${residentId}`)
       .send(updateData);
 
     expect(response.status).toBe(200);
@@ -134,7 +136,7 @@ describe("입주민 API 통합 테스트", () => {
   });
 
   test("DELETE /residents/:id 입주민 삭제", async () => {
-    const response = await agent.delete(`/residents/${residentId}`);
+    const response = await agent.delete(`/api/residents/${residentId}`);
     expect(response.status).toBe(200);
   });
 });

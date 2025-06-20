@@ -33,6 +33,7 @@ app.use(cookieParser());
 
 app.use("/api/auth", authRouter);
 app.use("/api/auth", userRouter);
+app.use("/api/residents", residentsRouter);
 
 // app.use('/users', usersRouter);
 

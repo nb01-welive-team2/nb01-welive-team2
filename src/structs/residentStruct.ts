@@ -7,10 +7,11 @@ import {
   boolean,
   size,
 } from "superstruct";
-
-const RESIDENCE_STATUS = ["RESIDENCE", "NO_RESIDENCE"] as const;
-const HOUSEHOLDER_STATUS = ["HOUSEHOLDER", "MEMBER"] as const;
-const APPROVAL_STATUS = ["UNRECEIVED", "PENDING", "APPROVED"] as const;
+import {
+  RESIDENCE_STATUS,
+  HOUSEHOLDER_STATUS,
+  APPROVAL_STATUS,
+} from "@prisma/client";
 
 export const createResidentBodyStruct = object({
   building: number(),
@@ -18,7 +19,7 @@ export const createResidentBodyStruct = object({
   contact: size(string(), 10, 20),
   name: size(string(), 1, 15),
   email: optional(size(string(), 5, 320)),
-  isHouseholder: enums(["HOUSEHOLDER", "MEMBER"]),
+  isHouseholder: enums(Object.values(HOUSEHOLDER_STATUS)),
 });
 
 export const UpdateResidentBodyStruct = object({
@@ -27,8 +28,8 @@ export const UpdateResidentBodyStruct = object({
   contact: optional(size(string(), 10, 20)),
   name: optional(size(string(), 1, 15)),
   email: optional(size(string(), 5, 320)),
-  residenceStatus: optional(enums(RESIDENCE_STATUS)),
-  isHouseholder: optional(enums(HOUSEHOLDER_STATUS)),
+  residenceStatus: optional(enums(Object.values(RESIDENCE_STATUS))),
+  isHouseholder: optional(enums(Object.values(HOUSEHOLDER_STATUS))),
   isRegistered: optional(boolean()),
-  approvalStatus: optional(enums(APPROVAL_STATUS)),
+  approvalStatus: optional(enums(Object.values(APPROVAL_STATUS))),
 });
