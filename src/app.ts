@@ -8,6 +8,7 @@ import cookieParser from "cookie-parser";
 // import pollsRouter from "./routes/pollRouter";
 import noticesRouter from "./routes/noticeRouter";
 // import pollsRouter from "./routes/pollRouter";
+import complaintsRouter from "./routes/complaintRouter";
 // import commentsRouter from './routers/commentRouter';
 // import imagesRouter from './routers/imageRouter';
 // import notificationsRouter from './routers/notificationRouter';
@@ -17,6 +18,11 @@ import {
 } from "./controllers/errorController";
 import residentsRouter from "./routes/residentsRouter";
 import authRouter from "./routes/authRoute";
+import userRouter from "./routes/userRoute";
+// import { renderHtmlWithUrl } from './lib/htmlRenderer';
+
+// const seedPath = path.resolve(__dirname, '../prisma/seed');
+// const { seedDatabase } = require(seedPath);
 
 const app = express();
 
@@ -25,13 +31,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-app.use("/auth", authRouter);
-app.use("/residents", residentsRouter);
+app.use("/api/auth", authRouter);
+app.use("/api/auth", userRouter);
+
 // app.use('/users', usersRouter);
 
 // app.use("/api/polls", pollsRouter);
 app.use("/api/notices", noticesRouter);
 // app.use("/api/polls", pollsRouter);
+app.use("/api/complaints", complaintsRouter);
 // app.use("/api/notices", noticesRouter);
 
 // app.use('/comments', commentsRouter);

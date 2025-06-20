@@ -1,0 +1,54 @@
+import {
+  SignupAdminRequestDTO,
+  SignupSuperAdminRequestDTO,
+  SignupUserRequestDTO,
+} from "@/dto/userDTO";
+import { hashPassword } from "@/lib/utils/hash";
+import * as userRepository from "@/repositories/userRepository";
+
+export const signupUser = async (data: SignupUserRequestDTO) => {
+  const { username, password, contact, email } = data;
+  await userRepository.usersUniqueColums(username, contact, email);
+
+  const encryptedPassword = await hashPassword(password);
+  const user = {
+    ...data,
+    password: encryptedPassword,
+  };
+
+  const signupUser = await userRepository.createUser(user);
+
+  return signupUser;
+};
+
+export const signupAdmin = async (data: SignupAdminRequestDTO) => {
+  const { username, password, contact, email } = data;
+
+  await userRepository.usersUniqueColums(username, contact, email);
+
+  const encryptedPassword = await hashPassword(password);
+  const user = {
+    ...data,
+    password: encryptedPassword,
+  };
+
+  const signupUser = await userRepository.createAdmin(user);
+
+  return signupUser;
+};
+
+export const signupSuperAdmin = async (data: SignupSuperAdminRequestDTO) => {
+  const { username, contact, email, password } = data;
+
+  await userRepository.usersUniqueColums(username, contact, email);
+
+  const encryptedPassword = await hashPassword(password);
+  const user = {
+    ...data,
+    password: encryptedPassword,
+  };
+
+  const signupSuperAdmin = await userRepository.createSuperAdmin(user);
+
+  return signupSuperAdmin;
+};

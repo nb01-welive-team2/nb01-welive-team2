@@ -1,7 +1,7 @@
 import { APPROVAL_STATUS, JOIN_STATUS, USER_ROLE } from "@prisma/client";
 
 interface BaseUser {
-  id: string;
+  // id: string;
   username: string;
   encryptedPassword: string;
   contact: string;
@@ -13,7 +13,7 @@ interface BaseUser {
 }
 
 interface UserInfo {
-  id: string;
+  // id: string;
   userId: string;
   apartmentId: string;
   apartmentName: string;
@@ -22,15 +22,15 @@ interface UserInfo {
 }
 
 interface ApartmentInfo {
-  id: string;
+  // id: string;
   userId: string;
   approvalStatus: APPROVAL_STATUS;
   apartmentName: string;
   apartmentAddress: string;
   apartmentManagementNumber: string;
-  description?: string;
-  startComplexNumber?: number;
-  endComplexNumber?: number;
+  description: string;
+  startComplexNumber: number;
+  endComplexNumber: number;
   startDongNumber: number;
   endDongNumber: number;
   startFloorNumber: number;
@@ -40,19 +40,19 @@ interface ApartmentInfo {
   createdAt: Date;
 }
 
-interface SuperAdmin extends BaseUser {
+export interface SuperAdmin extends BaseUser {
   role: "SUPER_ADMIN";
   joinStatus: "APPROVED";
 }
 
-interface Admin extends BaseUser {
+export interface Admin extends BaseUser {
   role: "ADMIN";
-  apartmentInfo: ApartmentInfo[];
+  apartmentInfo: ApartmentInfo;
 }
 
-interface ResidentUser extends BaseUser {
+export interface ResidentUser extends BaseUser {
   role: "USER";
-  userInfo: UserInfo[];
+  userInfo: UserInfo;
 }
 
 export type UserType = SuperAdmin | Admin | ResidentUser;

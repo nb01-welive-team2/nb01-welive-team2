@@ -2,18 +2,18 @@ import { create } from "superstruct";
 import { Request, Response } from "express";
 import { USER_ROLE } from "@prisma/client";
 import {
-  CreateNoticeBodyStruct,
-  NoticeIdParamStruct,
-  PatchNoticeBodyStruct,
-} from "../structs/noticeStructs";
-import noticeService from "../services/noticeService";
+  CreateComplaintBodyStruct,
+  ComplaintIdParamStruct,
+  PatchComplaintBodyStruct,
+} from "../structs/complaintStructs";
+import complaintService from "../services/complaintService";
 import registerSuccessMessage from "../lib/responseJson/registerSuccess";
 import { PageParamsStruct } from "../structs/commonStructs";
 import {
-  ResponseNoticeCommentDTO,
-  ResponseNoticeDTO,
-  ResponseNoticeListDTO,
-} from "../dto/noticeDTO";
+  ResponseComplaintCommentDTO,
+  ResponseComplaintDTO,
+  ResponseComplaintListDTO,
+} from "../dto/complaintDTO";
 import removeSuccessMessage from "../lib/responseJson/removeSuccess";
 import { AuthenticatedRequest } from "@/types/express";
 import ForbiddenError from "@/errors/ForbiddenError";
@@ -25,7 +25,7 @@ import ForbiddenError from "@/errors/ForbiddenError";
  *     summary: 공지사항 생성
  *     description: 관리자가 공지 카테고리, 제목, 내용 등을 입력하여 새로운 공지사항을 생성합니다.
  *     tags:
- *       - Notices
+ *       - Complaints
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -67,15 +67,15 @@ import ForbiddenError from "@/errors/ForbiddenError";
  *       401:
  *         description: 인증되지 않음. 관리자만 공지사항을 생성할 수 있습니다.
  */
-export async function createNotice(req: Request, res: Response) {
+export async function createComplaint(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
-  const data = create(req.body, CreateNoticeBodyStruct);
+  const data = create(req.body, CreateComplaintBodyStruct);
 
-  if (reqWithPayload.user.role !== USER_ROLE.ADMIN) {
+  if (reqWithPayload.user.role !== USER_ROLE.USER) {
     throw new ForbiddenError();
   }
 
-  await noticeService.createNotice(
+  await complaintService.createComplaint(
     data,
     reqWithPayload.user.userId,
     reqWithPayload.user.apartmentId
@@ -86,13 +86,13 @@ export async function createNotice(req: Request, res: Response) {
 
 /**
  * @openapi
- * /notices:
+ * /complaints:
  *   get:
  *     summary: 공지사항 목록 조회
  *     description: 사용자 권한에 따라 공지사항 목록을 페이지 단위로 조회합니다.
  *                  SUPER_ADMIN 권한 사용자는 접근이 제한됩니다.
  *     tags:
- *       - Notices
+ *       - Complaints
  *     parameters:
  *       - in: query
  *         name: page
@@ -114,7 +114,7 @@ export async function createNotice(req: Request, res: Response) {
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ResponseNoticeListDTO'
+ *               $ref: '#/components/schemas/ResponseComplaintListDTO'
  *       401:
  *         description: 권한이 없는 사용자입니다.
  *       400:
@@ -122,32 +122,32 @@ export async function createNotice(req: Request, res: Response) {
  *       500:
  *         description: 서버 오류가 발생했습니다.
  */
-export async function getNoticeList(req: Request, res: Response) {
+export async function getComplaintList(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
   if ((reqWithPayload.user.role as string) === USER_ROLE.SUPER_ADMIN) {
     throw new ForbiddenError();
   }
   const data = create(req.query, PageParamsStruct);
-  const result = await noticeService.getNoticeList(
+  const result = await complaintService.getComplaintList(
     reqWithPayload.user.userId,
     reqWithPayload.user.role as USER_ROLE,
     data
   );
-  res.send(new ResponseNoticeListDTO(result));
+  res.send(new ResponseComplaintListDTO(result));
 }
 
-export async function getNotice(req: Request, res: Response) {
+export async function getComplaint(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
   if ((reqWithPayload.user.role as string) === USER_ROLE.SUPER_ADMIN) {
     throw new ForbiddenError();
   }
-  const { noticeId } = create(req.params, NoticeIdParamStruct);
-  const result = await noticeService.getNotice(
-    noticeId,
+  const { complaintId } = create(req.params, ComplaintIdParamStruct);
+  const result = await complaintService.getComplaint(
+    complaintId,
     reqWithPayload.user.userId,
     reqWithPayload.user.role as USER_ROLE
   );
-  res.send(new ResponseNoticeCommentDTO(result));
+  res.send(new ResponseComplaintCommentDTO(result));
 }
 
 /**
@@ -194,15 +194,15 @@ export async function getNotice(req: Request, res: Response) {
  *       500:
  *         description: 서버 오류가 발생했습니다.
  */
-export async function editNotice(req: Request, res: Response) {
+export async function editComplaint(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
-  if (reqWithPayload.user.role !== USER_ROLE.ADMIN) {
+  if (reqWithPayload.user.role !== USER_ROLE.USER) {
     throw new ForbiddenError();
   }
-  const data = create(req.body, PatchNoticeBodyStruct);
-  const { noticeId } = create(req.params, NoticeIdParamStruct);
-  const notice = await noticeService.updateNotice(noticeId, data);
-  res.status(200).send(new ResponseNoticeDTO(notice));
+  const data = create(req.body, PatchComplaintBodyStruct);
+  const { complaintId } = create(req.params, ComplaintIdParamStruct);
+  const complaint = await complaintService.updateComplaint(complaintId, data);
+  res.status(200).send(new ResponseComplaintDTO(complaint));
 }
 
 /**
@@ -236,12 +236,12 @@ export async function editNotice(req: Request, res: Response) {
  *       500:
  *         description: 서버 오류가 발생했습니다.
  */
-export async function removeNotice(req: Request, res: Response) {
+export async function removeComplaint(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
   if (reqWithPayload.user.role !== USER_ROLE.ADMIN) {
     throw new ForbiddenError();
   }
-  const { noticeId } = create(req.params, NoticeIdParamStruct);
-  await noticeService.removeNotice(noticeId);
+  const { complaintId } = create(req.params, ComplaintIdParamStruct);
+  await complaintService.removeComplaint(complaintId);
   res.status(200).send(new removeSuccessMessage());
 }
