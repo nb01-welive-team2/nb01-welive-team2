@@ -34,3 +34,13 @@ export type ResidentUploadInputDto = {
   isHouseholder: Prisma.ResidentsCreateInput["isHouseholder"];
   apartmentId: string;
 };
+
+export type UploadResidentsInput = {
+  name: string;
+  building: number;
+  unitNumber: number;
+  contact: string;
+  email: string;
+  apartmentId: string;
+  isHouseholder: HOUSEHOLDER_STATUS;
+};

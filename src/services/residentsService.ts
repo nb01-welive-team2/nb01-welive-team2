@@ -4,8 +4,10 @@ import {
   ResidentUploadInputDto,
 } from "../dto/residents.dto";
 import { ResidentsFilter } from "../types/residents";
+import { HOUSEHOLDER_STATUS } from "@prisma/client";
 import residentsRepository from "../repositories/residentsRepository";
 import CommonError from "@/errors/CommonError";
+import { parseResidentsCsv } from "@/lib/utils/parseResidentsCsv";
 
 // 입주민 정보 개별 등록
 async function uploadResident(data: ResidentUploadInputDto) {
@@ -55,6 +57,64 @@ async function residentAccessCheck(id: string, apartmentId: string) {
   }
 }
 
+// 입주민 명부 CSV 업로드
+export async function uploadResidentsFromCsv(
+  csvText: string,
+  apartmentId: string
+) {
+  let records;
+  try {
+    records = parseResidentsCsv(csvText);
+  } catch (err) {
+    throw new CommonError("CSV 파싱 에러", 400);
+  }
+
+  const createdResidents = [];
+
+  for (const row of records) {
+    const { name, building, unitNumber, contact, email, isHouseholder } = row;
+
+    if (!name || !building || !unitNumber || !contact || !email) {
+      throw new CommonError(
+        `필수 항목 누락: ${JSON.stringify({
+          rowData: row,
+          missingFields: {
+            name: !name,
+            building: !building,
+            unitNumber: !unitNumber,
+            contact: !contact,
+            email: !email,
+            isHouseholder: !isHouseholder,
+          },
+        })}`,
+        400
+      );
+    }
+
+    const buildingNumber = Number(building);
+    const unitNumberNumber = Number(unitNumber);
+
+    const parsedIsHouseholder =
+      isHouseholder === "HOUSEHOLDER"
+        ? HOUSEHOLDER_STATUS.HOUSEHOLDER
+        : HOUSEHOLDER_STATUS.MEMBER;
+
+    const newResident = await residentsRepository.uploadResident({
+      name,
+      building: buildingNumber,
+      unitNumber: unitNumberNumber,
+      contact,
+      email,
+      apartmentId,
+      isHouseholder: parsedIsHouseholder,
+    });
+
+    createdResidents.push(newResident);
+  }
+
+  return createdResidents;
+}
+
 export default {
   removeResident,
   patchResident,
@@ -62,4 +122,5 @@ export default {
   getResidentsList,
   uploadResident,
   residentAccessCheck,
+  uploadResidentsFromCsv,
 };

@@ -1,13 +1,12 @@
 import { create } from "superstruct";
 import { Request, Response } from "express";
+import CommonError from "@/errors/CommonError";
 import residentsService from "../services/residentsService";
-import CommonError from "../errors/CommonError";
 import {
   createResidentBodyStruct,
   UpdateResidentBodyStruct,
 } from "../structs/residentStruct";
 import { AuthenticatedRequest } from "@/types/express";
-import residentsRepository from "@/repositories/residentsRepository";
 
 // 입주민 명부 개별 등록
 export async function uploadResidentController(req: Request, res: Response) {
@@ -72,4 +71,30 @@ export async function deleteResidentController(req: Request, res: Response) {
   await residentsService.removeResident(id);
 
   res.status(200).json({ message: "입주민 정보 삭제 성공" });
+}
+
+// 입주민 명부 CSV파일 업로드
+export async function uploadResidentsCsvController(
+  req: Request,
+  res: Response
+) {
+  const user = (req as AuthenticatedRequest).user;
+  if (!user) throw new CommonError("인증되지 않은 사용자입니다.", 401);
+
+  const apartmentId = user.apartmentId;
+  if (!apartmentId) throw new CommonError("아파트 정보가 없습니다.", 400);
+
+  if (!req.file) throw new CommonError("CSV 파일이 없습니다.", 400);
+
+  const csvText = req.file.buffer.toString("utf-8");
+
+  const createdResidents = await residentsService.uploadResidentsFromCsv(
+    csvText,
+    apartmentId
+  );
+
+  res.status(201).json({
+    message: "입주민 명부 업로드 성공",
+    data: createdResidents,
+  });
 }

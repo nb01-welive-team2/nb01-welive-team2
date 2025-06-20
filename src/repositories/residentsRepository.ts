@@ -2,6 +2,8 @@ import { Residents } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 import { Prisma } from "@prisma/client";
 import { ResidentsFilter } from "../types/residents";
+import { UploadResidentsInput } from "@/dto/residents.dto";
+import { RESIDENCE_STATUS, APPROVAL_STATUS } from "@prisma/client";
 
 // 입주민 명부 개별 등록 (관리자)
 async function createResident(data: Prisma.ResidentsCreateInput) {
@@ -61,10 +63,31 @@ async function deleteResident(id: string) {
   return await prisma.residents.delete({ where: { id } });
 }
 
+// 입주민 명부 CSV 업로드 (관리자)
+async function uploadResident(input: UploadResidentsInput) {
+  return await prisma.residents.create({
+    data: {
+      name: input.name,
+      building: input.building,
+      unitNumber: input.unitNumber,
+      contact: input.contact,
+      email: input.email,
+      isHouseholder: input.isHouseholder,
+      residenceStatus: RESIDENCE_STATUS.RESIDENCE,
+      isRegistered: false,
+      approvalStatus: APPROVAL_STATUS.PENDING,
+      apartmentInfo: {
+        connect: { id: input.apartmentId },
+      },
+    },
+  });
+}
+
 export default {
   deleteResident,
   updateResidentInfo,
   getResidentById,
   getResidentsFiltered,
   createResident,
+  uploadResident,
 };
