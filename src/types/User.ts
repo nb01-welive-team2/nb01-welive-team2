@@ -28,9 +28,9 @@ interface ApartmentInfo {
   apartmentName: string;
   apartmentAddress: string;
   apartmentManagementNumber: string;
-  description?: string;
-  startComplexNumber?: number;
-  endComplexNumber?: number;
+  description: string;
+  startComplexNumber: number;
+  endComplexNumber: number;
   startDongNumber: number;
   endDongNumber: number;
   startFloorNumber: number;

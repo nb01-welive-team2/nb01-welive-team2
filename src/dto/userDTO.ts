@@ -8,7 +8,7 @@ export interface userRequestDTO {
   name: string;
   email: string;
   role: USER_ROLE;
-  profileImage: string | null;
+  profileImage?: string;
 }
 
 export interface SignupUserRequestDTO extends userRequestDTO {

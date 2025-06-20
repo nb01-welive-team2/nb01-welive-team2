@@ -1,3 +1,4 @@
+import UnauthError from "@/errors/UnauthError";
 import { AuthenticatedRequest } from "@/types/express";
 import { USER_ROLE } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
@@ -8,11 +9,11 @@ export function requireRolle(allowedRoles: USER_ROLE) {
     const userRole = request.user?.role;
 
     if (!userRole) {
-      return next(new Error());
+      return next(new UnauthError());
     }
 
     if (!allowedRoles.includes(userRole)) {
-      return next(new Error());
+      return next(new UnauthError());
     }
 
     next();
