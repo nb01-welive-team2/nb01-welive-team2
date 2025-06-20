@@ -4,6 +4,8 @@ import {
   SignupUserRequestDTO,
   UpdateAdminDTO,
 } from "@/dto/userDTO";
+import BadRequestError from "@/errors/BadRequestError";
+import NotFoundError from "@/errors/NotFoundError";
 import { hashPassword } from "@/lib/utils/hash";
 import * as userRepository from "@/repositories/userRepository";
 
@@ -60,4 +62,11 @@ export const updateAdmin = async (
   const updatedAdmin = await userRepository.updateAdmin(data);
 
   return updatedAdmin;
+};
+
+export const deleteAdmin = async (id: string) => {
+  const deleted = await userRepository.deleteById(id);
+  if (!deleted) {
+    throw new BadRequestError("BadRequestError");
+  }
 };

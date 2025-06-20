@@ -18,7 +18,7 @@ import {
   globalErrorHandler,
 } from "./controllers/errorController";
 import authRouter from "./routes/authRoute";
-import userRouter from "./routes/userRoute";
+// import userRouter from "./routes/userRoute";
 // import { renderHtmlWithUrl } from './lib/htmlRenderer';
 
 // const seedPath = path.resolve(__dirname, '../prisma/seed');
@@ -31,7 +31,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/api/auth", authRouter);
-app.use("/api/users", userRouter);
+// app.use("/api/users", userRouter);
 
 // app.use('/users', usersRouter);
 
