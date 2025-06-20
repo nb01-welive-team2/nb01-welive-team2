@@ -1,11 +1,6 @@
 import { prisma } from "../../src/lib/prisma";
 import request from "supertest";
 import app from "../../src/app";
-import {
-  APPROVAL_STATUS,
-  HOUSEHOLDER_STATUS,
-  RESIDENCE_STATUS,
-} from "@prisma/client";
 
 describe("입주민 API 통합 테스트", () => {
   let residentId: any;

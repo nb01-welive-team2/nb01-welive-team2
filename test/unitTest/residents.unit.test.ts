@@ -65,7 +65,7 @@ describe("Residents Service", () => {
   describe("getResidentsList", () => {
     test("입주민 리스트 조회", async () => {
       const mockResidentsList = [mockResidents];
-      const query = {};
+      const query = { apartmentId: "mock-apartment-id" };
 
       jest
         .mocked(residentsRepository.getResidentsFiltered)
@@ -73,7 +73,9 @@ describe("Residents Service", () => {
 
       const result = await residentsService.getResidentsList(query);
 
-      expect(residentsRepository.getResidentsFiltered).toHaveBeenCalledWith({});
+      expect(residentsRepository.getResidentsFiltered).toHaveBeenCalledWith(
+        query
+      );
       expect(result).toEqual(mockResidentsList);
     });
   });

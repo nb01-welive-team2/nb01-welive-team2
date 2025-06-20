@@ -13,11 +13,19 @@ async function createResident(data: Prisma.ResidentsCreateInput) {
 
 // 입주민 목록 조회 (관리자)
 async function getResidentsFiltered(filters: ResidentsFilter) {
-  const { building, unitNumber, residenceStatus, isRegistered, name, contact } =
-    filters;
+  const {
+    apartmentId,
+    building,
+    unitNumber,
+    residenceStatus,
+    isRegistered,
+    name,
+    contact,
+  } = filters;
 
   return prisma.residents.findMany({
     where: {
+      apartmentId,
       ...(building && { building }),
       ...(unitNumber && { unitNumber }),
       ...(residenceStatus && { residenceStatus }),

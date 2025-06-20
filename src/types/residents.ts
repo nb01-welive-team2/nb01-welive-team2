@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import { RESIDENCE_STATUS } from "@prisma/client";
 
 export type ResidentsFilter = {
@@ -8,14 +7,5 @@ export type ResidentsFilter = {
   isRegistered?: boolean;
   name?: string;
   contact?: string;
-};
-
-export type ResidentUploadInput = {
-  name: string;
-  email: string;
-  contact: string;
-  building: number;
-  unitNumber: number;
-  isHouseholder: Prisma.ResidentsCreateInput["isHouseholder"];
   apartmentId: string;
 };
