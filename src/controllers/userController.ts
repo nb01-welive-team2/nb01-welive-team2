@@ -21,7 +21,7 @@ export const signupUser = async (
   };
   const user = await userService.signupUser(fixedData);
 
-  res.status(200).json(userResponseDTO(user as UserType));
+  res.status(201).json(userResponseDTO(user as UserType));
 };
 
 export const signupAdmin = async (
@@ -42,7 +42,7 @@ export const signupAdmin = async (
   };
   const user = await userService.signupAdmin(fixedData);
 
-  res.status(200).json(userResponseDTO(user as UserType));
+  res.status(201).json(userResponseDTO(user as UserType));
 };
 
 export const signupSuperAdmin = async (
@@ -52,5 +52,15 @@ export const signupSuperAdmin = async (
   const data = create(req.body, signupSuperAdminStruct);
   const user = await userService.signupSuperAdmin(data);
 
-  res.status(200).json(userResponseDTO(user as UserType));
+  res.status(201).json(userResponseDTO(user as UserType));
+};
+
+export const updateAdmin = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const data = req.body;
+  const updatedAdmin = await userService.updateAdmin(data);
+
+  res.status(200).json(updatedAdmin);
 };
