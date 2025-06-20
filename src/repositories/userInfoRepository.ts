@@ -4,11 +4,16 @@ import { prisma } from "../lib/prisma";
 async function findByUserId(userId: string) {
   return await prisma.userInfo.findUnique({
     where: {
-      id: userId,
+      userId: userId,
     },
   });
 }
 
+async function findUnique(params: Prisma.UserInfoFindUniqueArgs) {
+  return await prisma.userInfo.findUnique({ ...params });
+}
+
 export default {
   findByUserId,
+  findUnique,
 };
