@@ -14,6 +14,9 @@ export const getUserByUsername = async (username: string) => {
       apartmentInfo: {
         select: { id: true },
       },
+      userInfo: {
+        select: { id: true, apartmentId: true },
+      },
     },
   });
 
@@ -80,9 +83,6 @@ export const createUser = async (input: SignupUserRequestDTO) => {
 };
 
 export const createAdmin = async (input: SignupAdminRequestDTO) => {
-  const apartment = await findApartment(input.apartmentName); // TODO: 프로젝트 합친 후 apartment관련 리포지토리 있으면 거기에 맞춰 수정
-  if (!apartment) throw new BadRequestError("존재하지 않는 아파트입니다.");
-
   const user = await prisma.users.create({
     data: {
       username: input.username,
