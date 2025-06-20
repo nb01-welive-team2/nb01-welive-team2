@@ -190,7 +190,7 @@ export const findApartment = async (apartmentName: string) => {
   return data;
 };
 
-export const updateAdmin = async (data: UpdateAdminDTO) => {
+export const updateAdminAndApartment = async (data: UpdateAdminDTO) => {
   const {
     id,
     contact,
@@ -202,20 +202,21 @@ export const updateAdmin = async (data: UpdateAdminDTO) => {
     apartmentManagementNumber,
   } = data;
 
-  await prisma.users.update({
-    where: { id },
-    data: { contact, name, email },
-  });
-
-  await prisma.apartmentInfo.updateMany({
-    where: { userId: id },
-    data: {
-      description,
-      apartmentName,
-      apartmentAddress,
-      apartmentManagementNumber,
-    },
-  });
+  await prisma.$transaction([
+    prisma.users.update({
+      where: { id },
+      data: { contact, name, email },
+    }),
+    prisma.apartmentInfo.updateMany({
+      where: { userId: id },
+      data: {
+        description,
+        apartmentName,
+        apartmentAddress,
+        apartmentManagementNumber,
+      },
+    }),
+  ]);
 
   return data;
 };

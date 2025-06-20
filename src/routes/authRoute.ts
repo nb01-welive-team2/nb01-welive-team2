@@ -24,12 +24,12 @@ authRouter.post(
 authRouter.post("/signup", withAsync(signupUser));
 authRouter.post("/signup/admin", withAsync(signupAdmin));
 authRouter.post("/signup/super-admin", withAsync(signupSuperAdmin));
-// authRouter.patch(
-//   "/update-admin",
-//   authenticate({ optional: false }),
-//   requireRolle(USER_ROLE.SUPER_ADMIN),
-//   withAsync(updateAdminController)
-// );
+authRouter.patch(
+  "/update-admin",
+  authenticate({ optional: false }),
+  requireRolle(USER_ROLE.SUPER_ADMIN),
+  withAsync(updateAdminController)
+);
 authRouter.delete(
   "/deleted-admin/:id",
   authenticate({ optional: false }),

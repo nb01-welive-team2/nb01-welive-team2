@@ -5,7 +5,6 @@ import {
   UpdateAdminDTO,
 } from "@/dto/userDTO";
 import BadRequestError from "@/errors/BadRequestError";
-import NotFoundError from "@/errors/NotFoundError";
 import { hashPassword } from "@/lib/utils/hash";
 import * as userRepository from "@/repositories/userRepository";
 
@@ -59,7 +58,7 @@ export const signupSuperAdmin = async (data: SignupSuperAdminRequestDTO) => {
 export const updateAdmin = async (
   data: UpdateAdminDTO
 ): Promise<UpdateAdminDTO> => {
-  const updatedAdmin = await userRepository.updateAdmin(data);
+  const updatedAdmin = await userRepository.updateAdminAndApartment(data);
 
   return updatedAdmin;
 };

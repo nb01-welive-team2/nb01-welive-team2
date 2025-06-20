@@ -7,6 +7,7 @@ import {
   signupAdminStruct,
   signupSuperAdminStruct,
   signupUserStruct,
+  updateAdminStruct,
 } from "@/structs/userStruct";
 
 export const signupUser = async (
@@ -59,7 +60,7 @@ export const updateAdminController = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const data = req.body;
+  const data = create(req.body, updateAdminStruct);
   const updated = await userService.updateAdmin(data);
 
   res.status(200).json(updated);
