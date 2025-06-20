@@ -3,10 +3,8 @@ import { getUserByUsername, getUserId } from "@/repositories/userRepository";
 import bcrypt from "bcrypt";
 import { generateTokens, verifyRefreshToken } from "@/lib/utils/token";
 import { LoginRequestDTO } from "@/structs/userStruct";
-import { USER_ROLE } from "@prisma/client";
+import { JOIN_STATUS, USER_ROLE } from "@prisma/client";
 import UnauthError from "@/errors/UnauthError";
-
-// export const register = async(data: Omit<UserType, 'id'> )
 
 export const login = async (data: LoginRequestDTO) => {
   const { username, password } = data;
@@ -22,6 +20,11 @@ export const login = async (data: LoginRequestDTO) => {
   if (!isPasswordValid) {
     throw new UnauthError();
   }
+
+  // TODO: "JOIN_STATUS가 APPROVED일 때만 로그인 가능. 편의를 위해 다른 기능 완성 후 적용"
+  // if (user.joinStatus !== JOIN_STATUS.APPROVED) {
+  //   throw new UnauthError();
+  // }
 
   const userId = user.id;
   const role = user.role;
