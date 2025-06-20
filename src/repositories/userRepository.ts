@@ -219,3 +219,10 @@ export const updateAdmin = async (data: UpdateAdminDTO) => {
 
   return data;
 };
+
+export const deleteById = async (id: string) => {
+  const deleted = await prisma.users.delete({
+    where: { id },
+  });
+  return deleted;
+};

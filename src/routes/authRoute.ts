@@ -3,15 +3,17 @@ import { login, logout, refreshToken } from "../controllers/authController";
 import { withAsync } from "../lib/withAsync";
 import authenticate from "../middlewares/authenticate";
 import {
+  deleteAdmin,
   signupAdmin,
   signupSuperAdmin,
   signupUser,
-  updateAdmin,
+  updateAdminController,
 } from "@/controllers/userController";
 import { USER_ROLE } from "@prisma/client";
 import { requireRolle } from "@/middlewares/requireRole";
 
 const authRouter = express.Router();
+
 authRouter.post("/login", withAsync(login));
 authRouter.post("/logout", withAsync(logout));
 authRouter.post(
@@ -22,11 +24,17 @@ authRouter.post(
 authRouter.post("/signup", withAsync(signupUser));
 authRouter.post("/signup/admin", withAsync(signupAdmin));
 authRouter.post("/signup/super-admin", withAsync(signupSuperAdmin));
-authRouter.patch(
-  "/update-admin",
+// authRouter.patch(
+//   "/update-admin",
+//   authenticate({ optional: false }),
+//   requireRolle(USER_ROLE.SUPER_ADMIN),
+//   withAsync(updateAdminController)
+// );
+authRouter.delete(
+  "/deleted-admin/:id",
   authenticate({ optional: false }),
   requireRolle(USER_ROLE.SUPER_ADMIN),
-  withAsync(updateAdmin)
+  withAsync(deleteAdmin)
 );
 
 export default authRouter;

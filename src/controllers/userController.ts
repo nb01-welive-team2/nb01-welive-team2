@@ -55,12 +55,22 @@ export const signupSuperAdmin = async (
   res.status(201).json(userResponseDTO(user as UserType));
 };
 
-export const updateAdmin = async (
+export const updateAdminController = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   const data = req.body;
-  const updatedAdmin = await userService.updateAdmin(data);
+  const updated = await userService.updateAdmin(data);
 
-  res.status(200).json(updatedAdmin);
+  res.status(200).json(updated);
+};
+
+export const deleteAdmin = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { id: userId } = req.params;
+  await userService.deleteAdmin(userId);
+
+  res.status(200).json({ message: "AdminInfo deleted successfully" });
 };
