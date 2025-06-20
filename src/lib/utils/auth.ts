@@ -1,7 +1,6 @@
 import { Response } from "express";
 import {
   ACCESS_TOKEN_COOKIE_NAME,
-  NODE_ENV,
   REFRESH_TOKEN_COOKIE_NAME,
 } from "../constance";
 
