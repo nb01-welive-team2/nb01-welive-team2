@@ -217,7 +217,7 @@ const mockResidents: Residents[] = [
 const mockComplaints: Complaints[] = [
   {
     id: "693cd12f-d156-4e07-9934-ad02a4fce664",
-    userId: "0f9e7654-dfbb-46df-b93c-cc491ff9f5bd",
+    userId: "18c35b60-b56c-470d-8713-73446c585859",
     apartmentId: "2149430f-2892-463f-b3e7-4e893548c6d6",
     title: "Noisy neighbors",
     content: "There is too much noise after 10 PM.",

@@ -1,4 +1,4 @@
-name: noticeNcomplaintUnitTest
+name: noticeIntNcomplaintFullTest
 
 on:
   push:
@@ -47,6 +47,8 @@ jobs:
       IAM_SECRET_ACCESS_KEY: dummy-secret-key
       SERVER_URL: dummy-server-url
       SALT: $2b$10$abcdefghij1234567890ABCD # 테스트용 더미 값
+      JWT_ACCESS_TOKEN_SECRET: your-access-token-secret
+      JWT_REFRESH_TOKEN_SECRET: your-refresh-token-secret
 
     steps:
       - name: Checkout code
@@ -63,6 +65,9 @@ jobs:
       - name: Migrate database
         run: npm run prisma:migrate
 
+      - name: DB Seed
+        run: npm run prisma:seed
+
       - name: Type Check
         run: npm run typecheck
 
@@ -71,3 +76,6 @@ jobs:
 
       - name: Run complaint unit tests
         run: npm run test-complaint-unit
+
+      - name: Run complaint integration tests
+        run: npm run test-complaint-int

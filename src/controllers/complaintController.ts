@@ -69,20 +69,17 @@ import ForbiddenError from "@/errors/ForbiddenError";
  */
 export async function createComplaint(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
-  console.log("payload", reqWithPayload.user);
   const data = create(req.body, CreateComplaintBodyStruct);
 
   if (reqWithPayload.user.role !== USER_ROLE.USER) {
     throw new ForbiddenError();
   }
-  console.log("data", data);
 
   await complaintService.createComplaint(
     data,
     reqWithPayload.user.userId,
     reqWithPayload.user.apartmentId
   );
-  console.log("complaint created");
 
   res.status(201).send(new registerSuccessMessage());
 }

@@ -31,7 +31,6 @@ async function getComplaintList(
   params: PageParamsType
 ) {
   const searchCondition = await buildSearchCondition(params, { userId, role });
-  console.log(searchCondition);
   const totalCount = await complaintRepository.getCount({
     where: searchCondition.whereCondition,
   });
@@ -76,11 +75,11 @@ async function getComplaint(
   }
 
   const complaint = await complaintRepository.findById(complaintId);
-  if (!complaint?.user.userInfo) {
+  if (!complaint) {
     throw new NotFoundError("Complaint", complaintId);
   }
 
-  if (apartmentId !== complaint.user.userInfo.apartmentId) {
+  if (apartmentId !== complaint.apartmentId) {
     throw new ForbiddenError();
   }
   return complaint;

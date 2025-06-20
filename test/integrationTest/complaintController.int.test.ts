@@ -16,21 +16,18 @@ describe("ComplaintController Integration Tests", () => {
   const superAdminAgent = request.agent(app);
 
   beforeAll(async () => {
-    // USER 로그인
-    const resUser = await userAgent.post("/api/auth/login").send({
-      username: mockUsers[0].username, // USER
+    await userAgent.post("/api/auth/login").send({
+      username: mockUsers[0].username,
       password: "alicepassword",
     });
 
-    // ADMIN 로그인
     await adminAgent.post("/api/auth/login").send({
-      username: mockUsers[1].username, // ADMIN
+      username: mockUsers[1].username,
       password: "bobpassword",
     });
 
-    // SUPER_ADMIN 로그인
     await superAdminAgent.post("/api/auth/login").send({
-      username: mockUsers[2].username, // SUPER_ADMIN
+      username: mockUsers[2].username,
       password: "superpassword",
     });
   });
@@ -81,12 +78,13 @@ describe("ComplaintController Integration Tests", () => {
 
   describe("GET /api/complaints/:complaintId", () => {
     const validComplaintId = mockComplaints[0].id;
+    const invalidComplaintId = "2c6a4baf-9efd-4187-be34-624b2b35f195";
 
     it("should return complaint detail for non-SUPER_ADMIN", async () => {
       const res = await userAgent.get(`/api/complaints/${validComplaintId}`);
       expect(res.status).toBe(200);
-      expect(res.body).toHaveProperty("id", validComplaintId);
-      expect(res.body).toHaveProperty("user");
+      expect(res.body).toHaveProperty("complaintId", validComplaintId);
+      expect(res.body).toHaveProperty("writerName");
     });
 
     it("should return 403 for SUPER_ADMIN", async () => {
@@ -98,13 +96,14 @@ describe("ComplaintController Integration Tests", () => {
     });
 
     it("should return 404 if complaint not found", async () => {
-      const res = await userAgent.get(`/api/complaints/non-existent-id`);
+      const res = await userAgent.get(`/api/complaints/${invalidComplaintId}`);
       expect(res.status).toBe(404);
     });
   });
 
   describe("PUT /api/complaints/:complaintId", () => {
     const validComplaintId = mockComplaints[0].id;
+    const invalidComplaintId = "2c6a4baf-9efd-4187-be34-624b2b35f195";
     const validBody = {
       title: "수정된 제목",
       content: "수정된 내용",
@@ -129,29 +128,31 @@ describe("ComplaintController Integration Tests", () => {
 
     it("should return 404 if complaint not found", async () => {
       const res = await userAgent
-        .put(`/api/complaints/non-existent-id`)
+        .put(`/api/complaints/${invalidComplaintId}`)
         .send(validBody);
       expect(res.status).toBe(404);
     });
   });
 
   describe("DELETE /api/complaints/:complaintId", () => {
+    const complaintId = mockComplaints[0].id;
+    const invalidComplaintId = "2c6a4baf-9efd-4187-be34-624b2b35f195";
     it("should delete complaint for ADMIN role", async () => {
-      const complaintId = mockComplaints[0].id;
       const res = await adminAgent.delete(`/api/complaints/${complaintId}`);
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty("message");
     });
 
     it("should return 403 if role not ADMIN", async () => {
-      const complaintId = mockComplaints[0].id;
       const res = await userAgent.delete(`/api/complaints/${complaintId}`);
       expect(res.status).toBe(403);
       expect(res.body).toHaveProperty("message");
     });
 
     it("should return 404 if complaint not found", async () => {
-      const res = await adminAgent.delete(`/api/complaints/non-existent-id`);
+      const res = await adminAgent.delete(
+        `/api/complaints/${invalidComplaintId}`
+      );
       expect(res.status).toBe(404);
     });
   });

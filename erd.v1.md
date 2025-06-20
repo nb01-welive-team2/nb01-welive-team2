@@ -2,6 +2,7 @@
 erDiagram
 Users {
   UUID id PK
+  UUID residentId FK
   Varchar username UK
   Varchar encryptedPassword
   Varchar contact UK
@@ -31,7 +32,6 @@ ApartmentInfo {
   Int endFloorNumber
   Int startHoNumber
   Int endHoNumber
-  Varchar description
   Datetime createdAt
 }
 %% APPROVAL_STATUS : UNRECEIVED, PENDING, APPROVED
@@ -100,7 +100,7 @@ Polls {
 PollOptions {
   UUID id PK
   UUID pollId FK
-  Varchar Content
+  Varchar title
 }
 
 Votes {
