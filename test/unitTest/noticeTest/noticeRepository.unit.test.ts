@@ -29,6 +29,7 @@ describe("noticeRepository", () => {
         isPinned: false,
         category: "MAINTENANCE" as const,
         user: { connect: { id: "user-uuid" } },
+        ApartmentInfo: { connect: { id: "apt-uuid" } },
       };
       const expectedResult = { id: "1", ...input };
 
@@ -92,7 +93,6 @@ describe("noticeRepository", () => {
         where: { id: noticeId },
         include: {
           user: {
-            select: { username: true },
             include: { apartmentInfo: { select: { id: true } } },
           },
           NoticeComments: {

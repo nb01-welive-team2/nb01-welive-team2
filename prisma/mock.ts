@@ -4,7 +4,7 @@ import {
   APPROVAL_STATUS,
   RESIDENCE_STATUS,
   HOUSEHOLDER_STATUS,
-  BOARD_ID,
+  COMPLAINT_STATUS,
   POLL_STATUS,
   NOTICE_CATEGORY,
   NOTIFICATION_TYPE,
@@ -20,6 +20,7 @@ interface Users {
   role: USER_ROLE;
   joinStatus: JOIN_STATUS;
   profileImage?: string | null;
+  residentId: string | null;
 }
 
 interface ApartmentInfo {
@@ -67,16 +68,18 @@ interface Residents {
 interface Complaints {
   id: string;
   userId: string;
+  apartmentId: string;
   title: string;
   content: string;
   createdAt: Date;
   isPublic: boolean;
-  approvalStatus: APPROVAL_STATUS;
+  complaintStatus: COMPLAINT_STATUS;
 }
 
 interface Polls {
   id: string;
   userId: string;
+  apartmentId: string;
   title: string;
   content: string;
   startDate: Date;
@@ -99,6 +102,7 @@ interface Votes {
 interface Notices {
   id: string;
   userId: string;
+  apartmentId: string;
   title: string;
   content: string;
   startDate: Date;
@@ -132,6 +136,7 @@ const mockUsers: Users[] = [
     role: USER_ROLE.USER,
     joinStatus: JOIN_STATUS.APPROVED,
     profileImage: null,
+    residentId: null,
   },
   {
     id: "0f9e7654-dfbb-46df-b93c-cc491ff9f5bd",
@@ -144,13 +149,27 @@ const mockUsers: Users[] = [
     role: USER_ROLE.ADMIN,
     joinStatus: JOIN_STATUS.APPROVED,
     profileImage: "https://example.com/bob.jpg",
+    residentId: null,
+  },
+  {
+    id: "315ee9f0-c63f-4efd-8b95-53ab30b41318",
+    username: "super56",
+    encryptedPassword:
+      "$2a$10$OtHh.MuWFoT2Nvu62QI8NeuGWM9SXrPjQjWdIzQzGaV7L021xtjE2", //bycrypt round 10회 superpassword
+    contact: "01012344321",
+    name: "super Builder",
+    email: "super@example.com",
+    role: USER_ROLE.SUPER_ADMIN,
+    joinStatus: JOIN_STATUS.APPROVED,
+    profileImage: null,
+    residentId: null,
   },
 ];
 
 const mockApartmentInfo: ApartmentInfo[] = [
   {
     id: "2149430f-2892-463f-b3e7-4e893548c6d6",
-    userId: "18c35b60-b56c-470d-8713-73446c585859",
+    userId: "0f9e7654-dfbb-46df-b93c-cc491ff9f5bd",
     approvalStatus: APPROVAL_STATUS.APPROVED,
     apartmentName: "Sunshine Apartments",
     apartmentAddress: "123 Sunshine St, Seoul",
@@ -198,12 +217,13 @@ const mockResidents: Residents[] = [
 const mockComplaints: Complaints[] = [
   {
     id: "693cd12f-d156-4e07-9934-ad02a4fce664",
-    userId: "0f9e7654-dfbb-46df-b93c-cc491ff9f5bd",
+    userId: "18c35b60-b56c-470d-8713-73446c585859",
+    apartmentId: "2149430f-2892-463f-b3e7-4e893548c6d6",
     title: "Noisy neighbors",
     content: "There is too much noise after 10 PM.",
     createdAt: new Date("2024-04-01T12:00:00Z"),
     isPublic: true,
-    approvalStatus: APPROVAL_STATUS.PENDING,
+    complaintStatus: COMPLAINT_STATUS.PENDING,
   },
 ];
 
@@ -211,6 +231,7 @@ const mockPolls: Polls[] = [
   {
     id: "8b83f903-5ede-476d-86a4-a4e20f9c99ac",
     userId: "0f9e7654-dfbb-46df-b93c-cc491ff9f5bd",
+    apartmentId: "2149430f-2892-463f-b3e7-4e893548c6d6",
     title: "Vote on new playground",
     content: "Please vote for the playground location.",
     startDate: new Date("2024-04-20T00:00:00Z"),
@@ -243,7 +264,8 @@ const mockVotes: Votes[] = [
 const mockNotices: Notices[] = [
   {
     id: "f1c531ea-8f03-4f12-a8bb-7899148354df",
-    userId: "18c35b60-b56c-470d-8713-73446c585859",
+    userId: "0f9e7654-dfbb-46df-b93c-cc491ff9f5bd",
+    apartmentId: "2149430f-2892-463f-b3e7-4e893548c6d6",
     title: "Community Meeting",
     content: "Next community meeting is on May 1st.",
     startDate: new Date("2024-04-25T00:00:00Z"),

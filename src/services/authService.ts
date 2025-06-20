@@ -34,10 +34,11 @@ export const login = async (data: LoginRequestDTO) => {
   if (role === USER_ROLE.ADMIN && user.apartmentInfo) {
     apartmentId = user.apartmentInfo.id;
   } else if (role === USER_ROLE.USER && user.userInfo) {
-    const userInfo = await getUserByUsername(username);
     apartmentId = user.userInfo.apartmentId;
   } else if (role === USER_ROLE.SUPER_ADMIN) {
     apartmentId = undefined;
+  } else {
+    throw new UnauthError();
   }
 
   const { accessToken, refreshToken } = generateTokens(
