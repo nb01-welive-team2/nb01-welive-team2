@@ -29,9 +29,9 @@ interface ApartmentInfo {
   apartmentName: string;
   apartmentAddress: string;
   apartmentManagementNumber: string;
-  description?: string | null;
-  startComplexNumber?: number | null;
-  endComplexNumber?: number | null;
+  description: string;
+  startComplexNumber: number;
+  endComplexNumber: number;
   startDongNumber: number;
   endDongNumber: number;
   startFloorNumber: number;
@@ -154,16 +154,16 @@ const mockApartmentInfo: ApartmentInfo[] = [
     approvalStatus: APPROVAL_STATUS.APPROVED,
     apartmentName: "Sunshine Apartments",
     apartmentAddress: "123 Sunshine St, Seoul",
-    apartmentManagementNumber: "MNG-001",
+    apartmentManagementNumber: "02-345-6789",
     description: "A nice apartment complex.",
     startComplexNumber: 1,
     endComplexNumber: 5,
-    startDongNumber: 101,
-    endDongNumber: 105,
+    startDongNumber: 10,
+    endDongNumber: 10,
     startFloorNumber: 1,
     endFloorNumber: 10,
-    startHoNumber: 101,
-    endHoNumber: 120,
+    startHoNumber: 10,
+    endHoNumber: 10,
     createdAt: new Date("2024-01-01T09:00:00Z"),
   },
 ];
@@ -174,8 +174,8 @@ const mockUserInfo: UserInfo[] = [
     userId: "18c35b60-b56c-470d-8713-73446c585859",
     apartmentId: "2149430f-2892-463f-b3e7-4e893548c6d6",
     apartmentName: "Sunshine Apartments",
-    apartmentDong: 101,
-    apartmentHo: 110,
+    apartmentDong: 10,
+    apartmentHo: 10,
   },
 ];
 
@@ -184,7 +184,7 @@ const mockResidents: Residents[] = [
     id: "69f298ce-5775-4206-b377-d083313e4946",
     apartmentId: "2149430f-2892-463f-b3e7-4e893548c6d6",
     building: 1,
-    unitNumber: 110,
+    unitNumber: 11,
     contact: "010-9999-9999",
     name: "Charlie Chaplin",
     email: "charlie@example.com",
