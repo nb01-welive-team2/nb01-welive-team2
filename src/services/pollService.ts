@@ -36,6 +36,7 @@ export const createPoll = async (
     endDate: new Date(dto.endDate),
     buildingPermission: dto.buildingPermission,
     userId,
+    apartmentId: dto.apartmentId,
   });
 
   await pollRepo.createPollOptions(poll.id, dto.options);

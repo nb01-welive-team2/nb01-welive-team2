@@ -9,6 +9,7 @@ export interface CreatePollRequestDto {
   endDate: string;
   options: string[];
   buildingPermission: number;
+  apartmentId: string;
 } // 투표 생성 시 보내는 데이터
 
 export interface PollResponseDto {

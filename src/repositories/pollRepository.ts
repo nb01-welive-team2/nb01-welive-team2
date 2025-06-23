@@ -24,6 +24,7 @@ export const createPollEntry = async (data: {
   endDate: Date;
   buildingPermission: number;
   userId: string;
+  apartmentId: string;
 }) => {
   return await prisma.polls.create({
     data: {
@@ -34,6 +35,7 @@ export const createPollEntry = async (data: {
       buildingPermission: data.buildingPermission,
       status: $Enums.POLL_STATUS.IN_PROGRESS,
       userId: data.userId,
+      apartmentId: data.apartmentId,
     },
     include: {
       user: true,
@@ -47,7 +49,7 @@ export const createPollOptions = async (pollId: string, options: string[]) => {
       prisma.pollOptions.create({
         data: {
           pollId,
-          content: option,
+          title: option,
         },
       })
     )
