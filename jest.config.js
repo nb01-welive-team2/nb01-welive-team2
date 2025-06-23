@@ -14,7 +14,7 @@ module.exports = {
       testMatch: ["**/unit/**/poll*.test.ts"],
     },
     {
-      displayName: "poll-api",
+      displayName: "poll-integration",
       ...commonConfig,
       testMatch: ["**/integration/**/poll*.test.ts"],
     },
@@ -22,6 +22,16 @@ module.exports = {
       displayName: "notice-unit",
       ...commonConfig,
       testMatch: ["**/unitTest/noticeTest/notice*.test.ts"],
+    },
+    {
+      displayName: "complaint-unit",
+      ...commonConfig,
+      testMatch: ["**/unitTest/complaintTest/complaint*.test.ts"],
+    },
+    {
+      displayName: "complaint-integration",
+      ...commonConfig,
+      testMatch: ["**/integrationTest/complaint*.test.ts"],
     },
     {
       displayName: "auth-unit",

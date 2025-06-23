@@ -5,9 +5,11 @@ import { buildSearchCondition } from "@/lib/searchCondition";
 import NotFoundError from "@/errors/NotFoundError";
 import ForbiddenError from "@/errors/ForbiddenError";
 import { NOTICE_CATEGORY, USER_ROLE } from "@prisma/client";
+import * as userRepository from "@/repositories/userRepository";
 
 jest.mock("@/repositories/noticeRepository");
 jest.mock("@/repositories/userInfoRepository");
+jest.mock("@/repositories/userRepository");
 jest.mock("@/lib/searchCondition");
 
 describe("noticeService", () => {
@@ -24,13 +26,15 @@ describe("noticeService", () => {
         category: NOTICE_CATEGORY.MAINTENANCE,
       };
       const userId = "user-uuid";
+      const apartmentId = "apt-uuid";
 
       (noticeRepository.create as jest.Mock).mockResolvedValue(undefined);
 
-      await noticeService.createNotice(mockNotice, userId);
+      await noticeService.createNotice(mockNotice, userId, apartmentId);
 
       expect(noticeRepository.create).toHaveBeenCalledWith({
         user: { connect: { id: userId } },
+        ApartmentInfo: { connect: { id: apartmentId } },
         title: mockNotice.title,
         content: mockNotice.content,
         isPinned: mockNotice.isPinned,
@@ -88,54 +92,94 @@ describe("noticeService", () => {
     const noticeId = "notice-uuid";
     const userId = "user-uuid";
 
-    it("should throw NotFoundError if userInfo not found", async () => {
-      (userInfoRepository.findByUserId as jest.Mock).mockResolvedValue(null);
+    describe("when role is USER", () => {
+      it("should throw NotFoundError if userInfo not found", async () => {
+        (userInfoRepository.findByUserId as jest.Mock).mockResolvedValue(null);
 
-      await expect(noticeService.getNotice(noticeId, userId)).rejects.toThrow(
-        NotFoundError
-      );
-      expect(userInfoRepository.findByUserId).toHaveBeenCalledWith(userId);
+        await expect(
+          noticeService.getNotice(noticeId, userId, USER_ROLE.USER)
+        ).rejects.toThrow(NotFoundError);
+
+        expect(userInfoRepository.findByUserId).toHaveBeenCalledWith(userId);
+      });
+
+      it("should throw ForbiddenError if apartmentId mismatch", async () => {
+        (userInfoRepository.findByUserId as jest.Mock).mockResolvedValue({
+          apartmentId: "apt-1",
+        });
+        (noticeRepository.findById as jest.Mock).mockResolvedValue({
+          user: { apartmentInfo: { id: "apt-2" } },
+        });
+
+        await expect(
+          noticeService.getNotice(noticeId, userId, USER_ROLE.USER)
+        ).rejects.toThrow(ForbiddenError);
+      });
+
+      it("should return notice if all checks pass", async () => {
+        const mockNotice = {
+          id: noticeId,
+          user: { apartmentInfo: { id: "apt-1" } },
+          title: "Notice title",
+        };
+        (userInfoRepository.findByUserId as jest.Mock).mockResolvedValue({
+          apartmentId: "apt-1",
+        });
+        (noticeRepository.findById as jest.Mock).mockResolvedValue(mockNotice);
+
+        const result = await noticeService.getNotice(
+          noticeId,
+          userId,
+          USER_ROLE.USER
+        );
+
+        expect(result).toBe(mockNotice);
+      });
     });
 
-    it("should throw NotFoundError if notice not found", async () => {
-      (userInfoRepository.findByUserId as jest.Mock).mockResolvedValue({
-        apartmentId: "apt-1",
-      });
-      (noticeRepository.findById as jest.Mock).mockResolvedValue(null);
+    describe("when role is ADMIN", () => {
+      it("should throw NotFoundError if user.apartmentInfo not found", async () => {
+        (userRepository.getUserId as jest.Mock).mockResolvedValue({
+          apartmentInfo: null,
+        });
 
-      await expect(noticeService.getNotice(noticeId, userId)).rejects.toThrow(
-        NotFoundError
-      );
-      expect(noticeRepository.findById).toHaveBeenCalledWith(noticeId);
-    });
-
-    it("should throw ForbiddenError if apartmentId mismatch", async () => {
-      (userInfoRepository.findByUserId as jest.Mock).mockResolvedValue({
-        apartmentId: "apt-1",
-      });
-      (noticeRepository.findById as jest.Mock).mockResolvedValue({
-        user: { apartmentInfo: { id: "apt-2" } },
+        await expect(
+          noticeService.getNotice(noticeId, userId, USER_ROLE.ADMIN)
+        ).rejects.toThrow(NotFoundError);
       });
 
-      await expect(noticeService.getNotice(noticeId, userId)).rejects.toThrow(
-        ForbiddenError
-      );
-    });
+      it("should throw ForbiddenError if apartmentId mismatch", async () => {
+        (userRepository.getUserId as jest.Mock).mockResolvedValue({
+          apartmentInfo: { id: "apt-1" },
+        });
+        (noticeRepository.findById as jest.Mock).mockResolvedValue({
+          user: { apartmentInfo: { id: "apt-2" } },
+        });
 
-    it("should return notice if all checks pass", async () => {
-      const mockNotice = {
-        id: noticeId,
-        user: { apartmentInfo: { id: "apt-1" } },
-        title: "Notice title",
-      };
-      (userInfoRepository.findByUserId as jest.Mock).mockResolvedValue({
-        apartmentId: "apt-1",
+        await expect(
+          noticeService.getNotice(noticeId, userId, USER_ROLE.ADMIN)
+        ).rejects.toThrow(ForbiddenError);
       });
-      (noticeRepository.findById as jest.Mock).mockResolvedValue(mockNotice);
 
-      const result = await noticeService.getNotice(noticeId, userId);
+      it("should return notice if all checks pass", async () => {
+        const mockNotice = {
+          id: noticeId,
+          user: { apartmentInfo: { id: "apt-1" } },
+          title: "Notice title",
+        };
+        (userRepository.getUserId as jest.Mock).mockResolvedValue({
+          apartmentInfo: { id: "apt-1" },
+        });
+        (noticeRepository.findById as jest.Mock).mockResolvedValue(mockNotice);
 
-      expect(result).toBe(mockNotice);
+        const result = await noticeService.getNotice(
+          noticeId,
+          userId,
+          USER_ROLE.ADMIN
+        );
+
+        expect(result).toBe(mockNotice);
+      });
     });
   });
 
