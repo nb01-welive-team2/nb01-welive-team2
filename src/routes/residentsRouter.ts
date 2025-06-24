@@ -6,12 +6,19 @@ import {
   deleteResidentController,
   uploadResidentController,
   uploadResidentsCsvController,
+  downloadResidentsCsvController,
 } from "../controllers/residentsContoller";
 import authenticate from "@/middlewares/authenticate";
 import upload from "@/middlewares/multer";
 import { withAsync } from "../lib/withAsync";
 
 const residentsRouter = Router();
+
+residentsRouter.get(
+  "/download",
+  authenticate({ optional: false }),
+  withAsync(downloadResidentsCsvController)
+);
 
 residentsRouter.post(
   "/upload",

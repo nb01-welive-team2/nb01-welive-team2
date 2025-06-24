@@ -98,3 +98,22 @@ export async function uploadResidentsCsvController(
     data: createdResidents,
   });
 }
+
+// 입주민 명부 CSV 파일 다운로드
+export async function downloadResidentsCsvController(
+  req: Request,
+  res: Response
+) {
+  const user = (req as AuthenticatedRequest).user;
+  if (!user) throw new CommonError("인증되지 않은 사용자입니다.", 401);
+
+  const apartmentId = user.apartmentId;
+  if (!apartmentId) throw new CommonError("아파트 정보가 없습니다.", 400);
+
+  const csv = await residentsService.generateResidentsCsv({ apartmentId });
+  const filename = "residents.csv";
+
+  res.setHeader("Content-Type", "text/csv");
+  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+  res.status(200).send(csv);
+}

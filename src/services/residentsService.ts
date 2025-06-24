@@ -58,10 +58,7 @@ async function residentAccessCheck(id: string, apartmentId: string) {
 }
 
 // 입주민 명부 CSV 업로드
-export async function uploadResidentsFromCsv(
-  csvText: string,
-  apartmentId: string
-) {
+async function uploadResidentsFromCsv(csvText: string, apartmentId: string) {
   let records;
   try {
     records = parseResidentsCsv(csvText);
@@ -115,6 +112,33 @@ export async function uploadResidentsFromCsv(
   return createdResidents;
 }
 
+// 입주민 명부 CSV 다운로드
+async function generateResidentsCsv(query: ResidentsFilter) {
+  const residents = await residentsRepository.getResidentsFiltered(query);
+
+  const headers = [
+    "name",
+    "building",
+    "unitNumber",
+    "contact",
+    "email",
+    "isHouseholder",
+  ];
+  const rows = residents.map((resident) => [
+    resident.name,
+    resident.building,
+    resident.building,
+    resident.unitNumber,
+    resident.contact,
+    resident.email,
+    resident.isHouseholder,
+  ]);
+  const csvString = [headers, ...rows]
+    .map((row) => row.map((v) => `"${v}"`).join(","))
+    .join("\n");
+  return csvString;
+}
+
 export default {
   removeResident,
   patchResident,
@@ -123,4 +147,5 @@ export default {
   uploadResident,
   residentAccessCheck,
   uploadResidentsFromCsv,
+  generateResidentsCsv,
 };
