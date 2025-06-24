@@ -1,4 +1,3 @@
-import { UserType } from "@/types/User";
 import { prisma } from "../lib/prisma";
 import BadRequestError from "@/errors/BadRequestError";
 import {
@@ -7,6 +6,7 @@ import {
   SignupUserRequestDTO,
   UpdateAdminDTO,
 } from "@/dto/userDTO";
+import { JOIN_STATUS, USER_ROLE } from "@prisma/client";
 
 export const getUserByUsername = async (username: string) => {
   const user = await prisma.users.findUnique({
@@ -38,7 +38,6 @@ export const getUserId = async (id: string) => {
 
 export const createUser = async (input: SignupUserRequestDTO) => {
   const apartment = await findApartment(input.apartmentName); // TODO: 프로젝트 합친 후 apartment관련 리포지토리 있으면 거기에 맞춰 수정
-  if (!apartment) throw new BadRequestError("존재하지 않는 아파트입니다.");
 
   const user = await prisma.users.create({
     data: {
@@ -47,16 +46,16 @@ export const createUser = async (input: SignupUserRequestDTO) => {
       contact: input.contact,
       name: input.name,
       email: input.email,
-      role: "USER",
+      role: USER_ROLE.USER,
       profileImage: input.profileImage,
-      joinStatus: "PENDING",
+      joinStatus: JOIN_STATUS.PENDING,
       userInfo: {
         create: {
           apartmentName: input.apartmentName,
           apartmentDong: input.apartmentDong,
           apartmentHo: input.apartmentHo,
           apartmentInfo: {
-            connect: { id: apartment.id },
+            connect: { id: apartment!.id },
           },
         },
       },
@@ -91,9 +90,9 @@ export const createAdmin = async (input: SignupAdminRequestDTO) => {
       contact: input.contact,
       name: input.name,
       email: input.email,
-      role: "ADMIN",
+      role: USER_ROLE.ADMIN,
       profileImage: input.profileImage,
-      joinStatus: "PENDING",
+      joinStatus: JOIN_STATUS.PENDING,
       apartmentInfo: {
         create: {
           description: input.description,
@@ -108,7 +107,7 @@ export const createAdmin = async (input: SignupAdminRequestDTO) => {
           apartmentName: input.apartmentName,
           apartmentAddress: input.apartmentAddress,
           apartmentManagementNumber: input.apartmentManagementNumber,
-          approvalStatus: "PENDING",
+          approvalStatus: JOIN_STATUS.PENDING,
         },
       },
     },
@@ -151,9 +150,9 @@ export const createSuperAdmin = async (input: SignupSuperAdminRequestDTO) => {
       contact: input.contact,
       name: input.name,
       email: input.email,
-      role: "SUPER_ADMIN",
+      role: USER_ROLE.SUPER_ADMIN,
       profileImage: input.profileImage,
-      joinStatus: "APPROVED",
+      joinStatus: JOIN_STATUS.APPROVED,
     },
   });
 
@@ -168,19 +167,19 @@ export const createSuperAdmin = async (input: SignupSuperAdminRequestDTO) => {
 //   return data;
 // };
 
-export const usersUniqueColums = async (
-  username: string,
-  contact: string,
-  email: string
-) => {
-  const exists = await prisma.users.findFirst({
-    where: {
-      OR: [{ username }, { contact }, { email }],
-    },
-  });
+// export const usersUniqueColums = async (
+//   username: string,
+//   contact: string,
+//   email: string
+// ) => {
+//   const exists = await prisma.users.findFirst({
+//     where: {
+//       OR: [{ username }, { contact }, { email }],
+//     },
+//   });
 
-  if (exists) throw new BadRequestError("이미 등록된 사용자입니다.");
-};
+//   if (exists) throw new BadRequestError("이미 등록된 사용자입니다.");
+// };
 
 export const findApartment = async (apartmentName: string) => {
   const data = await prisma.apartmentInfo.findFirst({
@@ -227,3 +226,30 @@ export const deleteById = async (id: string) => {
   });
   return deleted;
 };
+
+// TODO: [최고관리자/관리자] 거절 계정 관리
+
+// // export const deleteManyByRole = async (role: USER_ROLE) => {
+// //   const deleted = await prisma.users.deleteMany({
+// //     where: { role, joinStatus: "REJECTED" },
+// //   });
+// //   return deleted;
+// // };
+
+// export const deleteAdmins = async (role: USER_ROLE) => {
+//   await prisma.users.deleteMany({
+//     where: {
+//       role: USER_ROLE.ADMIN,
+//       joinStatus: "REJECTED",
+//     },
+//   });
+// };
+
+// export const deleteUsers = async (role: USER_ROLE) => {
+//   await prisma.users.deleteMany({
+//     where: {
+//       role: USER_ROLE.USER,
+//       joinStatus: "REJECTED",
+//     },
+//   });
+// };

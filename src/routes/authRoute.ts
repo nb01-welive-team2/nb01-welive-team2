@@ -37,4 +37,13 @@ authRouter.delete(
   withAsync(deleteAdmin)
 );
 
+// TODO: [최고관리자/관리자] 거절 계정 관리
+
+// authRouter.post(
+//   "/cleanup",
+//   authenticate({ optional: false }),
+//   requireRolle(USER_ROLE.SUPER_ADMIN),
+//   withAsync(deleteAdmin)
+// );
+
 export default authRouter;

@@ -9,6 +9,7 @@ import {
   signupUserStruct,
   updateAdminStruct,
 } from "@/structs/userStruct";
+import { AuthenticatedRequest } from "@/types/express";
 
 export const signupUser = async (
   req: Request,
@@ -75,3 +76,15 @@ export const deleteAdmin = async (
 
   res.status(200).json({ message: "AdminInfo deleted successfully" });
 };
+
+// TODO: [최고관리자/관리자] 거절 계정 관리
+
+// export const deleteRejectedUsers = async (
+//   req: Request,
+//   res: Response
+// ): Promise<void> => {
+//   const { role } = (req as AuthenticatedRequest).user;
+//   await userService.deleteRejectedUsersByRole(role);
+
+//   res.status(200).json({ message: "Admins or Users deleted successfully" });
+// };
