@@ -6,7 +6,8 @@ import {
   SignupUserRequestDTO,
   UpdateAdminDTO,
 } from "@/dto/userDTO";
-import { JOIN_STATUS, USER_ROLE } from "@prisma/client";
+import { JOIN_STATUS, USER_ROLE, Users } from "@prisma/client";
+import { UserType } from "@/types/User";
 
 export const getUserByUsername = async (username: string) => {
   const user = await prisma.users.findUnique({
@@ -253,3 +254,11 @@ export const deleteById = async (id: string) => {
 //     },
 //   });
 // };
+
+export const updateUser = async (id: string, data: Partial<Users>) => {
+  const updatedUser = await prisma.users.update({
+    where: { id },
+    data,
+  });
+  return updatedUser;
+};

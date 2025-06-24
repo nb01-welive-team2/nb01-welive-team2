@@ -5,6 +5,8 @@ import { generateTokens, verifyRefreshToken } from "@/lib/utils/token";
 import { LoginRequestDTO } from "@/structs/userStruct";
 import { JOIN_STATUS, USER_ROLE } from "@prisma/client";
 import UnauthError from "@/errors/UnauthError";
+import * as userRepository from "@/repositories/userRepository";
+import { hashPassword } from "@/lib/utils/hash";
 
 export const login = async (data: LoginRequestDTO) => {
   const { username, password } = data;
@@ -76,4 +78,26 @@ export const refreshToken = async (refreshToken?: string) => {
     accessToken,
     refreshToken: newRefreshToken,
   };
+};
+
+export const updatePassword = async (
+  id: string,
+  currentPassword: string,
+  newPassword: string
+) => {
+  const user = await userRepository.getUserId(id);
+  if (!user) {
+    throw new UnauthError();
+  }
+
+  const isPasswordValid = await bcrypt.compare(
+    currentPassword,
+    user.encryptedPassword
+  );
+  if (!isPasswordValid) {
+    throw new UnauthError();
+  }
+
+  const hashedPassword = await hashPassword(newPassword);
+  await userRepository.updateUser(id, { encryptedPassword: hashedPassword });
 };
