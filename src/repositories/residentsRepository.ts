@@ -64,8 +64,11 @@ async function deleteResident(id: string) {
 }
 
 // 입주민 명부 CSV 업로드 (관리자)
-async function uploadResident(input: UploadResidentsInput) {
-  return await prisma.residents.create({
+async function uploadResident(
+  tx: Prisma.TransactionClient,
+  input: UploadResidentsInput
+) {
+  return await tx.residents.create({
     data: {
       name: input.name,
       building: input.building,
