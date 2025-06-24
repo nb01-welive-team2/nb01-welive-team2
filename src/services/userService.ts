@@ -5,9 +5,13 @@ import {
   UpdateAdminDTO,
 } from "@/dto/userDTO";
 import BadRequestError from "@/errors/BadRequestError";
+import UnauthError from "@/errors/UnauthError";
 import { hashPassword } from "@/lib/utils/hash";
 import * as userRepository from "@/repositories/userRepository";
-import { USER_ROLE } from "@prisma/client";
+import { UpdateUserDTO } from "@/structs/userStruct";
+import { UserType } from "@/types/User";
+import { USER_ROLE, Users } from "@prisma/client";
+import bcrypt from "bcrypt";
 
 export const signupUser = async (data: SignupUserRequestDTO) => {
   const { username, password, contact, email } = data;
@@ -94,3 +98,37 @@ export const deleteAdmin = async (id: string): Promise<void> => {
 
 //   return result;
 // };
+
+export const updateUser = async (
+  id: string,
+  data: Partial<UpdateUserDTO>
+): Promise<Users> => {
+  const user = await userRepository.getUserId(id);
+  if (!user) {
+    throw new UnauthError();
+  }
+
+  const { currentPassword, newPassword, profileImage } = data;
+  const updateData: Partial<Users> = {};
+
+  if (currentPassword && newPassword) {
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.encryptedPassword
+    );
+
+    if (!isPasswordValid) {
+      throw new UnauthError();
+    }
+
+    const hashedPassword = await hashPassword(newPassword);
+    updateData.encryptedPassword = hashedPassword;
+  }
+
+  if (profileImage !== undefined) {
+    updateData.profileImage = profileImage;
+  }
+  const updatedUser = await userRepository.updateUser(id, updateData);
+
+  return updatedUser;
+};

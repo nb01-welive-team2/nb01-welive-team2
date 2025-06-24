@@ -8,8 +8,10 @@ import {
   signupSuperAdminStruct,
   signupUserStruct,
   updateAdminStruct,
+  UpdateUserBodyStruct,
 } from "@/structs/userStruct";
 import { AuthenticatedRequest } from "@/types/express";
+import userInfoRepository from "@/repositories/userInfoRepository";
 
 export const signupUser = async (
   req: Request,
@@ -88,3 +90,15 @@ export const deleteAdmin = async (
 
 //   res.status(200).json({ message: "Admins or Users deleted successfully" });
 // };
+
+export const updateUser = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const data = create(req.body, UpdateUserBodyStruct);
+  const request = req as AuthenticatedRequest;
+  const userId = request.user.userId;
+  await userService.updateUser(userId, data);
+
+  res.status(200).json();
+};
