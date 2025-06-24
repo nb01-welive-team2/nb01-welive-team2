@@ -7,6 +7,7 @@ import {
   UpdateResidentBodyStruct,
 } from "../structs/residentStruct";
 import { AuthenticatedRequest } from "@/types/express";
+import { fileExistsAsync } from "tsconfig-paths/lib/filesystem";
 
 // 입주민 명부 개별 등록
 export async function uploadResidentController(req: Request, res: Response) {
@@ -110,10 +111,29 @@ export async function downloadResidentsCsvController(
   const apartmentId = user.apartmentId;
   if (!apartmentId) throw new CommonError("아파트 정보가 없습니다.", 400);
 
-  const csv = await residentsService.generateResidentsCsv({ apartmentId });
+  const csv = await residentsService.getResidentsCsv({ apartmentId });
   const filename = "residents.csv";
 
   res.setHeader("Content-Type", "text/csv");
   res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+  res.status(200).send(csv);
+}
+
+// 입주민 명부 CSV 템플릿 다운로드
+export async function downloadResidentsCsvTemplateController(
+  req: Request,
+  res: Response
+) {
+  const user = (req as AuthenticatedRequest).user;
+  if (!user) throw new CommonError("인증되지 않은 사용자입니다.", 401);
+
+  const apartmentId = user.apartmentId;
+  if (!apartmentId) throw new CommonError("아파트 정보가 없습니다.", 400);
+  const csv = await residentsService.getResidentsCsvTemplate();
+  const filename = "resident-form.csv";
+
+  res.header("Content-Type", "text/csv; charset=utf-8");
+  res.header("Content-Disposition", `attachment; filename="${filename}"`);
+
   res.status(200).send(csv);
 }

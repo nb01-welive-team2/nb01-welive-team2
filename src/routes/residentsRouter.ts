@@ -7,12 +7,19 @@ import {
   uploadResidentController,
   uploadResidentsCsvController,
   downloadResidentsCsvController,
+  downloadResidentsCsvTemplateController,
 } from "../controllers/residentsContoller";
 import authenticate from "@/middlewares/authenticate";
 import upload from "@/middlewares/multer";
 import { withAsync } from "../lib/withAsync";
 
 const residentsRouter = Router();
+
+residentsRouter.get(
+  "/template",
+  authenticate({ optional: false }),
+  withAsync(downloadResidentsCsvTemplateController)
+);
 
 residentsRouter.get(
   "/download",
