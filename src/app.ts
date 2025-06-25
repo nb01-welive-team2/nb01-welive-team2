@@ -19,6 +19,7 @@ import {
 import residentsRouter from "./routes/residentsRouter";
 import authRouter from "./routes/authRoute";
 import userRouter from "./routes/userRoute";
+import apartmentsRouter from "./routes/apartmentInfoRoute";
 // import { renderHtmlWithUrl } from './lib/htmlRenderer';
 
 // const seedPath = path.resolve(__dirname, '../prisma/seed');
@@ -34,6 +35,7 @@ app.use(cookieParser());
 app.use("/api/auth", authRouter);
 app.use("/api/auth", userRouter);
 app.use("/api/residents", residentsRouter);
+app.use("/api/apartments", apartmentsRouter);
 
 // app.use('/users', usersRouter);
 
