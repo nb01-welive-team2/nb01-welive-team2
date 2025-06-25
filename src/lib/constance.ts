@@ -1,10 +1,13 @@
 import dotenv from "dotenv";
+import path from "path";
 
 dotenv.config();
 
 export const DATABASE_URL = process.env.DATABASE_URL;
 export const PORT = process.env.PORT || 3000;
 export const REDIRECT_PORT = process.env.REDIRECT_PORT || PORT;
+export const PUBLIC_PATH = path.resolve(process.cwd(), "public/uploads");
+export const STATIC_PATH = "/uploads";
 
 export const ACCESS_TOKEN_COOKIE_NAME = "access-token";
 export const REFRESH_TOKEN_COOKIE_NAME = "refresh-token";

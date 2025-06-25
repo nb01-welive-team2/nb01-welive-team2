@@ -21,6 +21,8 @@ import authRouter from "./routes/authRoute";
 import userRouter from "./routes/userRoute";
 import pollsRouter from "./routes/pollRouter";
 // import userRouter from "./routes/userRoute";
+import imagesRouter from "./routes/imageRouter";
+import { PUBLIC_PATH, STATIC_PATH } from "./lib/constance";
 // import { renderHtmlWithUrl } from './lib/htmlRenderer';
 
 // const seedPath = path.resolve(__dirname, '../prisma/seed');
@@ -31,6 +33,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
+app.use(STATIC_PATH, express.static(PUBLIC_PATH));
 
 app.use("/api/auth", authRouter);
 app.use("/api/users", userRouter);
@@ -44,7 +47,7 @@ app.use("/api/complaints", complaintsRouter);
 // app.use("/api/notices", noticesRouter);
 
 // app.use('/comments', commentsRouter);
-// app.use('/images', imagesRouter);
+app.use("/api/users", imagesRouter);
 // app.use('/notifications', notificationsRouter);
 
 app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
