@@ -162,7 +162,11 @@ export const editPoll = async (
 };
 
 // 투표 삭제
-export const removePoll = async (pollId: string, userId: string) => {
+export const removePoll = async (
+  pollId: string,
+  userId: string,
+  role: string
+) => {
   const poll = await pollRepo.findPollWithAuthor(pollId);
   if (!poll) throw new NotFoundError("Poll", "해당 투표를 찾을 수 없습니다.");
   if (poll.userId !== userId) {

@@ -115,6 +115,7 @@ export const getUserDongNumber = async (
 ): Promise<number | null> => {
   const userInfo = await prisma.userInfo.findFirst({
     where: { userId },
+    select: { apartmentDong: true },
   });
 
   return userInfo?.apartmentDong ?? null;
@@ -166,6 +167,7 @@ export const findPollWithAuthor = async (pollId: string) => {
 };
 
 export const deletePollById = async (pollId: string) => {
-  await prisma.pollOptions.deleteMany({ where: { pollId } });
-  await prisma.polls.delete({ where: { id: pollId } });
+  return await prisma.polls.delete({
+    where: { id: pollId },
+  });
 };
