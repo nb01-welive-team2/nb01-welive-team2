@@ -66,9 +66,10 @@ export const editPoll = async (req: Request, res: Response) => {
 // 투표 삭제
 export const removePoll = async (req: Request, res: Response) => {
   const userId = req.user?.id;
-  if (!userId) throw new UnauthError();
+  const role = req.user?.role;
+  if (!userId || !role) throw new UnauthError();
 
   validate({ pollId: req.params.pollId }, pollIdParamSchema);
-  await pollService.removePoll(req.params.pollId, userId);
+  await pollService.removePoll(req.params.pollId, userId, role);
   res.status(204).send();
 };

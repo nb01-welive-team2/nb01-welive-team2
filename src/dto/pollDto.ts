@@ -1,7 +1,6 @@
 import { $Enums } from "@prisma/client";
 
 export interface CreatePollRequestDto {
-  articleId: string;
   title: string;
   description?: string;
   status: $Enums.POLL_STATUS;

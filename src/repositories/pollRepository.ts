@@ -17,7 +17,6 @@ export const findPolls = async (where: any, skip: number, take: number) => {
 };
 
 export const createPollEntry = async (data: {
-  articleId: string;
   title: string;
   description?: string;
   startDate: Date;
@@ -66,23 +65,6 @@ export const findPollById = async (pollId: string) => {
   });
 };
 
-export const getApartmentIdByPollId = async (
-  pollId: string
-): Promise<string | null> => {
-  const poll = await prisma.polls.findUnique({
-    where: { id: pollId },
-    include: {
-      user: {
-        include: {
-          userInfo: true,
-        },
-      },
-    },
-  });
-
-  return poll?.user?.userInfo?.apartmentId ?? null;
-};
-
 export const isUserInApartment = async (
   userId: string,
   apartmentId: string
@@ -97,6 +79,19 @@ export const isUserInApartment = async (
   return !!userInfo;
 };
 
+export const getApartmentIdByPollId = async (
+  pollId: string
+): Promise<string | null> => {
+  const poll = await prisma.polls.findUnique({
+    where: { id: pollId },
+    select: {
+      apartmentId: true,
+    },
+  });
+
+  return poll?.apartmentId ?? null;
+};
+
 export const findPollByIdWithVotes = async (pollId: string) => {
   return await prisma.polls.findUnique({
     where: { id: pollId },
@@ -104,6 +99,11 @@ export const findPollByIdWithVotes = async (pollId: string) => {
       pollOptions: {
         include: {
           votes: true,
+        },
+      },
+      user: {
+        include: {
+          userInfo: true,
         },
       },
     },

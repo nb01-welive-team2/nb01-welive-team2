@@ -1,4 +1,12 @@
-import { object, string, array, number, optional, refine } from "superstruct";
+import {
+  object,
+  string,
+  array,
+  number,
+  optional,
+  refine,
+  size,
+} from "superstruct";
 
 const isDateString = (value: any) => !isNaN(Date.parse(value));
 
@@ -7,9 +15,10 @@ export const createPollSchema = object({
   description: optional(string()),
   startDate: refine(string(), "startDate", isDateString),
   endDate: refine(string(), "endDate", isDateString),
-  options: array(string()),
+  options: size(array(string()), 1, Infinity),
   buildingPermission: number(),
   status: optional(string()),
+  apartmentId: string(),
 }); // 생성 요청 유효성 검사
 
 export const pollIdParamSchema = object({

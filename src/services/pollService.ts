@@ -8,6 +8,8 @@ import * as pollRepo from "../repositories/pollRepository";
 import { getPagination } from "../utils/pagination";
 import NotFoundError from "../errors/NotFoundError";
 import ForbiddenError from "../errors/ForbiddenError";
+import { createPollSchema } from "../structs/pollStructs";
+import { assert } from "superstruct";
 
 const toISO = (d: Date) => d.toISOString();
 
@@ -28,8 +30,8 @@ export const createPoll = async (
   dto: CreatePollRequestDto,
   userId: string
 ): Promise<PollResponseDto> => {
+  assert(dto, createPollSchema);
   const poll = await pollRepo.createPollEntry({
-    articleId: dto.articleId,
     title: dto.title,
     description: dto.description,
     startDate: new Date(dto.startDate),
@@ -69,6 +71,7 @@ export const getPollList = async (
         mode: "insensitive",
       },
     }),
+    ...(userId && { userId }),
   };
 
   const isUserRole = role === "USER";
@@ -93,12 +96,11 @@ export const getPoll = async (
   const poll = await pollRepo.findPollByIdWithVotes(pollId);
   if (!poll) throw new NotFoundError("Poll", "투표를 찾을 수 없습니다.");
 
-  const apartmentId = await pollRepo.getApartmentIdByPollId(pollId);
+  const apartmentId = await pollRepo.findPollByIdWithVotes(pollId);
   const isEligible =
     apartmentId && userId
-      ? await pollRepo.isUserInApartment(userId, apartmentId)
+      ? await pollRepo.isUserInApartment(userId, poll.apartmentId)
       : false;
-
   const now = new Date();
   const showResult = now >= poll.endDate;
   const canVote = now >= poll.startDate && now < poll.endDate;
