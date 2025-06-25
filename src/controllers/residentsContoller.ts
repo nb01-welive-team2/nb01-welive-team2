@@ -7,7 +7,6 @@ import {
   UpdateResidentBodyStruct,
 } from "../structs/residentStruct";
 import { AuthenticatedRequest } from "@/types/express";
-import { fileExistsAsync } from "tsconfig-paths/lib/filesystem";
 
 // 입주민 명부 개별 등록
 export async function uploadResidentController(req: Request, res: Response) {
@@ -84,11 +83,9 @@ export async function uploadResidentsCsvController(
 
   const apartmentId = user.apartmentId;
   if (!apartmentId) throw new CommonError("아파트 정보가 없습니다.", 400);
-
   if (!req.file) throw new CommonError("CSV 파일이 없습니다.", 400);
 
   const csvText = req.file.buffer.toString("utf-8");
-
   const createdResidents = await residentsService.uploadResidentsFromCsv(
     csvText,
     apartmentId
@@ -134,6 +131,5 @@ export async function downloadResidentsCsvTemplateController(
 
   res.header("Content-Type", "text/csv; charset=utf-8");
   res.header("Content-Disposition", `attachment; filename="${filename}"`);
-
   res.status(200).send(csv);
 }

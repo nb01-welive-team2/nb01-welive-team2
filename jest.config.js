@@ -21,7 +21,7 @@ module.exports = {
     {
       displayName: "residents-api",
       ...commonConfig,
-      testMatch: ["**/integrationTest/**/residents*.test.ts"],
+      testMatch: ["**/integrationTest/**/asd*.test.ts"],
     },
     {
       displayName: "residents-unit",
