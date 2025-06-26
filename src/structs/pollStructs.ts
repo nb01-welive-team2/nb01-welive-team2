@@ -20,6 +20,7 @@ export const createPollSchema = object({
   buildingPermission: number(),
   status: optional(string()),
   boardId: optional(any()),
+  apartmentId: optional(string()),
 }); // 생성 요청 유효성 검사
 
 export const pollIdParamSchema = object({
