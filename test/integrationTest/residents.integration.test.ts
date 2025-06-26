@@ -4,84 +4,33 @@ import app from "../../src/app";
 import path from "path";
 const seedPath = path.resolve(__dirname, "../../prisma/seed");
 const { seedDatabase } = require(seedPath);
+const mockPath = path.resolve(__dirname, "../../prisma/mock");
+const { mockUsers, mockComplaints } = require(mockPath);
 
-// beforeEach(async () => {
-//   await seedDatabase();
-// });
+beforeEach(async () => {
+  await seedDatabase();
+});
 
 describe("입주민 API 통합 테스트", () => {
-  let residentId: any;
-  let apartmentId: any;
-  let agent: any;
+  const adminAgent = request.agent(app);
+  const superAdminAgent = request.agent(app);
+  const userAgent = request.agent(app);
 
-  beforeEach(async () => {
-    agent = request.agent(app);
-    await prisma.residents.deleteMany();
-    await prisma.apartmentInfo.deleteMany();
-    await prisma.users.deleteMany();
-
-    const testUser = await prisma.users.create({
-      data: {
-        username: "adminUser",
-        encryptedPassword:
-          "$2a$10$pJffFvTAHtCQzjOh4YRKF.qwIqSCCcPLLawMhjJSwaHWxtUytjqwa", // bobpassword
-        contact: "010-1234-5678",
-        name: "관리자",
-        email: "admin@example.com",
-        role: "ADMIN",
-        joinStatus: "APPROVED",
-      },
+  beforeAll(async () => {
+    await userAgent.post("/api/auth/login").send({
+      username: mockUsers[0].username,
+      password: "alicepassword",
     });
 
-    const testApartment = await prisma.apartmentInfo.create({
-      data: {
-        userId: testUser.id,
-        approvalStatus: "APPROVED",
-        apartmentName: "테스트아파트",
-        apartmentAddress: "서울시 테스트구 테스트동",
-        apartmentManagementNumber: "MGMT-1234",
-        description: "테스트용 아파트입니다.",
-        startComplexNumber: 1,
-        endComplexNumber: 3,
-        startDongNumber: 101,
-        endDongNumber: 105,
-        startFloorNumber: 1,
-        endFloorNumber: 15,
-        startHoNumber: 101,
-        endHoNumber: 1204,
-      },
+    await adminAgent.post("/api/auth/login").send({
+      username: mockUsers[1].username,
+      password: "bobpassword",
     });
 
-    apartmentId = testApartment.id;
-
-    const testResident = await prisma.residents.create({
-      data: {
-        apartmentId: apartmentId,
-        building: 102,
-        unitNumber: 1104,
-        contact: "010-1234-5678",
-        name: "김입주",
-        email: "resident@example.com",
-        residenceStatus: "RESIDENCE",
-        isHouseholder: "HOUSEHOLDER",
-        isRegistered: true,
-        approvalStatus: "APPROVED",
-      },
+    await superAdminAgent.post("/api/auth/login").send({
+      username: mockUsers[2].username,
+      password: "superpassword",
     });
-
-    residentId = testResident.id;
-
-    await agent
-      .post("/api/auth/login")
-      .send({ username: "adminUser", password: "bobpassword" })
-      .expect(200);
-  });
-
-  afterAll(async () => {
-    await prisma.residents.deleteMany();
-    await prisma.apartmentInfo.deleteMany();
-    await prisma.users.deleteMany();
-    await prisma.$disconnect();
   });
 
   describe("POST /api/residents/register", () => {
@@ -94,7 +43,7 @@ describe("입주민 API 통합 테스트", () => {
         name: "테스트유저",
         isHouseholder: "HOUSEHOLDER",
       };
-      const response = await agent
+      const response = await adminAgent
         .post("/api/residents/register")
         .send(newResident);
 
@@ -106,7 +55,6 @@ describe("입주민 API 통합 테스트", () => {
         email: "testuser@example.com",
         name: "테스트유저",
         isHouseholder: "HOUSEHOLDER",
-        apartmentId,
         residenceStatus: "RESIDENCE",
         isRegistered: false,
         approvalStatus: "PENDING",
@@ -116,7 +64,7 @@ describe("입주민 API 통합 테스트", () => {
 
   describe("GET /api/residents", () => {
     test("입주민 목록 조회", async () => {
-      const response = await agent.get("/api/residents");
+      const response = await adminAgent.get("/api/residents");
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
       expect(response.body.length).toBeGreaterThan(0);
@@ -125,10 +73,12 @@ describe("입주민 API 통합 테스트", () => {
 
   describe("GET /residents/${residentId}", () => {
     test("입주민 상세 조회", async () => {
-      const response = await agent.get(`/api/residents/${residentId}`);
+      const response = await adminAgent.get(
+        "/api/residents/69f298ce-5775-4206-b377-d083313e4946"
+      );
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject({
-        id: residentId,
+        id: "69f298ce-5775-4206-b377-d083313e4946",
       });
     });
   });
@@ -138,28 +88,21 @@ describe("입주민 API 통합 테스트", () => {
       const updateData = {
         name: "코드잇",
       };
-      const response = await agent
-        .patch(`/api/residents/${residentId}`)
+      const response = await adminAgent
+        .patch(`/api/residents/69f298ce-5775-4206-b377-d083313e4946`)
         .send(updateData);
 
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject({
         ...updateData,
-        id: residentId,
+        id: "69f298ce-5775-4206-b377-d083313e4946",
       });
-    });
-  });
-
-  describe("DELETE /api/residents/:id", () => {
-    test("입주민 삭제", async () => {
-      const response = await agent.delete(`/api/residents/${residentId}`);
-      expect(response.status).toBe(200);
     });
   });
 
   describe("GET /api/residents/download", () => {
     test("입주민 명부 다운로드", async () => {
-      const res = await agent
+      const res = await adminAgent
         .get("/api/residents/download")
         .expect("Content-Type", "text/csv; charset=utf-8")
         .expect("Content-Disposition", /attachment; filename=.*\.csv/)
@@ -173,7 +116,7 @@ describe("입주민 API 통합 테스트", () => {
 
   describe("GET /api/residents/template", () => {
     test("입주민 명부 양식 다운로드", async () => {
-      const res = await agent
+      const res = await adminAgent
         .get("/api/residents/template")
         .expect(200)
         .expect("Content-Type", "text/csv; charset=utf-8");
@@ -188,7 +131,7 @@ describe("입주민 API 통합 테스트", () => {
     test("입주민 명부 파일 업로드", async () => {
       const filePath = path.join(__dirname, "fixtures", "test-residents.csv");
 
-      const res = await agent
+      const res = await adminAgent
         .post("/api/residents/upload")
         .attach("file", filePath)
         .expect(201);
@@ -196,14 +139,31 @@ describe("입주민 API 통합 테스트", () => {
       expect(Array.isArray(res.body.data)).toBe(true);
       expect(res.body.data.length).toBeGreaterThan(0);
     });
-  });
-  test("잘못된 CSV 형식 업로드 시 400 응답", async () => {
-    const filePath = path.join(__dirname, "fixtures", "error-residents.csv");
-    const res = await agent
-      .post("/api/residents/upload")
-      .attach("file", filePath)
-      .expect(400);
 
-    expect(res.body.message).toContain("형식 오류");
+    test("잘못된 CSV 형식 업로드 시 400 응답", async () => {
+      const filePath = path.join(__dirname, "fixtures", "error-residents.csv");
+      const res = await adminAgent
+        .post("/api/residents/upload")
+        .attach("file", filePath)
+        .expect(400);
+
+      expect(res.body.message).toContain("형식 오류");
+    });
+  });
+
+  describe("DELETE /api/residents/:id", () => {
+    test("입주민 삭제", async () => {
+      const response = await adminAgent.delete(
+        "/api/residents/69f298ce-5775-4206-b377-d083313e4946"
+      );
+      expect(response.status).toBe(200);
+    });
+
+    test("관리자와 입주민의 apartmentId가 다르면 403", async () => {
+      const response = await adminAgent.delete(
+        "/api/residents/a2381297a-5775-4206-b377-d083313e4941"
+      );
+      expect(response.status).toBe(403);
+    });
   });
 });
