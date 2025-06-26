@@ -70,6 +70,19 @@ describe("apartments 통합 테스트", () => {
         })
       );
     });
+
+    test("비로그인 유저 - 아파트 목록 조회", async () => {
+      const res = await request(app).get("/api/apartments");
+      expect(res.status).toBe(200);
+
+      const apt = res.body.apartments[0];
+      expect(apt).toHaveProperty("id");
+      expect(apt).toHaveProperty("name");
+
+      expect(apt).not.toHaveProperty("officeNumber");
+      expect(apt).not.toHaveProperty("description");
+      expect(apt).not.toHaveProperty("dongRange");
+    });
   });
 
   describe("GET /api/apartments/:id", () => {
