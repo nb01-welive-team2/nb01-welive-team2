@@ -45,7 +45,6 @@ describe("PollController Logined", () => {
       const validBody = {
         boardId:
           "게시판의 고유 ID (민원, 투표, 공지 중 하나 - boardId, UUID 형식)",
-        userId: "0f9e7654-dfbb-46df-b93c-cc491ff9f5bd",
         status: "PENDING",
         title: "제 3기 동대표 선출",
         content: "동대표를 선출합니다. 투표에 참여해주세요",
@@ -103,7 +102,7 @@ describe("PollController Logined", () => {
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty("status", mockPolls[0].status);
-      expect(response.body).toHaveProperty("title", mockArticles[1].title);
+      expect(response.body).toHaveProperty("title", mockPolls[0].title);
     });
 
     it("should return 401 if user is not authenticated", async () => {

@@ -1,0 +1,51 @@
+import { $Enums } from "@prisma/client";
+
+export interface CreatePollRequestDto {
+  title: string;
+  content: string;
+  status: $Enums.POLL_STATUS;
+  startDate: string;
+  endDate: string;
+  options: { title: string }[];
+  buildingPermission: number;
+  apartmentId: string;
+} // 투표 생성 시 보내는 데이터
+
+export interface PollResponseDto {
+  id: string;
+  title: string;
+  author: string;
+  content: string;
+  status: string;
+  buildingPermission: number;
+  startDate: string;
+  endDate: string;
+  options: { title: string }[];
+} // 생성된 투표의 응답 데이터
+
+export interface PollOptionResultDto {
+  content: string;
+  voteCount?: number;
+}
+
+export interface PollDetailResponseDto {
+  id: string;
+  title: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  options: PollOptionResultDto[];
+  canVote: boolean;
+  showResult: boolean;
+  isEligible: boolean;
+  status: string;
+}
+
+export interface GetPollListParams {
+  page: number;
+  limit: number;
+  keyword?: string;
+  status?: string;
+  userId?: string; // 권한 필터링(userInfo, residents 조인 필요)
+  role?: string;
+}

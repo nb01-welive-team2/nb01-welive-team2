@@ -83,3 +83,9 @@ jobs:
 
       - name: Run complaint integration tests
         run: npm run test-complaint-int
+
+      - name: Run poll unit tests
+        run: npm run test-poll-unit
+
+      - name: Run poll integration tests
+        run: npm run test-poll-int
