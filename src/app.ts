@@ -19,6 +19,7 @@ import {
 } from "./controllers/errorController";
 import authRouter from "./routes/authRoute";
 import userRouter from "./routes/userRoute";
+import pollsRouter from "./routes/pollRouter";
 // import { renderHtmlWithUrl } from './lib/htmlRenderer';
 
 // const seedPath = path.resolve(__dirname, '../prisma/seed');
@@ -35,7 +36,7 @@ app.use("/api/auth", userRouter);
 
 // app.use('/users', usersRouter);
 
-// app.use("/api/polls", pollsRouter);
+app.use("/api/polls", pollsRouter);
 app.use("/api/notices", noticesRouter);
 // app.use("/api/polls", pollsRouter);
 app.use("/api/complaints", complaintsRouter);
