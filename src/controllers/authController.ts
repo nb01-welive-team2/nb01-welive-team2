@@ -13,12 +13,12 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   const data = create(req.body, loginBodyStruct);
   const { accessToken, refreshToken } = await authService.login(data);
   setTokenCookies(res, accessToken, refreshToken);
-  res.status(200).json();
+  res.status(200).json({ message: "로그인이 완료되었습니다" });
 };
 
 export const logout = async (req: Request, res: Response): Promise<void> => {
   clearTokenCookies(res);
-  res.status(200).json();
+  res.status(200).json({ message: "로그아웃이 완료되었습니다" });
 };
 
 export const refreshToken = async (
@@ -31,7 +31,7 @@ export const refreshToken = async (
     await authService.refreshToken(getRefreshToken);
   setTokenCookies(res, accessToken, newRefreshToken);
 
-  res.status(200).json();
+  res.status(200).json({ message: "토큰 갱신이 완료되었습니다" });
 };
 
 export const updatePassword = async (
@@ -46,5 +46,5 @@ export const updatePassword = async (
   const userId = request.user.userId;
   await authService.updatePassword(userId, currentPassword, newPassword);
 
-  res.status(200).json();
+  res.status(200).json({ message: "비밀번호 변경 완료" });
 };

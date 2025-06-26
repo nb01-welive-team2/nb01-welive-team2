@@ -75,7 +75,9 @@ export const deleteAdmin = async (
   const { id: userId } = req.params;
   await userService.deleteAdmin(userId);
 
-  res.status(200).json();
+  res
+    .status(200)
+    .json({ message: "관리자 정보(아파트 정보 포함) 삭제가 완료되었습니다" });
 };
 
 export const updateUser = async (
@@ -87,7 +89,7 @@ export const updateUser = async (
   const userId = request.user.userId;
   await userService.updateUser(userId, data);
 
-  res.status(200).json();
+  res.status(200).json({ message: "유저 정보 수정 성공" });
 };
 
 export const deleteRejectedUsers = async (
@@ -99,7 +101,9 @@ export const deleteRejectedUsers = async (
 
   await userService.deleteRejectedUsersByRole(role);
 
-  res.status(200).json();
+  res
+    .status(200)
+    .json({ message: "관리자 정보(아파트 정보 포함) 삭제가 완료되었습니다" });
 };
 
 export const approveAdmin = async (
@@ -112,7 +116,7 @@ export const approveAdmin = async (
   const { id: bodyId } = req.body;
 
   await userService.approveAdmin(bodyId, loginId);
-  res.status(200).json();
+  res.status(200).json({ message: "관리자 가입 승인이 완료되었습니다" });
 };
 
 export const rejectAdmin = async (
@@ -125,7 +129,7 @@ export const rejectAdmin = async (
   const { id: bodyId } = req.body;
 
   await userService.rejectAdmin(bodyId, loginId);
-  res.status(200).json();
+  res.status(200).json({ message: "관리자 가입 거절이 완료되었습니다" });
 };
 
 export const approveAllAdmins = async (
@@ -136,7 +140,7 @@ export const approveAllAdmins = async (
   const id = request.user.userId;
 
   await userService.approveAllAdmins(id);
-  res.status(200).json();
+  res.status(200).json({ message: "관리자 가입 전체 승인이 완료되었습니다" });
 };
 
 export const rejectAllAdmins = async (
@@ -147,7 +151,7 @@ export const rejectAllAdmins = async (
   const id = request.user.userId;
 
   await userService.rejectAllAdmins(id);
-  res.status(200).json();
+  res.status(200).json({ message: "관리자 가입 전체 거절이 완료되었습니다" });
 };
 
 export const approveUser = async (
@@ -160,7 +164,7 @@ export const approveUser = async (
   const { id: bodyId } = req.params;
 
   await userService.approveUser(bodyId, loginId);
-  res.status(200).json();
+  res.status(200).json({ message: "사용자 가입 요청 승인 성공" });
 };
 
 export const rejectUser = async (
@@ -173,7 +177,7 @@ export const rejectUser = async (
   const { id: bodyId } = req.params;
 
   await userService.rejectUser(bodyId, loginId);
-  res.status(200).json();
+  res.status(200).json({ message: "사용자 가입 요청 거절 성공" });
 };
 
 export const approveAllUsers = async (
@@ -184,7 +188,7 @@ export const approveAllUsers = async (
   const id = request.user.userId;
 
   await userService.approveAllUsers(id);
-  res.status(200).json();
+  res.status(200).json({ message: "사용자 가입 요청 전체 승인 성공" });
 };
 
 export const rejectAllUsers = async (
@@ -195,5 +199,5 @@ export const rejectAllUsers = async (
   const id = request.user.userId;
 
   await userService.rejectAllUsers(id);
-  res.status(200).json();
+  res.status(200).json({ message: "사용자 가입 요청 전체 거절 성공" });
 };
