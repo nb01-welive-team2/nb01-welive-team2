@@ -30,9 +30,6 @@ export const createPoll = async (req: Request, res: Response) => {
 // 투표 전체 조회
 export const getPollList = async (req: Request, res: Response) => {
   const reqWithPayload = req as AuthenticatedRequest;
-  if (reqWithPayload.user.role === USER_ROLE.SUPER_ADMIN) {
-    throw new ForbiddenError();
-  }
   const { page, limit } = getPagination({
     page: req.query.page as string,
     limit: req.query.limit as string,
@@ -43,16 +40,16 @@ export const getPollList = async (req: Request, res: Response) => {
   const userId = reqWithPayload.user.userId;
   const role = reqWithPayload.user.role;
 
-  res.status(200).json(
-    await pollService.getPollList({
-      page,
-      limit,
-      keyword,
-      status,
-      userId,
-      role,
-    })
-  );
+  const polls = await pollService.getPollList({
+    page,
+    limit,
+    keyword,
+    status,
+    userId,
+    role,
+  });
+
+  res.status(200).json({ polls });
 };
 
 // 투표 상세 조회

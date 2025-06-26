@@ -134,6 +134,7 @@ export const updatePoll = async (
   pollId: string,
   data: {
     title: string;
+    content: string;
     startDate: Date;
     endDate: Date;
     buildingPermission: number;
@@ -144,6 +145,7 @@ export const updatePoll = async (
     where: { id: pollId },
     data: {
       title: data.title,
+      content: data.content,
       startDate: data.startDate,
       endDate: data.endDate,
       buildingPermission: data.buildingPermission,

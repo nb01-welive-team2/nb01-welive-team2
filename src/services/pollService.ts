@@ -17,9 +17,9 @@ const mapToPollResponse = (poll: any): PollResponseDto => ({
   id: poll.id,
   title: poll.title,
   author: poll.user.name,
+  content: poll.content,
   status: poll.status,
   buildingPermission: poll.buildingPermission,
-  description: poll.content,
   startDate: toISO(poll.startDate),
   endDate: toISO(poll.endDate),
   options: poll.pollOptions.map((opt: any) => opt.content),
@@ -108,6 +108,7 @@ export const getPoll = async (
     canVote,
     showResult,
     isEligible,
+    status: poll.status,
   };
 };
 
@@ -119,6 +120,7 @@ export const editPoll = async (
   role: string
 ): Promise<PollResponseDto> => {
   const poll = await pollRepo.findPollForEdit(pollId);
+
   if (!poll) throw new NotFoundError("Poll", "투표를 찾을 수 없습니다.");
   if (poll.userId !== userId && role !== "ADMIN") {
     throw new ForbiddenError();
@@ -129,6 +131,7 @@ export const editPoll = async (
 
   const updated = await pollRepo.updatePoll(pollId, {
     title: dto.title,
+    content: dto.content,
     startDate: new Date(dto.startDate),
     endDate: new Date(dto.endDate),
     buildingPermission: dto.buildingPermission,
@@ -141,7 +144,7 @@ export const editPoll = async (
     id: updated.id,
     title: updated.title,
     author: updated.user?.name ?? "",
-    description: updated.content,
+    content: updated.content,
     startDate: toISO(updated.startDate),
     endDate: toISO(updated.endDate),
     options: dto.options,

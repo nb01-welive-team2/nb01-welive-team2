@@ -15,9 +15,9 @@ export interface PollResponseDto {
   id: string;
   title: string;
   author: string;
+  content: string;
   status: string;
   buildingPermission: number;
-  description: string;
   startDate: string;
   endDate: string;
   options: { title: string }[];
@@ -38,6 +38,7 @@ export interface PollDetailResponseDto {
   canVote: boolean;
   showResult: boolean;
   isEligible: boolean;
+  status: string;
 }
 
 export interface GetPollListParams {
