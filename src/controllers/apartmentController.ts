@@ -15,3 +15,12 @@ export async function getApartmentsListController(req: Request, res: Response) {
 
   res.status(200).json({ apartments });
 }
+
+export async function getApartmentDetailController(
+  req: Request,
+  res: Response
+) {
+  const id = req.params.id;
+  const apartment = await apartmentInfoService.getApartmentDetail(id);
+  res.status(200).json({ apartment });
+}

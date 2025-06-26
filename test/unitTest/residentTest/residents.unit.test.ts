@@ -1,13 +1,13 @@
-import { prisma } from "../../src/lib/prisma";
-import residentsService from "../../src/services/residentsService";
-import residentsRepository from "../../src/repositories/residentsRepository";
+import { prisma } from "../../../src/lib/prisma";
+import residentsService from "../../../src/services/residentsService";
+import residentsRepository from "../../../src/repositories/residentsRepository";
 import {
   APPROVAL_STATUS,
   HOUSEHOLDER_STATUS,
   RESIDENCE_STATUS,
 } from "@prisma/client";
 
-jest.mock("../../src/repositories/residentsRepository");
+jest.mock("../../../src/repositories/residentsRepository");
 
 describe("Residents Service", () => {
   const mockResidents = {
