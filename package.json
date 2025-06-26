@@ -12,7 +12,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "test-poll-unit": "jest --selectProjects poll-unit --runInBand --detectOpenHandles",
-    "test-poll-api": "jest --selectProjects poll-api --runInBand --detectOpenHandles",
+    "test-poll-int": "jest --selectProjects poll-integration --runInBand --detectOpenHandles",
     "test-notice-unit": "jest --selectProjects notice-unit --runInBand --detectOpenHandles --coverage",
     "test-complaint-unit": "jest --selectProjects complaint-unit --runInBand --detectOpenHandles --coverage",
     "test-complaint-int": "jest --selectProjects complaint-integration --runInBand --detectOpenHandles --coverage",

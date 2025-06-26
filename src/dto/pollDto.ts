@@ -2,11 +2,11 @@ import { $Enums } from "@prisma/client";
 
 export interface CreatePollRequestDto {
   title: string;
-  description?: string;
+  content: string;
   status: $Enums.POLL_STATUS;
   startDate: string;
   endDate: string;
-  options: string[];
+  options: { title: string }[];
   buildingPermission: number;
   apartmentId: string;
 } // 투표 생성 시 보내는 데이터
@@ -20,7 +20,7 @@ export interface PollResponseDto {
   description: string;
   startDate: string;
   endDate: string;
-  options: string[];
+  options: { title: string }[];
 } // 생성된 투표의 응답 데이터
 
 export interface PollOptionResultDto {

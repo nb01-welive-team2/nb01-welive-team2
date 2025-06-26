@@ -16,7 +16,7 @@ module.exports = {
     {
       displayName: "poll-integration",
       ...commonConfig,
-      testMatch: ["**/integration/**/poll*.test.ts"],
+      testMatch: ["**/integrationTest/**/poll*.test.ts"],
     },
     {
       displayName: "notice-unit",

@@ -34,7 +34,7 @@ describe("pollController.createPoll", () => {
   it("관리자일 경우 정상 생성", async () => {
     const req: any = {
       body: validBody,
-      user: { id: "admin-id", role: "ADMIN" },
+      user: { userId: "admin-id", role: "ADMIN" },
     };
     const res = mockRes();
 
@@ -62,7 +62,7 @@ describe("pollController.createPoll", () => {
   it("일반 사용자 접근 시 AccessDeniedError", async () => {
     const req: any = {
       body: validBody,
-      user: { id: "user-id", role: "USER" },
+      user: { userId: "user-id", role: "USER" },
     };
     const res = mockRes();
 
@@ -82,7 +82,7 @@ describe("pollController.getPollList", () => {
   it("기본 조회 요청 처리", async () => {
     const req: any = {
       query: {},
-      user: { id: "user-id" },
+      user: { userId: "user-id" },
     };
     const res = mockRes();
 
@@ -105,7 +105,7 @@ describe("pollController.getPollList", () => {
   it("쿼리 파라미터 존재할 때 처리", async () => {
     const req: any = {
       query: { page: "2", limit: "5", keyword: "주민", status: "IN_PROGRESS" },
-      user: { id: "admin-id" },
+      user: { userId: "admin-id" },
     };
     const res = mockRes();
 
@@ -135,7 +135,7 @@ describe("pollController.getPoll", () => {
   it("투표 상세 데이터 반환 성공", async () => {
     const req: any = {
       params: { pollId: "poll-123" },
-      user: { id: "user-abc" },
+      user: { userId: "user-abc" },
     };
     const res = mockRes();
 
@@ -181,7 +181,7 @@ describe("pollController.editPoll", () => {
     const req: any = {
       params: { pollId: "poll-123" },
       body: mockBody,
-      user: { id: "admin-id", role: "ADMIN" },
+      user: { userId: "admin-id", role: "ADMIN" },
     };
     const res = mockRes();
 
@@ -228,7 +228,7 @@ describe("pollController.removePoll", () => {
   it("유효한 요청일 경우 삭제 성공", async () => {
     const req: any = {
       params: { pollId: "poll-789" },
-      user: { id: "user-id", role: "USER" },
+      user: { userId: "user-id", role: "USER" },
     };
     const res = mockRes();
 

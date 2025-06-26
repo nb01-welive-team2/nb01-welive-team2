@@ -28,32 +28,21 @@ const mapToPollResponse = (poll: any): PollResponseDto => ({
 // 투표 등록
 export const createPoll = async (
   dto: CreatePollRequestDto,
-  userId: string
-): Promise<PollResponseDto> => {
+  userId: string,
+  apartmentId: string
+): Promise<void> => {
   assert(dto, createPollSchema);
   const poll = await pollRepo.createPollEntry({
     title: dto.title,
-    description: dto.description,
+    content: dto.content || "",
     startDate: new Date(dto.startDate),
     endDate: new Date(dto.endDate),
     buildingPermission: dto.buildingPermission,
     userId,
-    apartmentId: dto.apartmentId,
+    apartmentId: apartmentId,
   });
 
   await pollRepo.createPollOptions(poll.id, dto.options);
-
-  return {
-    id: poll.id,
-    title: poll.title,
-    author: poll.user.name,
-    description: poll.content,
-    startDate: toISO(poll.startDate),
-    endDate: toISO(poll.endDate),
-    options: dto.options,
-    status: poll.status,
-    buildingPermission: poll.buildingPermission,
-  };
 };
 
 // 투표 전체 조회

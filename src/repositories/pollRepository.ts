@@ -18,7 +18,7 @@ export const findPolls = async (where: any, skip: number, take: number) => {
 
 export const createPollEntry = async (data: {
   title: string;
-  description?: string;
+  content: string;
   startDate: Date;
   endDate: Date;
   buildingPermission: number;
@@ -28,13 +28,13 @@ export const createPollEntry = async (data: {
   return await prisma.polls.create({
     data: {
       title: data.title,
-      content: data.description || "",
+      content: data.content || "",
       startDate: data.startDate,
       endDate: data.endDate,
       buildingPermission: data.buildingPermission,
       status: $Enums.POLL_STATUS.IN_PROGRESS,
-      userId: data.userId,
-      apartmentId: data.apartmentId,
+      user: { connect: { id: data.userId } },
+      ApartmentInfo: { connect: { id: data.apartmentId } },
     },
     include: {
       user: true,
@@ -42,13 +42,16 @@ export const createPollEntry = async (data: {
   });
 };
 
-export const createPollOptions = async (pollId: string, options: string[]) => {
+export const createPollOptions = async (
+  pollId: string,
+  options: { title: string }[]
+) => {
   await Promise.all(
     options.map((option) =>
       prisma.pollOptions.create({
         data: {
-          pollId,
-          title: option,
+          poll: { connect: { id: pollId } },
+          title: option.title,
         },
       })
     )
@@ -152,7 +155,10 @@ export const updatePoll = async (
   });
 };
 
-export const replacePollOptions = async (pollId: string, options: string[]) => {
+export const replacePollOptions = async (
+  pollId: string,
+  options: { title: string }[]
+) => {
   await prisma.pollOptions.deleteMany({ where: { pollId } });
   await createPollOptions(pollId, options);
 };

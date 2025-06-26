@@ -5,21 +5,34 @@ import UnauthError from "../errors/UnauthError";
 import ForbiddenError from "../errors/ForbiddenError";
 import { createPollSchema, pollIdParamSchema } from "../structs/pollStructs";
 import { validate } from "superstruct";
+import { USER_ROLE } from "@prisma/client";
+import { AuthenticatedRequest } from "@/types/express";
+import registerSuccessMessage from "@/lib/responseJson/registerSuccess";
 
 // 투표 등록
 export const createPoll = async (req: Request, res: Response) => {
-  const userId = req.user?.id;
-  const role = req.user?.role;
+  const reqWithPayload = req as AuthenticatedRequest;
+  const userId = reqWithPayload.user.userId;
+  const role = reqWithPayload.user.role;
 
   if (!userId || !role) throw new UnauthError();
-  if (role !== "ADMIN") throw new ForbiddenError();
+  if (role !== USER_ROLE.ADMIN) throw new ForbiddenError();
 
   validate(req.body, createPollSchema);
-  res.status(201).json(await pollService.createPoll(req.body, userId));
+  await pollService.createPoll(
+    req.body,
+    userId,
+    reqWithPayload.user.apartmentId
+  );
+  res.status(201).send(new registerSuccessMessage());
 };
 
 // 투표 전체 조회
 export const getPollList = async (req: Request, res: Response) => {
+  const reqWithPayload = req as AuthenticatedRequest;
+  if (reqWithPayload.user.role === USER_ROLE.SUPER_ADMIN) {
+    throw new ForbiddenError();
+  }
   const { page, limit } = getPagination({
     page: req.query.page as string,
     limit: req.query.limit as string,
@@ -27,8 +40,8 @@ export const getPollList = async (req: Request, res: Response) => {
 
   const keyword = req.query.keyword as string;
   const status = req.query.status as string;
-  const userId = req.user?.id;
-  const role = req.user?.role;
+  const userId = reqWithPayload.user.userId;
+  const role = reqWithPayload.user.role;
 
   res.status(200).json(
     await pollService.getPollList({
@@ -44,15 +57,17 @@ export const getPollList = async (req: Request, res: Response) => {
 
 // 투표 상세 조회
 export const getPoll = async (req: Request, res: Response) => {
+  const reqWithPayload = req as AuthenticatedRequest;
   const pollId = req.params.pollId;
-  const userId = req.user?.id;
+  const userId = reqWithPayload.user.userId;
   res.status(200).json(await pollService.getPoll(pollId, userId));
 };
 
 // 투표 수정
 export const editPoll = async (req: Request, res: Response) => {
-  const userId = req.user?.id;
-  const role = req.user?.role;
+  const reqWithPayload = req as AuthenticatedRequest;
+  const userId = reqWithPayload.user.userId;
+  const role = reqWithPayload.user.role;
   if (!userId || !role) throw new UnauthError();
 
   validate(req.body, createPollSchema);
@@ -65,8 +80,9 @@ export const editPoll = async (req: Request, res: Response) => {
 
 // 투표 삭제
 export const removePoll = async (req: Request, res: Response) => {
-  const userId = req.user?.id;
-  const role = req.user?.role;
+  const reqWithPayload = req as AuthenticatedRequest;
+  const userId = reqWithPayload.user.userId;
+  const role = reqWithPayload.user.role;
   if (!userId || !role) throw new UnauthError();
 
   validate({ pollId: req.params.pollId }, pollIdParamSchema);
