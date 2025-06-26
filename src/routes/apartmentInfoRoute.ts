@@ -7,7 +7,7 @@ const apartmentsRouter = Router();
 
 apartmentsRouter.get(
   "/",
-  authenticate({ optional: true }),
+  authenticate({ optional: false }),
   withAsync(getApartmentsListController)
 );
 

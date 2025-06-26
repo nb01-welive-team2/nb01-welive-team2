@@ -5,9 +5,9 @@ import path from "path";
 const seedPath = path.resolve(__dirname, "../../prisma/seed");
 const { seedDatabase } = require(seedPath);
 
-beforeEach(async () => {
-  await seedDatabase();
-});
+// beforeEach(async () => {
+//   await seedDatabase();
+// });
 
 describe("입주민 API 통합 테스트", () => {
   let residentId: any;
