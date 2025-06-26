@@ -13,7 +13,7 @@ export async function getApartmentsListController(req: Request, res: Response) {
     isAuthenticated
   );
 
-  res.status(200).json({ apartments });
+  res.status(200).json(apartments);
 }
 
 export async function getApartmentDetailController(
@@ -22,5 +22,5 @@ export async function getApartmentDetailController(
 ) {
   const id = req.params.id;
   const apartment = await apartmentInfoService.getApartmentDetail(id);
-  res.status(200).json({ apartment });
+  res.status(200).json(apartment);
 }

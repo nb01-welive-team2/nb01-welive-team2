@@ -51,7 +51,7 @@ module.exports = {
     {
       displayName: "apartmentInfo-api",
       ...commonConfig,
-      testMatch: ["**/apartmentInfoTest/apartmentInfo*.test.ts"],
+      testMatch: ["**/integrationTest/apartmentInfo*.test.ts"],
     },
     {
       displayName: "apartmentInfo-unit",
