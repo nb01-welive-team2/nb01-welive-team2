@@ -264,3 +264,51 @@ export const updateJoinStatustoReject = async (id: string) => {
     },
   });
 };
+
+export const updateJoinStatustoApprovedAllAdmins = async () => {
+  return await prisma.users.updateMany({
+    where: {
+      role: USER_ROLE.ADMIN,
+      joinStatus: { not: JOIN_STATUS.APPROVED },
+    },
+    data: {
+      joinStatus: JOIN_STATUS.APPROVED,
+    },
+  });
+};
+
+export const updateJoinStatustoRejectAllAdmins = async () => {
+  return await prisma.users.updateMany({
+    where: {
+      role: USER_ROLE.ADMIN,
+      joinStatus: { not: JOIN_STATUS.REJECTED },
+    },
+    data: {
+      joinStatus: JOIN_STATUS.REJECTED,
+    },
+  });
+};
+
+export const updateJoinStatustoApprovedAllUsers = async () => {
+  return await prisma.users.updateMany({
+    where: {
+      role: USER_ROLE.USER,
+      joinStatus: { not: JOIN_STATUS.APPROVED },
+    },
+    data: {
+      joinStatus: JOIN_STATUS.APPROVED,
+    },
+  });
+};
+
+export const updateJoinStatustoRejectAllUsers = async () => {
+  return await prisma.users.updateMany({
+    where: {
+      role: USER_ROLE.USER,
+      joinStatus: { not: JOIN_STATUS.REJECTED },
+    },
+    data: {
+      joinStatus: JOIN_STATUS.REJECTED,
+    },
+  });
+};

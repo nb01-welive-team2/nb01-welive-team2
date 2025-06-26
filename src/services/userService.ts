@@ -158,6 +158,26 @@ export const rejectAdmin = async (bodyId: string, loginId: string) => {
   await userRepository.updateJoinStatustoReject(bodyId);
 };
 
+export const approveAllAdmins = async (id: string) => {
+  const user = await userRepository.getUserId(id);
+
+  if (!user || user.role !== USER_ROLE.SUPER_ADMIN) {
+    throw new UnauthError();
+  }
+
+  await userRepository.updateJoinStatustoApprovedAllAdmins();
+};
+
+export const rejectAllAdmins = async (id: string) => {
+  const user = await userRepository.getUserId(id);
+
+  if (!user || user.role !== USER_ROLE.SUPER_ADMIN) {
+    throw new UnauthError();
+  }
+
+  await userRepository.updateJoinStatustoRejectAllAdmins();
+};
+
 export const approveUser = async (bodyId: string, loginId: string) => {
   const user = await userRepository.getUserId(loginId);
 
@@ -186,4 +206,24 @@ export const rejectUser = async (bodyId: string, loginId: string) => {
   }
 
   await userRepository.updateJoinStatustoReject(bodyId);
+};
+
+export const approveAllUsers = async (id: string) => {
+  const user = await userRepository.getUserId(id);
+
+  if (!user || user.role !== USER_ROLE.ADMIN) {
+    throw new UnauthError();
+  }
+
+  await userRepository.updateJoinStatustoApprovedAllUsers();
+};
+
+export const rejectAllUsers = async (id: string) => {
+  const user = await userRepository.getUserId(id);
+
+  if (!user || user.role !== USER_ROLE.ADMIN) {
+    throw new UnauthError();
+  }
+
+  await userRepository.updateJoinStatustoRejectAllUsers();
 };

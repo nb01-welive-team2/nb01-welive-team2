@@ -128,6 +128,28 @@ export const rejectAdmin = async (
   res.status(200).json();
 };
 
+export const approveAllAdmins = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const request = req as AuthenticatedRequest;
+  const id = request.user.userId;
+
+  await userService.approveAllAdmins(id);
+  res.status(200).json();
+};
+
+export const rejectAllAdmins = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const request = req as AuthenticatedRequest;
+  const id = request.user.userId;
+
+  await userService.rejectAllAdmins(id);
+  res.status(200).json();
+};
+
 export const approveUser = async (
   req: Request,
   res: Response
@@ -151,5 +173,27 @@ export const rejectUser = async (
   const { id: bodyId } = req.params;
 
   await userService.rejectUser(bodyId, loginId);
+  res.status(200).json();
+};
+
+export const approveAllUsers = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const request = req as AuthenticatedRequest;
+  const id = request.user.userId;
+
+  await userService.approveAllUsers(id);
+  res.status(200).json();
+};
+
+export const rejectAllUsers = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const request = req as AuthenticatedRequest;
+  const id = request.user.userId;
+
+  await userService.rejectAllUsers(id);
   res.status(200).json();
 };

@@ -4,10 +4,14 @@ import { withAsync } from "../lib/withAsync";
 import authenticate from "../middlewares/authenticate";
 import {
   approveAdmin,
+  approveAllAdmins,
+  approveAllUsers,
   approveUser,
   deleteAdmin,
   deleteRejectedUsers,
   rejectAdmin,
+  rejectAllAdmins,
+  rejectAllUsers,
   rejectUser,
   signupAdmin,
   signupSuperAdmin,
@@ -61,6 +65,34 @@ authRouter.post(
   authenticate({ optional: false }),
   requireRolle([USER_ROLE.SUPER_ADMIN]),
   withAsync(rejectAdmin)
+);
+
+authRouter.post(
+  "/approve-amdins",
+  authenticate({ optional: false }),
+  requireRolle([USER_ROLE.SUPER_ADMIN]),
+  withAsync(approveAllAdmins)
+);
+
+authRouter.post(
+  "/reject-amdins",
+  authenticate({ optional: false }),
+  requireRolle([USER_ROLE.SUPER_ADMIN]),
+  withAsync(rejectAllAdmins)
+);
+
+authRouter.post(
+  "/approve-users",
+  authenticate({ optional: false }),
+  requireRolle([USER_ROLE.ADMIN]),
+  withAsync(approveAllUsers)
+);
+
+authRouter.post(
+  "/reject-users",
+  authenticate({ optional: false }),
+  requireRolle([USER_ROLE.ADMIN]),
+  withAsync(rejectAllUsers)
 );
 
 authRouter.post(
