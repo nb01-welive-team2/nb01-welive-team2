@@ -11,7 +11,6 @@ import {
   UpdateUserBodyStruct,
 } from "@/structs/userStruct";
 import { AuthenticatedRequest } from "@/types/express";
-import userInfoRepository from "@/repositories/userInfoRepository";
 
 export const signupUser = async (
   req: Request,
@@ -76,20 +75,8 @@ export const deleteAdmin = async (
   const { id: userId } = req.params;
   await userService.deleteAdmin(userId);
 
-  res.status(200).json({ message: "AdminInfo deleted successfully" });
+  res.status(200).json();
 };
-
-// TODO: [최고관리자/관리자] 거절 계정 관리
-
-// export const deleteRejectedUsers = async (
-//   req: Request,
-//   res: Response
-// ): Promise<void> => {
-//   const { role } = (req as AuthenticatedRequest).user;
-//   await userService.deleteRejectedUsersByRole(role);
-
-//   res.status(200).json({ message: "Admins or Users deleted successfully" });
-// };
 
 export const updateUser = async (
   req: Request,
@@ -99,6 +86,18 @@ export const updateUser = async (
   const request = req as AuthenticatedRequest;
   const userId = request.user.userId;
   await userService.updateUser(userId, data);
+
+  res.status(200).json();
+};
+
+export const deleteRejectedUsers = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const request = req as AuthenticatedRequest;
+  const role = request.user.role;
+
+  await userService.deleteRejectedUsersByRole(role);
 
   res.status(200).json();
 };

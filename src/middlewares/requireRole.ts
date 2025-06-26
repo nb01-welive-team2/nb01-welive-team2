@@ -3,12 +3,12 @@ import { AuthenticatedRequest } from "@/types/express";
 import { USER_ROLE } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 
-export function requireRolle(allowedRole: USER_ROLE) {
+export function requireRolle(allowedRoles: USER_ROLE[]) {
   return (req: Request, res: Response, next: NextFunction) => {
     const request = req as AuthenticatedRequest;
     const userRole = request.user.role;
 
-    if (!userRole || userRole !== allowedRole) {
+    if (!userRole || !allowedRoles.includes(userRole)) {
       return next(new UnauthError());
     }
 

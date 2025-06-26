@@ -4,6 +4,7 @@ import { withAsync } from "../lib/withAsync";
 import authenticate from "../middlewares/authenticate";
 import {
   deleteAdmin,
+  deleteRejectedUsers,
   signupAdmin,
   signupSuperAdmin,
   signupUser,
@@ -27,23 +28,21 @@ authRouter.post("/signup/super-admin", withAsync(signupSuperAdmin));
 authRouter.patch(
   "/update-admin",
   authenticate({ optional: false }),
-  requireRolle(USER_ROLE.SUPER_ADMIN),
+  requireRolle([USER_ROLE.SUPER_ADMIN]),
   withAsync(updateAdminController)
 );
 authRouter.delete(
   "/deleted-admin/:id",
   authenticate({ optional: false }),
-  requireRolle(USER_ROLE.SUPER_ADMIN),
+  requireRolle([USER_ROLE.SUPER_ADMIN]),
   withAsync(deleteAdmin)
 );
 
-// TODO: [최고관리자/관리자] 거절 계정 관리
-
-// authRouter.post(
-//   "/cleanup",
-//   authenticate({ optional: false }),
-//   requireRolle(USER_ROLE.SUPER_ADMIN),
-//   withAsync(deleteAdmin)
-// );
+authRouter.post(
+  "/cleanup",
+  authenticate({ optional: false }),
+  requireRolle([USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN]),
+  withAsync(deleteRejectedUsers)
+);
 
 export default authRouter;

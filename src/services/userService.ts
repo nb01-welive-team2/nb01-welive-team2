@@ -9,13 +9,11 @@ import UnauthError from "@/errors/UnauthError";
 import { hashPassword } from "@/lib/utils/hash";
 import * as userRepository from "@/repositories/userRepository";
 import { UpdateUserDTO } from "@/structs/userStruct";
-import { UserType } from "@/types/User";
 import { USER_ROLE, Users } from "@prisma/client";
 import bcrypt from "bcrypt";
 
 export const signupUser = async (data: SignupUserRequestDTO) => {
   const { username, password, contact, email } = data;
-  // await userRepository.usersUniqueColums(username, contact, email);
 
   const apartment = await userRepository.findApartment(data.apartmentName);
   if (!apartment) throw new BadRequestError("존재하지 않는 아파트입니다.");
@@ -34,8 +32,6 @@ export const signupUser = async (data: SignupUserRequestDTO) => {
 export const signupAdmin = async (data: SignupAdminRequestDTO) => {
   const { username, password, contact, email } = data;
 
-  // await userRepository.usersUniqueColums(username, contact, email);
-
   const encryptedPassword = await hashPassword(password);
   const user = {
     ...data,
@@ -49,8 +45,6 @@ export const signupAdmin = async (data: SignupAdminRequestDTO) => {
 
 export const signupSuperAdmin = async (data: SignupSuperAdminRequestDTO) => {
   const { username, contact, email, password } = data;
-
-  // await userRepository.usersUniqueColums(username, contact, email);
 
   const encryptedPassword = await hashPassword(password);
   const user = {
@@ -77,27 +71,6 @@ export const deleteAdmin = async (id: string): Promise<void> => {
     throw new BadRequestError("BadRequestError");
   }
 };
-
-// TODO: [최고관리자/관리자] 거절 계정 관리
-
-// export const deleteRejectedUsersByRole = async (role: USER_ROLE) => {
-//   let userRole: USER_ROLE;
-
-//   let result;
-//   if (role === USER_ROLE.SUPER_ADMIN) {
-//     userRole = USER_ROLE.ADMIN;
-//     result = userRepository.deleteAdmins;
-//   } else if (role === USER_ROLE.ADMIN) {
-//     userRole = USER_ROLE.USER;
-//     result = userRepository.deleteUsers;
-//   } else {
-//     throw new Error("해당 역할은 삭제 권한이 없습니다.");
-//   }
-
-//   // const result = await userRepository.deleteManyByRole(role);
-
-//   return result;
-// };
 
 export const updateUser = async (
   id: string,
@@ -131,4 +104,17 @@ export const updateUser = async (
   const updatedUser = await userRepository.updateUser(id, updateData);
 
   return updatedUser;
+};
+
+export const deleteRejectedUsersByRole = async (role: USER_ROLE) => {
+  let result;
+  if (role === USER_ROLE.SUPER_ADMIN) {
+    result = await userRepository.deleteAdmins();
+  } else if (role === USER_ROLE.ADMIN) {
+    result = await userRepository.deleteUsers();
+  } else {
+    throw new Error("There is no authorization");
+  }
+
+  return result;
 };
