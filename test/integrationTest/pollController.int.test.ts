@@ -102,7 +102,7 @@ describe("PollController Logined", () => {
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty("status", mockPolls[0].status);
-      expect(response.body).toHaveProperty("title", mockArticles[1].title);
+      expect(response.body).toHaveProperty("title", mockPolls[0].title);
     });
 
     it("should return 401 if user is not authenticated", async () => {
