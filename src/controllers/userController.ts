@@ -101,3 +101,55 @@ export const deleteRejectedUsers = async (
 
   res.status(200).json();
 };
+
+export const approveAdmin = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const request = req as AuthenticatedRequest;
+  const loginId = request.user.userId;
+
+  const { id: bodyId } = req.body;
+
+  await userService.approveAdmin(bodyId, loginId);
+  res.status(200).json();
+};
+
+export const rejectAdmin = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const request = req as AuthenticatedRequest;
+  const loginId = request.user.userId;
+
+  const { id: bodyId } = req.body;
+
+  await userService.rejectAdmin(bodyId, loginId);
+  res.status(200).json();
+};
+
+export const approveUser = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const request = req as AuthenticatedRequest;
+  const loginId = request.user.userId;
+
+  const { id: bodyId } = req.params;
+
+  await userService.approveUser(bodyId, loginId);
+  res.status(200).json();
+};
+
+export const rejectUser = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const request = req as AuthenticatedRequest;
+  const loginId = request.user.userId;
+
+  const { id: bodyId } = req.params;
+
+  await userService.rejectUser(bodyId, loginId);
+  res.status(200).json();
+};

@@ -18,12 +18,12 @@ export function requireRolle(allowedRoles: USER_ROLE[]) {
 
 /**
  * 라우터에서 미들웨어로 사용
- * requireRole(USER_ROLE.역할)
+ * requireRole([USER_ROLE.역할])
  * [ex]
  * 관리자 승인 API
- * router.post("/admin/approve", authenticateToken, requireRole(USER_ROLE.SUPER_ADMIN), approveAdmin);
+ * router.post("/admin/approve", authenticateToken, requireRole([USER_ROLE.SUPER_ADMIN]), approveAdmin);
  * 입주민 승인 API
- * router.post("/resident/approve", authenticateToken, requireRole(USER_ROLE.ADMIN), approveResident);
+ * router.post("/resident/approve", authenticateToken, requireRole([USER_ROLE.ADMIN]), approveResident);
  * 입주민 문의 등록 API
- * router.post("/inquiry", authenticateToken, requireRole(USER_ROLE.RESIDENT), createInquiry);
+ * router.post("/inquiry", authenticateToken, requireRole([USER_ROLE.RESIDENT]), createInquiry);
  **/

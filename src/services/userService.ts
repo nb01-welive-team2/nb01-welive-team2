@@ -60,12 +60,21 @@ export const signupSuperAdmin = async (data: SignupSuperAdminRequestDTO) => {
 export const updateAdmin = async (
   data: UpdateAdminDTO
 ): Promise<UpdateAdminDTO> => {
+  const bodyUser = await userRepository.findRoleById(data.id);
+  if (!bodyUser || bodyUser.role !== USER_ROLE.ADMIN) {
+    throw new UnauthError();
+  }
   const updatedAdmin = await userRepository.updateAdminAndApartment(data);
 
   return updatedAdmin;
 };
 
 export const deleteAdmin = async (id: string): Promise<void> => {
+  const bodyUser = await userRepository.findRoleById(id);
+  if (!bodyUser || bodyUser.role !== USER_ROLE.ADMIN) {
+    throw new UnauthError();
+  }
+
   const deleted = await userRepository.deleteById(id);
   if (!deleted) {
     throw new BadRequestError("BadRequestError");
@@ -113,8 +122,68 @@ export const deleteRejectedUsersByRole = async (role: USER_ROLE) => {
   } else if (role === USER_ROLE.ADMIN) {
     result = await userRepository.deleteUsers();
   } else {
-    throw new Error("There is no authorization");
+    throw new UnauthError();
   }
 
   return result;
+};
+
+export const approveAdmin = async (bodyId: string, loginId: string) => {
+  const user = await userRepository.getUserId(loginId);
+
+  if (!user || user.role !== USER_ROLE.SUPER_ADMIN) {
+    throw new UnauthError();
+  }
+
+  const bodyUser = await userRepository.findRoleById(bodyId);
+  if (!bodyUser || bodyUser.role !== USER_ROLE.ADMIN) {
+    throw new UnauthError();
+  }
+
+  await userRepository.updateJoinStatustoApproved(bodyId);
+};
+
+export const rejectAdmin = async (bodyId: string, loginId: string) => {
+  const user = await userRepository.getUserId(loginId);
+
+  if (!user || user.role !== USER_ROLE.SUPER_ADMIN) {
+    throw new UnauthError();
+  }
+
+  const bodyUser = await userRepository.findRoleById(bodyId);
+  if (!bodyUser || bodyUser.role !== USER_ROLE.ADMIN) {
+    throw new UnauthError();
+  }
+
+  await userRepository.updateJoinStatustoReject(bodyId);
+};
+
+export const approveUser = async (bodyId: string, loginId: string) => {
+  const user = await userRepository.getUserId(loginId);
+
+  if (!user || user.role !== USER_ROLE.ADMIN) {
+    throw new UnauthError();
+  }
+
+  const bodyUser = await userRepository.findRoleById(bodyId);
+  if (!bodyUser || bodyUser.role !== USER_ROLE.USER) {
+    throw new UnauthError();
+  }
+
+  await userRepository.updateJoinStatustoApproved(bodyId);
+};
+
+export const rejectUser = async (bodyId: string, loginId: string) => {
+  const user = await userRepository.getUserId(loginId);
+
+  if (!user || user.role !== USER_ROLE.ADMIN) {
+    throw new UnauthError();
+  }
+
+  const bodyUser = await userRepository.findRoleById(bodyId);
+  if (!bodyUser || bodyUser.role !== USER_ROLE.USER) {
+    throw new UnauthError();
+  }
+
+  await userRepository.updateJoinStatustoReject(bodyId);
 };

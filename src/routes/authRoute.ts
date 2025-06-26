@@ -3,8 +3,12 @@ import { login, logout, refreshToken } from "../controllers/authController";
 import { withAsync } from "../lib/withAsync";
 import authenticate from "../middlewares/authenticate";
 import {
+  approveAdmin,
+  approveUser,
   deleteAdmin,
   deleteRejectedUsers,
+  rejectAdmin,
+  rejectUser,
   signupAdmin,
   signupSuperAdmin,
   signupUser,
@@ -43,6 +47,34 @@ authRouter.post(
   authenticate({ optional: false }),
   requireRolle([USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN]),
   withAsync(deleteRejectedUsers)
+);
+
+authRouter.post(
+  "/approve-amdin",
+  authenticate({ optional: false }),
+  requireRolle([USER_ROLE.SUPER_ADMIN]),
+  withAsync(approveAdmin)
+);
+
+authRouter.post(
+  "/reject-amdin",
+  authenticate({ optional: false }),
+  requireRolle([USER_ROLE.SUPER_ADMIN]),
+  withAsync(rejectAdmin)
+);
+
+authRouter.post(
+  "/approve-user/:id",
+  authenticate({ optional: false }),
+  requireRolle([USER_ROLE.ADMIN]),
+  withAsync(approveUser)
+);
+
+authRouter.post(
+  "/reject-user/:id",
+  authenticate({ optional: false }),
+  requireRolle([USER_ROLE.ADMIN]),
+  withAsync(rejectUser)
 );
 
 export default authRouter;

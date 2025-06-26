@@ -237,3 +237,30 @@ export const deleteUsers = async () => {
     },
   });
 };
+
+export const findRoleById = async (id: string) => {
+  return await prisma.users.findUnique({
+    where: { id },
+    select: {
+      role: true,
+    },
+  });
+};
+
+export const updateJoinStatustoApproved = async (id: string) => {
+  return await prisma.users.update({
+    where: { id },
+    data: {
+      joinStatus: JOIN_STATUS.APPROVED,
+    },
+  });
+};
+
+export const updateJoinStatustoReject = async (id: string) => {
+  return await prisma.users.update({
+    where: { id },
+    data: {
+      joinStatus: JOIN_STATUS.REJECTED,
+    },
+  });
+};
