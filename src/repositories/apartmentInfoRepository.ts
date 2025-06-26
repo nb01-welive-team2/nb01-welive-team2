@@ -27,36 +27,7 @@ async function findApartmentsList(query: {
   return await prisma.apartmentInfo.findMany({ where });
 }
 
-async function findPublicApartmentsList(query: {
-  apartmentName?: string;
-  apartmentAddress?: string;
-}) {
-  const where = {
-    ...(query.apartmentName && {
-      apartmentName: {
-        contains: query.apartmentName,
-        mode: Prisma.QueryMode.insensitive,
-      },
-    }),
-    ...(query.apartmentAddress && {
-      apartmentAddress: {
-        contains: query.apartmentAddress,
-        mode: Prisma.QueryMode.insensitive,
-      },
-    }),
-  };
-  return await prisma.apartmentInfo.findMany({
-    where,
-    select: {
-      id: true,
-      apartmentName: true,
-      apartmentAddress: true,
-    },
-  });
-}
-
 export default {
   findUnique,
   findApartmentsList,
-  findPublicApartmentsList,
 };
