@@ -20,7 +20,6 @@ import {
 import authRouter from "./routes/authRoute";
 import userRouter from "./routes/userRoute";
 import pollsRouter from "./routes/pollRouter";
-// import userRouter from "./routes/userRoute";
 import imagesRouter from "./routes/imageRouter";
 import { PUBLIC_PATH, STATIC_PATH } from "./lib/constance";
 // import { renderHtmlWithUrl } from './lib/htmlRenderer';

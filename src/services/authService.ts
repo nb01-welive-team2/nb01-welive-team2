@@ -24,9 +24,9 @@ export const login = async (data: LoginRequestDTO) => {
   }
 
   // TODO: "JOIN_STATUS가 APPROVED일 때만 로그인 가능. 편의를 위해 다른 기능 완성 후 적용"
-  // if (user.joinStatus !== JOIN_STATUS.APPROVED) {
-  //   throw new UnauthError();
-  // }
+  if (user.joinStatus !== JOIN_STATUS.APPROVED) {
+    throw new UnauthError();
+  }
 
   const userId = user.id;
   const role = user.role;
