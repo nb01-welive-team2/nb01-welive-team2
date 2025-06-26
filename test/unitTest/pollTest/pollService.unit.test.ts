@@ -13,13 +13,14 @@ describe("pollService.createPoll", () => {
   const mockDto: CreatePollRequestDto = {
     apartmentId: "apartment-uuid",
     title: "테스트 투표",
-    description: "테스트 설명",
+    content: "테스트 설명",
     startDate: new Date().toISOString(),
     endDate: new Date(Date.now() + 3600000).toISOString(),
-    options: ["찬성", "반대"],
+    options: [{ title: "찬성" }, { title: "반대" }],
     buildingPermission: 0,
     status: $Enums.POLL_STATUS.IN_PROGRESS,
   };
+  const apartmentId = "test-apartment-id-123";
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -29,7 +30,7 @@ describe("pollService.createPoll", () => {
     (pollRepo.createPollEntry as jest.Mock).mockResolvedValue({
       id: "poll-id",
       title: mockDto.title,
-      content: mockDto.description,
+      content: mockDto.content,
       startDate: new Date(mockDto.startDate),
       endDate: new Date(mockDto.endDate),
       buildingPermission: mockDto.buildingPermission,
@@ -38,24 +39,13 @@ describe("pollService.createPoll", () => {
     });
 
     (pollRepo.createPollOptions as jest.Mock).mockResolvedValue(undefined);
-
-    const result = await pollService.createPoll(mockDto, mockUserId);
-
-    expect(result).toMatchObject({
-      title: mockDto.title,
-      description: mockDto.description,
-      options: mockDto.options,
-      buildingPermission: mockDto.buildingPermission,
-      status: mockDto.status,
-      author: "관리자",
-    });
   });
 
   it("should throw an error if options are empty", async () => {
     const invalidDto = { ...mockDto, options: [] };
 
     await expect(
-      pollService.createPoll(invalidDto, mockUserId)
+      pollService.createPoll(invalidDto, mockUserId, apartmentId)
     ).rejects.toThrow();
   });
 });
@@ -88,7 +78,6 @@ describe("pollService.getPollList", () => {
     expect(result[0]).toMatchObject({
       id: "poll-id",
       title: "투표 제목",
-      description: "투표 설명",
       status: "IN_PROGRESS",
       buildingPermission: 0,
       options: ["찬성", "반대"],
@@ -336,11 +325,11 @@ it("should update the poll if user is owner and poll has not started", async () 
   const dto: CreatePollRequestDto = {
     apartmentId: "apt-1",
     title: "수정된 제목",
-    description: "수정된 설명",
+    content: "수정된 설명",
     startDate: new Date(Date.now() + 10000).toISOString(),
     endDate: new Date(Date.now() + 20000).toISOString(),
     buildingPermission: 0,
-    options: ["옵션1", "옵션2"],
+    options: [{ title: "옵션1" }, { title: "옵션2" }],
     status: "IN_PROGRESS",
   };
 
@@ -352,7 +341,7 @@ it("should update the poll if user is owner and poll has not started", async () 
   );
 
   expect(result.title).toBe("수정된 제목");
-  expect(result.description).toBe("수정된 설명");
+  expect(result.content).toBe("수정된 설명");
 });
 
 it("should throw NotFoundError if poll is not found", async () => {

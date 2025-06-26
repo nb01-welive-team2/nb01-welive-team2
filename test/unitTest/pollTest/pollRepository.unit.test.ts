@@ -47,7 +47,7 @@ describe("pollRepository", () => {
     const data = {
       articleId: "article-id",
       title: "투표 제목",
-      description: "설명",
+      content: "내용",
       startDate: new Date(),
       endDate: new Date(),
       buildingPermission: 0,
@@ -60,13 +60,17 @@ describe("pollRepository", () => {
     expect(prisma.polls.create).toHaveBeenCalledWith({
       data: {
         title: data.title,
-        content: data.description || "",
+        content: data.content || "",
         startDate: data.startDate,
         endDate: data.endDate,
         buildingPermission: data.buildingPermission,
         status: $Enums.POLL_STATUS.IN_PROGRESS,
-        userId: data.userId,
-        apartmentId: data.apartmentId,
+        user: {
+          connect: { id: data.userId },
+        },
+        ApartmentInfo: {
+          connect: { id: data.apartmentId },
+        },
       },
       include: {
         user: true,
@@ -118,11 +122,22 @@ describe("pollRepository", () => {
 });
 
 it("createPollOptions: 투표 옵션 생성", async () => {
-  await pollRepo.createPollOptions("poll-id", ["찬성", "반대"]);
+  await pollRepo.createPollOptions("poll-id", [
+    { title: "찬성" },
+    { title: "반대" },
+  ]);
 
-  expect(prisma.pollOptions.create).toHaveBeenCalledTimes(2);
   expect(prisma.pollOptions.create).toHaveBeenCalledWith({
-    data: { pollId: "poll-id", title: "찬성" },
+    data: {
+      poll: { connect: { id: "poll-id" } },
+      title: "찬성",
+    },
+  });
+  expect(prisma.pollOptions.create).toHaveBeenCalledWith({
+    data: {
+      poll: { connect: { id: "poll-id" } },
+      title: "반대",
+    },
   });
 });
 
@@ -130,7 +145,10 @@ it("replacePollOptions: 투표 옵션 교체", async () => {
   (prisma.pollOptions.deleteMany as jest.Mock).mockResolvedValue(undefined);
   (prisma.pollOptions.create as jest.Mock).mockResolvedValue(undefined);
 
-  await pollRepo.replacePollOptions("poll-id", ["찬성", "반대"]);
+  await pollRepo.replacePollOptions("poll-id", [
+    { title: "찬성" },
+    { title: "반대" },
+  ]);
 
   expect(prisma.pollOptions.deleteMany).toHaveBeenCalledWith({
     where: { pollId: "poll-id" },
@@ -164,6 +182,7 @@ it("updatePoll: 투표 수정", async () => {
 
   const result = await pollRepo.updatePoll("poll-id", {
     title: "수정된 제목",
+    content: "내용",
     startDate: new Date(),
     endDate: new Date(),
     buildingPermission: 1,
@@ -290,6 +309,7 @@ it("updatePoll: 투표 수정", async () => {
   const pollId = "poll-123";
   const updateData = {
     title: "수정된 제목",
+    content: "새로운 내용",
     startDate: new Date("2025-07-01T00:00:00.000Z"),
     endDate: new Date("2025-07-02T00:00:00.000Z"),
     buildingPermission: 1,

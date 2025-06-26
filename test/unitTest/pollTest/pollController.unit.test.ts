@@ -8,6 +8,7 @@ import {
 import * as pollService from "@/services/pollService";
 import UnauthError from "@/errors/UnauthError";
 import ForbiddenError from "@/errors/ForbiddenError";
+import registerSuccessMessage from "@/lib/responseJson/registerSuccess";
 
 jest.mock("@/services/pollService");
 
@@ -27,7 +28,7 @@ describe("pollController.createPoll", () => {
   const mockRes = () => {
     const res: any = {};
     res.status = jest.fn().mockReturnValue(res);
-    res.json = jest.fn().mockReturnValue(res);
+    res.send = jest.fn().mockReturnValue(res);
     return res;
   };
 
@@ -49,11 +50,11 @@ describe("pollController.createPoll", () => {
     await createPoll(req, res);
 
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(mockResult);
+    expect(res.send).toHaveBeenCalledWith(new registerSuccessMessage());
   });
 
   it("로그인하지 않은 경우 UnauthError", async () => {
-    const req: any = { body: validBody };
+    const req: any = { body: validBody, user: undefined };
     const res = mockRes();
 
     await expect(createPoll(req, res)).rejects.toThrow(UnauthError);
@@ -99,7 +100,7 @@ describe("pollController.getPollList", () => {
       userId: "user-id",
     });
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(mockList);
+    expect(res.json).toHaveBeenCalledWith({ polls: mockList });
   });
 
   it("쿼리 파라미터 존재할 때 처리", async () => {
