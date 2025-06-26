@@ -16,14 +16,14 @@ const prisma = new PrismaClient();
 
 export async function seedDatabase(): Promise<void> {
   // 삭제 순서: 의존성 관계 고려 (참조하는 쪽이 먼저 삭제)
-  await prisma.notifications.deleteMany();
-  await prisma.votes.deleteMany();
-  await prisma.pollOptions.deleteMany();
-  await prisma.polls.deleteMany();
+  // await prisma.notifications.deleteMany();
+  // await prisma.votes.deleteMany();
+  // await prisma.pollOptions.deleteMany();
+  // await prisma.polls.deleteMany();
   await prisma.notices.deleteMany();
   await prisma.complaints.deleteMany();
   await prisma.userInfo.deleteMany();
-  await prisma.residents.deleteMany();
+  // await prisma.residents.deleteMany();
   await prisma.apartmentInfo.deleteMany();
   await prisma.users.deleteMany();
 
