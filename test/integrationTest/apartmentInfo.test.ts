@@ -37,7 +37,7 @@ describe("apartments 통합 테스트", () => {
       const res = await adminAgent.get("/api/apartments");
       expect(res.status).toBe(200);
 
-      const apt = res.body.apartments[0];
+      const apt = res.body[0];
       expect(apt).toHaveProperty("id");
       expect(apt).toHaveProperty("name");
 
@@ -56,7 +56,7 @@ describe("apartments 통합 테스트", () => {
       const res = await superAdminAgent.get("/api/apartments");
       expect(res.status).toBe(200);
 
-      const apt = res.body.apartments[0];
+      const apt = res.body[0];
       expect(apt).toHaveProperty("id");
       expect(apt).toHaveProperty("name");
 
@@ -75,7 +75,7 @@ describe("apartments 통합 테스트", () => {
       const res = await request(app).get("/api/apartments");
       expect(res.status).toBe(200);
 
-      const apt = res.body.apartments[0];
+      const apt = res.body[0];
       expect(apt).toHaveProperty("id");
       expect(apt).toHaveProperty("name");
 
