@@ -60,6 +60,21 @@ describe("입주민 API 통합 테스트", () => {
         approvalStatus: "PENDING",
       });
     });
+
+    test("관리자 외에 유저 개별 등록 403 반환", async () => {
+      const newResident = {
+        building: 108,
+        unitNumber: 1503,
+        contact: "01098765432",
+        email: "testuser@example.com",
+        name: "테스트유저",
+        isHouseholder: "HOUSEHOLDER",
+      };
+      const response = await userAgent
+        .post("/api/residents/register")
+        .send(newResident);
+      expect(response.status).toBe(403);
+    });
   });
 
   describe("GET /api/residents", () => {
@@ -68,6 +83,16 @@ describe("입주민 API 통합 테스트", () => {
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
       expect(response.body.length).toBeGreaterThan(0);
+    });
+
+    test("일반유저 입주민 목록 조회 403", async () => {
+      const response = await userAgent.get("/api/residents");
+      expect(response.status).toBe(403);
+    });
+
+    test("슈퍼관리자 입주민 목록 조회 403", async () => {
+      const response = await superAdminAgent.get("/api/residents");
+      expect(response.status).toBe(403);
     });
   });
 
@@ -81,10 +106,23 @@ describe("입주민 API 통합 테스트", () => {
         id: "69f298ce-5775-4206-b377-d083313e4946",
       });
     });
+
+    test("일반유저 입주민 목록 조회 403", async () => {
+      const response = await userAgent.get(
+        "/api/residents/69f298ce-5775-4206-b377-d083313e4946"
+      );
+      expect(response.status).toBe(403);
+    });
+    test("슈퍼관리자 입주민 목록 조회 403", async () => {
+      const response = await superAdminAgent.get(
+        "/api/residents/69f298ce-5775-4206-b377-d083313e4946"
+      );
+      expect(response.status).toBe(403);
+    });
   });
 
   describe("PATCH /api/residents/:id", () => {
-    test("입주민 정보 수정", async () => {
+    test("관리자) 입주민 정보 수정", async () => {
       const updateData = {
         name: "코드잇",
       };
@@ -97,6 +135,28 @@ describe("입주민 API 통합 테스트", () => {
         ...updateData,
         id: "69f298ce-5775-4206-b377-d083313e4946",
       });
+    });
+
+    test("일반유저) 입주민 정보 수정 403", async () => {
+      const updateData = {
+        name: "코드잇",
+      };
+      const response = await userAgent
+        .patch(`/api/residents/69f298ce-5775-4206-b377-d083313e4946`)
+        .send(updateData);
+
+      expect(response.status).toBe(403);
+    });
+
+    test("슈퍼관리자) 입주민 정보 수정 403", async () => {
+      const updateData = {
+        name: "코드잇",
+      };
+      const response = await superAdminAgent
+        .patch(`/api/residents/69f298ce-5775-4206-b377-d083313e4946`)
+        .send(updateData);
+
+      expect(response.status).toBe(403);
     });
   });
 
@@ -157,6 +217,20 @@ describe("입주민 API 통합 테스트", () => {
         "/api/residents/69f298ce-5775-4206-b377-d083313e4946"
       );
       expect(response.status).toBe(200);
+    });
+
+    test("슈퍼관리자)입주민 삭제 403", async () => {
+      const response = await superAdminAgent.delete(
+        "/api/residents/69f298ce-5775-4206-b377-d083313e4946"
+      );
+      expect(response.status).toBe(403);
+    });
+
+    test("일반유저)입주민 삭제 403", async () => {
+      const response = await userAgent.delete(
+        "/api/residents/69f298ce-5775-4206-b377-d083313e4946"
+      );
+      expect(response.status).toBe(403);
     });
 
     test("관리자와 입주민의 apartmentId가 다르면 403", async () => {

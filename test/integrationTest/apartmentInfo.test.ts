@@ -86,7 +86,7 @@ describe("apartments 통합 테스트", () => {
   });
 
   describe("GET /api/apartments/:id", () => {
-    test("관리자 계정 로그인 - 아파트 정보 조회", async () => {
+    test("관리자 계정 로그인 - 아파트 정보 상세 조회", async () => {
       const res = await adminAgent.get(
         `/api/apartments/2149430f-2892-463f-b3e7-4e893548c6d6`
       );
