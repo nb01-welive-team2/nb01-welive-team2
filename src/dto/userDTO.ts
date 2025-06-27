@@ -72,3 +72,14 @@ export const userResponseDTO = (user: UserType) => {
 
   return {};
 };
+
+export interface UpdateAdminDTO {
+  contact: string;
+  name: string;
+  email: string;
+  description: string;
+  apartmentName: string;
+  apartmentAddress: string;
+  apartmentManagementNumber: string;
+  id: string;
+}

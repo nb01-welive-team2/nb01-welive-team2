@@ -41,10 +41,10 @@ jobs:
       JWT_SECRET: your-secret-key
 
       # AWS 관련 설정 - 실제 AWS 리소스를 사용하는 경우에는 Secrets로 값 주입 필요
-      # AWS_REGION: ap-northeast-2
-      # AWS_ACCESS_KEY_ID: aws-access-key # 실제 키를 넣으면 안 됨 (테스트용 더미 값)
-      # AWS_SECRET_ACCESS_KEY: aws-secret-access-key # 실제 키를 넣으면 안 됨
-      # AWS_S3_BUCKET_NAME: panda-market
+      AWS_REGION: ap-northeast-2
+      AWS_ACCESS_KEY_ID: aws-access-key # 실제 키를 넣으면 안 됨 (테스트용 더미 값)
+      AWS_SECRET_ACCESS_KEY: aws-secret-access-key # 실제 키를 넣으면 안 됨
+      AWS_S3_BUCKET_NAME: panda-market
 
       S3_ENDPOINT: dummy-s3-endpoint
       IAM_ACCESS_KEY: dummy-access-key
