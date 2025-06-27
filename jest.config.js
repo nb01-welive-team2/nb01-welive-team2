@@ -58,5 +58,10 @@ module.exports = {
       ...commonConfig,
       testMatch: ["**/unitTest/**/apartmentInfo*.unit.test.ts"],
     },
+    {
+      displayName: "notice-unit",
+      ...commonConfig,
+      testMatch: ["**/unitTest/noticeTest/notice*.test.ts"],
+    },
   ],
 };
