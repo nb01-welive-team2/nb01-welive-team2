@@ -1,11 +1,11 @@
-import { UserType } from "@/types/User";
 import { prisma } from "../lib/prisma";
-import BadRequestError from "@/errors/BadRequestError";
 import {
   SignupAdminRequestDTO,
   SignupSuperAdminRequestDTO,
   SignupUserRequestDTO,
+  UpdateAdminDTO,
 } from "@/dto/userDTO";
+import { JOIN_STATUS, USER_ROLE, Users } from "@prisma/client";
 
 export const getUserByUsername = async (username: string) => {
   const user = await prisma.users.findUnique({
@@ -37,7 +37,6 @@ export const getUserId = async (id: string) => {
 
 export const createUser = async (input: SignupUserRequestDTO) => {
   const apartment = await findApartment(input.apartmentName); // TODO: 프로젝트 합친 후 apartment관련 리포지토리 있으면 거기에 맞춰 수정
-  if (!apartment) throw new BadRequestError("존재하지 않는 아파트입니다.");
 
   const user = await prisma.users.create({
     data: {
@@ -46,16 +45,16 @@ export const createUser = async (input: SignupUserRequestDTO) => {
       contact: input.contact,
       name: input.name,
       email: input.email,
-      role: "USER",
+      role: USER_ROLE.USER,
       profileImage: input.profileImage,
-      joinStatus: "PENDING",
+      joinStatus: JOIN_STATUS.PENDING,
       userInfo: {
         create: {
           apartmentName: input.apartmentName,
           apartmentDong: input.apartmentDong,
           apartmentHo: input.apartmentHo,
           apartmentInfo: {
-            connect: { id: apartment.id },
+            connect: { id: apartment!.id },
           },
         },
       },
@@ -90,9 +89,9 @@ export const createAdmin = async (input: SignupAdminRequestDTO) => {
       contact: input.contact,
       name: input.name,
       email: input.email,
-      role: "ADMIN",
+      role: USER_ROLE.ADMIN,
       profileImage: input.profileImage,
-      joinStatus: "PENDING",
+      joinStatus: JOIN_STATUS.PENDING,
       apartmentInfo: {
         create: {
           description: input.description,
@@ -107,7 +106,7 @@ export const createAdmin = async (input: SignupAdminRequestDTO) => {
           apartmentName: input.apartmentName,
           apartmentAddress: input.apartmentAddress,
           apartmentManagementNumber: input.apartmentManagementNumber,
-          approvalStatus: "PENDING",
+          approvalStatus: JOIN_STATUS.PENDING,
         },
       },
     },
@@ -150,9 +149,9 @@ export const createSuperAdmin = async (input: SignupSuperAdminRequestDTO) => {
       contact: input.contact,
       name: input.name,
       email: input.email,
-      role: "SUPER_ADMIN",
+      role: USER_ROLE.SUPER_ADMIN,
       profileImage: input.profileImage,
-      joinStatus: "APPROVED",
+      joinStatus: JOIN_STATUS.APPROVED,
     },
   });
 
@@ -167,24 +166,149 @@ export const createSuperAdmin = async (input: SignupSuperAdminRequestDTO) => {
 //   return data;
 // };
 
-export const usersUniqueColums = async (
-  username: string,
-  contact: string,
-  email: string
-) => {
-  const exists = await prisma.users.findFirst({
-    where: {
-      OR: [{ username }, { contact }, { email }],
-    },
-  });
-
-  if (exists) throw new BadRequestError("이미 등록된 사용자입니다.");
-};
-
 export const findApartment = async (apartmentName: string) => {
   const data = await prisma.apartmentInfo.findFirst({
     where: { apartmentName },
   });
 
   return data;
+};
+
+export const updateAdminAndApartment = async (data: UpdateAdminDTO) => {
+  const {
+    id,
+    contact,
+    name,
+    email,
+    description,
+    apartmentName,
+    apartmentAddress,
+    apartmentManagementNumber,
+  } = data;
+
+  await prisma.$transaction([
+    prisma.users.update({
+      where: { id },
+      data: { contact, name, email },
+    }),
+    prisma.apartmentInfo.updateMany({
+      where: { userId: id },
+      data: {
+        description,
+        apartmentName,
+        apartmentAddress,
+        apartmentManagementNumber,
+      },
+    }),
+  ]);
+
+  return data;
+};
+
+export const deleteById = async (id: string) => {
+  const deleted = await prisma.users.delete({
+    where: { id },
+  });
+  return deleted;
+};
+
+export const updateUser = async (id: string, data: Partial<Users>) => {
+  const updatedUser = await prisma.users.update({
+    where: { id },
+    data,
+  });
+  return updatedUser;
+};
+
+export const deleteAdmins = async () => {
+  return await prisma.users.deleteMany({
+    where: {
+      role: USER_ROLE.ADMIN,
+      joinStatus: JOIN_STATUS.REJECTED,
+    },
+  });
+};
+
+export const deleteUsers = async () => {
+  return await prisma.users.deleteMany({
+    where: {
+      role: USER_ROLE.USER,
+      joinStatus: JOIN_STATUS.REJECTED,
+    },
+  });
+};
+
+export const findRoleById = async (id: string) => {
+  return await prisma.users.findUnique({
+    where: { id },
+    select: {
+      role: true,
+    },
+  });
+};
+
+export const updateJoinStatustoApproved = async (id: string) => {
+  return await prisma.users.update({
+    where: { id },
+    data: {
+      joinStatus: JOIN_STATUS.APPROVED,
+    },
+  });
+};
+
+export const updateJoinStatustoReject = async (id: string) => {
+  return await prisma.users.update({
+    where: { id },
+    data: {
+      joinStatus: JOIN_STATUS.REJECTED,
+    },
+  });
+};
+
+export const updateJoinStatustoApprovedAllAdmins = async () => {
+  return await prisma.users.updateMany({
+    where: {
+      role: USER_ROLE.ADMIN,
+      joinStatus: { not: JOIN_STATUS.APPROVED },
+    },
+    data: {
+      joinStatus: JOIN_STATUS.APPROVED,
+    },
+  });
+};
+
+export const updateJoinStatustoRejectAllAdmins = async () => {
+  return await prisma.users.updateMany({
+    where: {
+      role: USER_ROLE.ADMIN,
+      joinStatus: { not: JOIN_STATUS.REJECTED },
+    },
+    data: {
+      joinStatus: JOIN_STATUS.REJECTED,
+    },
+  });
+};
+
+export const updateJoinStatustoApprovedAllUsers = async () => {
+  return await prisma.users.updateMany({
+    where: {
+      role: USER_ROLE.USER,
+      joinStatus: { not: JOIN_STATUS.APPROVED },
+    },
+    data: {
+      joinStatus: JOIN_STATUS.APPROVED,
+    },
+  });
+};
+
+export const updateJoinStatustoRejectAllUsers = async () => {
+  return await prisma.users.updateMany({
+    where: {
+      role: USER_ROLE.USER,
+      joinStatus: { not: JOIN_STATUS.REJECTED },
+    },
+    data: {
+      joinStatus: JOIN_STATUS.REJECTED,
+    },
+  });
 };
