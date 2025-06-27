@@ -4,7 +4,6 @@ import {
 } from "@/controllers/apartmentController";
 import { Router } from "express";
 import { withAsync } from "@/lib/withAsync";
-import authenticate from "@/middlewares/authenticate";
 import { optionalAuth } from "@/middlewares/authenticate";
 
 const apartmentsRouter = Router();
@@ -17,7 +16,7 @@ apartmentsRouter.get(
 
 apartmentsRouter.get(
   "/:id",
-  authenticate({ optional: false }),
+  optionalAuth(),
   withAsync(getApartmentDetailController)
 );
 

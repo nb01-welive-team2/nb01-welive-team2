@@ -1,4 +1,3 @@
-import { prisma } from "../../../src/lib/prisma";
 import residentsService from "../../../src/services/residentsService";
 import residentsRepository from "../../../src/repositories/residentsRepository";
 import {
