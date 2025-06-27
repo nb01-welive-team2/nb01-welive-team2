@@ -11,12 +11,12 @@ module.exports = {
     {
       displayName: "poll-unit",
       ...commonConfig,
-      testMatch: ["**/unit/**/poll*.test.ts"],
+      testMatch: ["**/unitTest/pollTest/poll*.test.ts"],
     },
     {
       displayName: "poll-integration",
       ...commonConfig,
-      testMatch: ["**/integration/**/poll*.test.ts"],
+      testMatch: ["**/integrationTest/**/poll*.test.ts"],
     },
     {
       displayName: "residents-api",

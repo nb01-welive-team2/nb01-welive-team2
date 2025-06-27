@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/server.js",
+    "start": "node dist/src/server.js",
     "dev": "nodemon --watch src src/server.ts",
     "typecheck": "tsc --noEmit",
     "prisma:seed": "ts-node prisma/seed.ts",
@@ -15,6 +15,7 @@
     "test-poll-api": "jest --selectProjects poll-api --runInBand --detectOpenHandles",
     "test-residents-api": "jest --selectProjects residents-api --runInBand --detectOpenHandles",
     "test-residents-unit": "jest --selectProjects residents-unit --runInBand --detectOpenHandles",
+    "test-poll-int": "jest --selectProjects poll-integration --runInBand --detectOpenHandles",
     "test-notice-unit": "jest --selectProjects notice-unit --runInBand --detectOpenHandles --coverage",
     "test-complaint-unit": "jest --selectProjects complaint-unit --runInBand --detectOpenHandles --coverage",
     "test-complaint-int": "jest --selectProjects complaint-integration --runInBand --detectOpenHandles --coverage",

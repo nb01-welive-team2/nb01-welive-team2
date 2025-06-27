@@ -13,6 +13,7 @@ export function setTokenCookies(
     httpOnly: true,
     secure: false,
     maxAge: 1 * 60 * 60 * 1000, // 1 hour
+    path: "/",
   });
   res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, {
     httpOnly: true,
@@ -26,6 +27,7 @@ export function clearTokenCookies(res: Response) {
   res.clearCookie(ACCESS_TOKEN_COOKIE_NAME, {
     httpOnly: true,
     secure: false,
+    path: "/",
   });
   res.clearCookie(REFRESH_TOKEN_COOKIE_NAME, {
     httpOnly: true,

@@ -5,6 +5,8 @@ import { generateTokens, verifyRefreshToken } from "@/lib/utils/token";
 import { LoginRequestDTO } from "@/structs/userStruct";
 import { JOIN_STATUS, USER_ROLE } from "@prisma/client";
 import UnauthError from "@/errors/UnauthError";
+import * as userRepository from "@/repositories/userRepository";
+import { hashPassword } from "@/lib/utils/hash";
 
 export const login = async (data: LoginRequestDTO) => {
   const { username, password } = data;
@@ -24,9 +26,9 @@ export const login = async (data: LoginRequestDTO) => {
   }
 
   // TODO: "JOIN_STATUS가 APPROVED일 때만 로그인 가능. 편의를 위해 다른 기능 완성 후 적용"
-  // if (user.joinStatus !== JOIN_STATUS.APPROVED) {
-  //   throw new UnauthError();
-  // }
+  if (user.joinStatus !== JOIN_STATUS.APPROVED) {
+    throw new UnauthError();
+  }
 
   const userId = user.id;
   const role = user.role;
@@ -48,6 +50,7 @@ export const login = async (data: LoginRequestDTO) => {
     role,
     apartmentId!
   );
+
   return {
     accessToken,
     refreshToken,
@@ -77,4 +80,26 @@ export const refreshToken = async (refreshToken?: string) => {
     accessToken,
     refreshToken: newRefreshToken,
   };
+};
+
+export const updatePassword = async (
+  id: string,
+  currentPassword: string,
+  newPassword: string
+) => {
+  const user = await userRepository.getUserId(id);
+  if (!user) {
+    throw new UnauthError();
+  }
+
+  const isPasswordValid = await bcrypt.compare(
+    currentPassword,
+    user.encryptedPassword
+  );
+  if (!isPasswordValid) {
+    throw new UnauthError();
+  }
+
+  const hashedPassword = await hashPassword(newPassword);
+  await userRepository.updateUser(id, { encryptedPassword: hashedPassword });
 };
