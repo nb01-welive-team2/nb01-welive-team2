@@ -86,6 +86,7 @@ async function getApartmentDetail(id: string) {
       start: apartment.startHoNumber,
       end: apartment.endHoNumber,
     },
+    apartmentStatus: apartment.approvalStatus,
   };
 }
 
