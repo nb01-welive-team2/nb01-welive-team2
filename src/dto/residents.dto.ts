@@ -44,3 +44,53 @@ export type UploadResidentsInput = {
   apartmentId: string;
   isHouseholder: HOUSEHOLDER_STATUS;
 };
+
+export class ResidentResponseDto {
+  id!: string;
+  name!: string;
+  apartmentId!: string;
+  building!: number;
+  unitNumber!: number;
+  contact!: string;
+  email!: string;
+  residenceStatus!: RESIDENCE_STATUS;
+  isHouseholder!: HOUSEHOLDER_STATUS;
+  isRegistered!: boolean;
+  approvalStatus!: APPROVAL_STATUS;
+
+  constructor(partial: Partial<ResidentResponseDto>) {
+    Object.assign(this, partial);
+  }
+}
+
+export class ResidentsListResponseDto {
+  id!: string;
+  name!: string;
+  apartmentId!: string;
+  building!: number;
+  unitNumber!: number;
+  contact!: string;
+  email!: string;
+  residenceStatus!: RESIDENCE_STATUS;
+  isRegistered!: boolean;
+  approvalStatus!: APPROVAL_STATUS;
+  isHouseholder!: HOUSEHOLDER_STATUS;
+
+  constructor(partial: Partial<ResidentsListResponseDto>) {
+    Object.assign(this, partial);
+  }
+}
+
+export class UpdateResidentResponseDto {
+  name?: string;
+  contact?: string;
+  email?: string;
+  residenceStatus?: RESIDENCE_STATUS;
+  isHouseholder?: HOUSEHOLDER_STATUS;
+  isRegistered?: boolean;
+  approvalStatus?: APPROVAL_STATUS;
+
+  constructor(partial: Partial<UpdateResidentResponseDto>) {
+    Object.assign(this, partial);
+  }
+}

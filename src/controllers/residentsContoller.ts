@@ -7,6 +7,11 @@ import {
   UpdateResidentBodyStruct,
 } from "../structs/residentStruct";
 import { AuthenticatedRequest } from "@/types/express";
+import {
+  ResidentResponseDto,
+  ResidentsListResponseDto,
+  UpdateResidentResponseDto,
+} from "@/dto/residents.dto";
 
 // 입주민 명부 개별 등록
 export async function uploadResidentController(req: Request, res: Response) {
@@ -19,7 +24,7 @@ export async function uploadResidentController(req: Request, res: Response) {
     apartmentId,
   });
 
-  res.status(201).json(residents);
+  res.status(201).json(new ResidentResponseDto(residents));
 }
 
 // 입주민 목록 조회
@@ -33,7 +38,9 @@ export async function getResidentsListFilteredController(
     apartmentId,
   });
 
-  res.status(200).json(residents);
+  res
+    .status(200)
+    .json(residents.map((resident) => new ResidentsListResponseDto(resident)));
 }
 
 // 입주민 상세 조회
@@ -43,8 +50,11 @@ export async function getResidentByIdController(req: Request, res: Response) {
 
   await residentsService.residentAccessCheck(id, apartmentId);
   const resident = await residentsService.getResident(id);
+  if (!resident) {
+    throw new CommonError("입주민이 존재 하지 않습니다.", 404);
+  }
 
-  res.status(200).json(resident);
+  res.status(200).json(new ResidentResponseDto(resident));
 }
 
 // 입주민 정보 수정
@@ -59,7 +69,7 @@ export async function updateResidentInfoController(
   await residentsService.residentAccessCheck(id, apartmentId);
   const resident = await residentsService.patchResident(id, data);
 
-  res.status(200).json(resident);
+  res.status(200).json(new UpdateResidentResponseDto(resident));
 }
 
 // 입주민 정보 삭제
