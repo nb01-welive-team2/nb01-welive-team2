@@ -15,8 +15,12 @@ import {
 
 // 입주민 명부 개별 등록
 export async function uploadResidentController(req: Request, res: Response) {
-  const { apartmentId } = (req as AuthenticatedRequest).user;
+  const { role, apartmentId } = (req as AuthenticatedRequest).user;
   const data = create(req.body, createResidentBodyStruct);
+
+  if (role !== "ADMIN") {
+    throw new CommonError("권한이 없습니다.", 403);
+  }
 
   const residents = await residentsService.uploadResident({
     ...data,
@@ -32,7 +36,12 @@ export async function getResidentsListFilteredController(
   req: Request,
   res: Response
 ) {
-  const { apartmentId } = (req as AuthenticatedRequest).user;
+  const { role, apartmentId } = (req as AuthenticatedRequest).user;
+
+  if (role !== "ADMIN") {
+    throw new CommonError("권한이 없습니다.", 403);
+  }
+
   const residents = await residentsService.getResidentsList({
     ...req.query,
     apartmentId,
@@ -46,7 +55,11 @@ export async function getResidentsListFilteredController(
 // 입주민 상세 조회
 export async function getResidentByIdController(req: Request, res: Response) {
   const { id } = req.params;
-  const { apartmentId } = (req as AuthenticatedRequest).user;
+  const { apartmentId, role } = (req as AuthenticatedRequest).user;
+
+  if (role !== "ADMIN") {
+    throw new CommonError("권한이 없습니다.", 403);
+  }
 
   await residentsService.residentAccessCheck(id, apartmentId);
   const resident = await residentsService.getResident(id);
@@ -63,7 +76,11 @@ export async function updateResidentInfoController(
   res: Response
 ) {
   const { id } = req.params;
-  const { apartmentId } = (req as AuthenticatedRequest).user;
+  const { apartmentId, role } = (req as AuthenticatedRequest).user;
+
+  if (role !== "ADMIN") {
+    throw new CommonError("권한이 없습니다.", 403);
+  }
 
   const data = create(req.body, UpdateResidentBodyStruct);
   await residentsService.residentAccessCheck(id, apartmentId);
@@ -75,7 +92,11 @@ export async function updateResidentInfoController(
 // 입주민 정보 삭제
 export async function deleteResidentController(req: Request, res: Response) {
   const { id } = req.params;
-  const { apartmentId } = (req as AuthenticatedRequest).user;
+  const { apartmentId, role } = (req as AuthenticatedRequest).user;
+
+  if (role !== "ADMIN") {
+    throw new CommonError("권한이 없습니다.", 403);
+  }
 
   await residentsService.residentAccessCheck(id, apartmentId);
   await residentsService.removeResident(id);
@@ -115,6 +136,10 @@ export async function downloadResidentsCsvController(
   const user = (req as AuthenticatedRequest).user;
   if (!user) throw new CommonError("인증되지 않은 사용자입니다.", 401);
 
+  if (user.role !== "ADMIN") {
+    throw new CommonError("해당 기능은 관리자 전용입니다.", 403);
+  }
+
   const apartmentId = user.apartmentId;
   if (!apartmentId) throw new CommonError("아파트 정보가 없습니다.", 400);
 
@@ -133,6 +158,10 @@ export async function downloadResidentsCsvTemplateController(
 ) {
   const user = (req as AuthenticatedRequest).user;
   if (!user) throw new CommonError("인증되지 않은 사용자입니다.", 401);
+
+  if (user.role !== "ADMIN") {
+    new CommonError("해당 기능은 관리자 전용입니다.", 403);
+  }
 
   const apartmentId = user.apartmentId;
   if (!apartmentId) throw new CommonError("아파트 정보가 없습니다.", 400);
