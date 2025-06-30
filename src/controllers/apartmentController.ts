@@ -4,6 +4,9 @@ import {
   ApartmentsListPublicResponseDto,
   ApartmentsListResponseDto,
   ApartmentResponseDto,
+  ApartmentsListResponseDtoProps,
+  ApartmentDtoBaseProps,
+  ApartmentDetailResponseDtoProps,
 } from "@/dto/apartmentInfo.dto";
 
 export async function getApartmentsListController(req: Request, res: Response) {
@@ -18,15 +21,19 @@ export async function getApartmentsListController(req: Request, res: Response) {
     isAuthenticated
   );
 
-  res
-    .status(200)
-    .json(
-      apartments.map((apartment) =>
-        isAuthenticated
-          ? new ApartmentsListResponseDto(apartment)
-          : new ApartmentsListPublicResponseDto(apartment)
-      )
-    );
+  res.status(200).json(
+    apartments.map((apartment) => {
+      if (isAuthenticated) {
+        return new ApartmentsListResponseDto(
+          apartment as ApartmentsListResponseDtoProps
+        );
+      } else {
+        return new ApartmentsListPublicResponseDto(
+          apartment as ApartmentDtoBaseProps
+        );
+      }
+    })
+  );
 }
 
 export async function getApartmentDetailController(
@@ -35,5 +42,9 @@ export async function getApartmentDetailController(
 ) {
   const id = req.params.id;
   const apartment = await apartmentInfoService.getApartmentDetail(id);
-  res.status(200).json(new ApartmentResponseDto(apartment));
+  res
+    .status(200)
+    .json(
+      new ApartmentResponseDto(apartment as ApartmentDetailResponseDtoProps)
+    );
 }
