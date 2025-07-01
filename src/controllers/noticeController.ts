@@ -4,6 +4,7 @@ import { USER_ROLE } from "@prisma/client";
 import {
   CreateNoticeBodyStruct,
   NoticeIdParamStruct,
+  NoticePageParamsStruct,
   PatchNoticeBodyStruct,
 } from "../structs/noticeStructs";
 import noticeService from "../services/noticeService";
@@ -127,7 +128,7 @@ export async function getNoticeList(req: Request, res: Response) {
   if ((reqWithPayload.user.role as string) === USER_ROLE.SUPER_ADMIN) {
     throw new ForbiddenError();
   }
-  const data = create(req.query, PageParamsStruct);
+  const data = create(req.query, NoticePageParamsStruct);
   const result = await noticeService.getNoticeList(
     reqWithPayload.user.userId,
     reqWithPayload.user.role as USER_ROLE,

@@ -47,7 +47,12 @@ describe("noticeService", () => {
     it("should build search condition, get count and list, then return them", async () => {
       const userId = "user-uuid";
       const role = USER_ROLE.ADMIN;
-      const params = { page: 1, limit: 10 };
+      const params = {
+        page: 1,
+        limit: 10,
+        category: NOTICE_CATEGORY.MAINTENANCE,
+        keyword: "",
+      };
 
       const searchCondition = {
         whereCondition: { category: "MAINTENANCE" },
@@ -67,10 +72,16 @@ describe("noticeService", () => {
 
       const result = await noticeService.getNoticeList(userId, role, params);
 
-      expect(buildSearchCondition).toHaveBeenCalledWith(params, {
-        userId,
-        role,
-      });
+      expect(buildSearchCondition).toHaveBeenCalledWith(
+        params.page,
+        params.limit,
+        params.keyword,
+        {
+          userId,
+          role,
+        },
+        { category: params.category }
+      );
       expect(noticeRepository.getCount).toHaveBeenCalledWith(
         searchCondition.whereCondition
       );

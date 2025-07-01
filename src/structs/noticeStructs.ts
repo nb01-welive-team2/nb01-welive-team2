@@ -8,14 +8,16 @@ import {
   union,
   boolean,
   partial,
+  defaulted,
 } from "superstruct";
-import { UUID } from "./commonStructs";
+import { integerString, UUID } from "./commonStructs";
 
 const NoticeCategoryEnum = union([
   literal("MAINTENANCE"),
   literal("EMERGENCY"),
   literal("COMMUNITY"),
   literal("RESIDENT_VOTE"),
+  literal("RESIDENT_COUNCIL"),
   literal("ETC"),
 ]);
 
@@ -33,3 +35,11 @@ export type PatchNoticeBodyType = Infer<typeof PatchNoticeBodyStruct>;
 export const NoticeIdParamStruct = object({
   noticeId: UUID,
 });
+
+export const NoticePageParamsStruct = object({
+  page: defaulted(integerString, 1),
+  limit: defaulted(integerString, 11),
+  category: defaulted(NoticeCategoryEnum, undefined),
+  keyword: defaulted(nonempty(string()), ""),
+});
+export type NoticePageParamsType = Infer<typeof NoticePageParamsStruct>;
