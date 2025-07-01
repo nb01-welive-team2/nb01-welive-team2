@@ -1,6 +1,6 @@
 import request from "supertest";
 import app from "@/app";
-import { NOTICE_CATEGORY, BOARD_ID } from "@prisma/client";
+import { NOTICE_CATEGORY } from "@prisma/client";
 import { seedDatabase } from "../../prisma/seed";
 import { mockUsers, mockNotices } from "../../prisma/mock";
 import TestAgent from "supertest/lib/agent";
@@ -42,7 +42,6 @@ describe("Notice API Integration Test", () => {
         title: "새 공지입니다",
         content: "내용입니다",
         category: NOTICE_CATEGORY.EMERGENCY,
-        boardId: BOARD_ID.NOTICE,
       });
 
       expect(res.status).toBe(201);
@@ -61,7 +60,6 @@ describe("Notice API Integration Test", () => {
         title: "공지",
         content: "내용",
         category: NOTICE_CATEGORY.ETC,
-        boardId: BOARD_ID.NOTICE,
       });
 
       expect(res.status).toBe(401);
