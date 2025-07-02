@@ -68,7 +68,7 @@ describe("Image Integration Tests", () => {
         },
       });
 
-      const loginResponse = await request(app).post("/auth/login").send({
+      const loginResponse = await request(app).post("/api/auth/login").send({
         username: "testuser",
         password: "password123!",
       });
@@ -160,7 +160,7 @@ describe("Image Integration Tests", () => {
         },
       });
 
-      const loginResponse = await request(app).post("/auth/login").send({
+      const loginResponse = await request(app).post("/api/auth/login").send({
         username: "testuser",
         password: "password123!",
       });
@@ -225,7 +225,7 @@ describe("Image Integration Tests", () => {
         },
       });
 
-      const loginResponse = await request(app).post("/auth/login").send({
+      const loginResponse = await request(app).post("/api/auth/login").send({
         username: "testuser",
         password: "password123!",
       });
@@ -311,7 +311,7 @@ describe("Image Integration Tests", () => {
         },
       });
 
-      const loginResponse = await request(app).post("/auth/login").send({
+      const loginResponse = await request(app).post("/api/auth/login").send({
         username: "testuser",
         password: "password123!",
       });
@@ -340,7 +340,6 @@ describe("Image Integration Tests", () => {
       expect(updateResponse.status).toBe(200);
       expect(updateResponse.body.message).toBe("유저 정보 수정 성공");
 
-      // 테스트 파일 정리
       if (fs.existsSync(testImagePath)) {
         fs.unlinkSync(testImagePath);
       }
@@ -406,7 +405,7 @@ describe("Image Integration Tests", () => {
         },
       });
 
-      const loginResponse = await request(app).post("/auth/login").send({
+      const loginResponse = await request(app).post("/api/auth/login").send({
         username: "testuser",
         password: "password123!",
       });
@@ -484,7 +483,7 @@ describe("Image Integration Tests", () => {
         },
       });
 
-      const loginResponse = await request(app).post("/auth/login").send({
+      const loginResponse = await request(app).post("/api/auth/login").send({
         username: "testuser",
         password: "password123!",
       });

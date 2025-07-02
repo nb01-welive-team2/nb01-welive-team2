@@ -156,7 +156,7 @@ describe("User & Auth Integration Tests", () => {
       });
 
       const approveAdminResponse = await request(app)
-        .post("/api/auth/approve-admin") // 오타 수정
+        .post("/api/auth/approve-admin")
         .set("cookie", superAdminCookies)
         .send({ id: admin!.id });
 
@@ -387,7 +387,7 @@ describe("User & Auth Integration Tests", () => {
       expect(updateAdminResponse.status).toBe(200);
 
       const deleteAdminResponse = await request(app)
-        .delete(`/api/auth/deleted-admin/${admin.id}`) // 오타 수정
+        .delete(`/api/auth/deleted-admin/${admin.id}`)
         .set("Cookie", superAdminCookies);
 
       expect(deleteAdminResponse.status).toBe(200);
@@ -428,7 +428,7 @@ describe("User & Auth Integration Tests", () => {
       const superAdminCookies = superAdminLogin.headers["set-cookie"];
 
       const rejectAdminResponse = await request(app)
-        .post("/api/auth/reject-admin") // 오타 수정
+        .post("/api/auth/reject-admin")
         .set("Cookie", superAdminCookies)
         .send({ id: admin.id });
 
@@ -438,7 +438,7 @@ describe("User & Auth Integration Tests", () => {
       );
 
       const approveAllResponse = await request(app)
-        .post("/api/auth/approve-admins") // 오타 수정
+        .post("/api/auth/approve-admins")
         .set("Cookie", superAdminCookies);
 
       expect(approveAllResponse.status).toBe(200);
@@ -447,7 +447,7 @@ describe("User & Auth Integration Tests", () => {
       );
 
       const rejectAllResponse = await request(app)
-        .post("/api/auth/reject-admins") // 오타 수정
+        .post("/api/auth/reject-admins")
         .set("Cookie", superAdminCookies);
 
       expect(rejectAllResponse.status).toBe(200);
@@ -832,7 +832,7 @@ describe("User & Auth Integration Tests", () => {
       expect(userCookies).toBeDefined();
 
       const approveResponse = await request(app)
-        .post("/api/auth/approve-admin") // 오타 수정
+        .post("/api/auth/approve-admin")
         .set("Cookie", userCookies)
         .send({ id: admin.id });
 
@@ -1219,7 +1219,7 @@ describe("User & Auth Integration Tests", () => {
       const superAdminCookies = superAdminLogin.headers["set-cookie"];
 
       const approveResponse = await request(app)
-        .post("/api/auth/approve-admin") // 오타 수정
+        .post("/api/auth/approve-admin")
         .set("Cookie", superAdminCookies)
         .send({ id: "nonexistent-id" });
 
@@ -1258,7 +1258,7 @@ describe("User & Auth Integration Tests", () => {
       const superAdminCookies = superAdminLogin.headers["set-cookie"];
 
       const approveResponse = await request(app)
-        .post("/api/auth/approve-admin") // 오타 수정
+        .post("/api/auth/approve-admin")
         .set("Cookie", superAdminCookies)
         .send({ id: user.id });
 
