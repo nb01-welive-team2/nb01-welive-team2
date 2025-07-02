@@ -9,8 +9,20 @@ import {
   boolean,
   partial,
   defaulted,
+  coerce,
+  integer,
+  StructError,
 } from "superstruct";
-import { integerString, UUID } from "./commonStructs";
+import {
+  DateTimeStringStruct,
+  integerString,
+  integerString1,
+  integerString11,
+  searchKeywordStruct,
+  UUID,
+} from "./commonStructs";
+import { NOTICE_CATEGORY } from "@prisma/client";
+import CommonError from "@/errors/CommonError";
 
 const NoticeCategoryEnum = union([
   literal("MAINTENANCE"),
@@ -26,6 +38,8 @@ export const CreateNoticeBodyStruct = object({
   title: nonempty(string()),
   content: string(),
   isPinned: boolean(),
+  startDate: optional(DateTimeStringStruct),
+  endDate: optional(DateTimeStringStruct),
 });
 export type CreateNoticeBodyType = Infer<typeof CreateNoticeBodyStruct>;
 
@@ -36,10 +50,20 @@ export const NoticeIdParamStruct = object({
   noticeId: UUID,
 });
 
+const noticeCategoryStruct = coerce(
+  optional(NoticeCategoryEnum),
+  string(),
+  (value) => {
+    if (value in NOTICE_CATEGORY) return value;
+    else if (value === undefined) return undefined;
+    else throw new CommonError("notice category struct err", 400);
+  }
+);
+
 export const NoticePageParamsStruct = object({
-  page: defaulted(integerString, 1),
-  limit: defaulted(integerString, 11),
-  category: defaulted(NoticeCategoryEnum, undefined),
-  keyword: defaulted(nonempty(string()), ""),
+  page: integerString1,
+  limit: integerString11,
+  category: noticeCategoryStruct,
+  keyword: searchKeywordStruct,
 });
 export type NoticePageParamsType = Infer<typeof NoticePageParamsStruct>;

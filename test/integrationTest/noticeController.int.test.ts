@@ -30,7 +30,7 @@ describe("Notice API Integration Test", () => {
     const rawAgent = request.agent(app);
     const login = await rawAgent
       .post("/api/auth/login")
-      .send({ username: mockUsers[0].username, password: "adminpassword" });
+      .send({ username: mockUsers[1].username, password: "bobpassword" });
 
     agent = authAgent(rawAgent, login.body.accessToken);
   });
@@ -42,6 +42,7 @@ describe("Notice API Integration Test", () => {
         title: "새 공지입니다",
         content: "내용입니다",
         category: NOTICE_CATEGORY.EMERGENCY,
+        isPinned: false,
       });
 
       expect(res.status).toBe(201);
@@ -71,7 +72,8 @@ describe("Notice API Integration Test", () => {
     it("공지 목록 조회 성공", async () => {
       const res = await agent.get("/api/notices").query({ page: 1 });
       expect(res.status).toBe(200);
-      expect(Array.isArray(res.body.data)).toBe(true);
+      expect(res.body.notices).toBeInstanceOf(Array);
+      expect(typeof res.body.totalCount).toBe("number");
     });
   });
 
@@ -79,11 +81,13 @@ describe("Notice API Integration Test", () => {
     it("공지 상세 조회 성공", async () => {
       const res = await agent.get(`/api/notices/${mockNotices[0].id}`);
       expect(res.status).toBe(200);
-      expect(res.body.data.title).toBe(mockNotices[0].title);
+      expect(res.body.title).toBe(mockNotices[0].title);
     });
 
     it("존재하지 않는 공지 ID는 404 반환", async () => {
-      const res = await agent.get("/api/notices/invalid-id");
+      const res = await agent.get(
+        "/api/notices/e7d48b31-2718-46be-b8b8-c5d25bb82d43"
+      );
       expect(res.status).toBe(404);
     });
   });
@@ -101,16 +105,18 @@ describe("Notice API Integration Test", () => {
       });
 
       expect(res.status).toBe(200);
-      expect(res.body.data.title).toBe("수정된 제목");
+      expect(res.body.title).toBe("수정된 제목");
     });
 
     it("없는 공지 ID 수정 시 404 반환", async () => {
-      const res = await agent.put("/api/notices/nonexistent-id").send({
-        title: "수정 불가",
-        content: "내용",
-        category: NOTICE_CATEGORY.ETC,
-        isPinned: false,
-      });
+      const res = await agent
+        .put("/api/notices/e7d48b31-2718-46be-b8b8-c5d25bb82d43")
+        .send({
+          title: "수정 불가",
+          content: "내용",
+          category: NOTICE_CATEGORY.ETC,
+          isPinned: false,
+        });
 
       expect(res.status).toBe(404);
     });
@@ -124,7 +130,9 @@ describe("Notice API Integration Test", () => {
     });
 
     it("없는 공지 ID 삭제 시 404 반환", async () => {
-      const res = await agent.delete("/api/notices/invalid-id");
+      const res = await agent.delete(
+        "/api/notices/e7d48b31-2718-46be-b8b8-c5d25bb82d43"
+      );
       expect(res.status).toBe(404);
     });
 

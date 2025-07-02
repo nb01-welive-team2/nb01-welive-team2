@@ -24,6 +24,8 @@ async function createNotice(
     content: notice.content,
     isPinned: notice.isPinned,
     category: notice.category,
+    ...(notice.startDate && { startDate: notice.startDate }),
+    ...(notice.endDate && { endDate: notice.endDate }),
   });
 }
 
@@ -43,10 +45,9 @@ async function getNoticeList(
     additionalCondition
   );
 
-  const totalCount = await noticeRepository.getCount(
-    searchCondition.whereCondition
-  );
-
+  const totalCount = await noticeRepository.getCount({
+    where: searchCondition.whereCondition,
+  });
   const notices = await noticeRepository.getList(searchCondition.bothCondition);
 
   return { notices, totalCount };

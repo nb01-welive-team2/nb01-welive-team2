@@ -82,9 +82,9 @@ describe("noticeService", () => {
         },
         { category: params.category }
       );
-      expect(noticeRepository.getCount).toHaveBeenCalledWith(
-        searchCondition.whereCondition
-      );
+      expect(noticeRepository.getCount).toHaveBeenCalledWith({
+        where: searchCondition.whereCondition,
+      });
       expect(noticeRepository.getList).toHaveBeenCalledWith(
         searchCondition.bothCondition
       );
