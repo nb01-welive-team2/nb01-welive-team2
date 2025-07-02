@@ -60,8 +60,8 @@ export const getPollList = async (
         mode: "insensitive",
       },
     }),
-    ...(userId && { userId }),
-  };
+    ...(role === "ADMIN" && userId && { userId }),
+  }; // 관리자인 경우에만 userId 필터 적용
 
   const isUserRole = role === "USER";
   if (isUserRole && userId) {
