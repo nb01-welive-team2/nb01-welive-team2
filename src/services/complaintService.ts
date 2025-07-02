@@ -30,7 +30,12 @@ async function getComplaintList(
   role: USER_ROLE,
   params: PageParamsType
 ) {
-  const searchCondition = await buildSearchCondition(params, { userId, role });
+  const searchCondition = await buildSearchCondition(
+    params.page,
+    params.limit,
+    "",
+    { userId, role }
+  );
   const totalCount = await complaintRepository.getCount({
     where: searchCondition.whereCondition,
   });
