@@ -54,28 +54,28 @@ authRouter.post(
 );
 
 authRouter.post(
-  "/approve-amdin",
+  "/approve-admin",
   authenticate({ optional: false }),
   requireRolle([USER_ROLE.SUPER_ADMIN]),
   withAsync(approveAdmin)
 );
 
 authRouter.post(
-  "/reject-amdin",
+  "/reject-admin",
   authenticate({ optional: false }),
   requireRolle([USER_ROLE.SUPER_ADMIN]),
   withAsync(rejectAdmin)
 );
 
 authRouter.post(
-  "/approve-amdins",
+  "/approve-admins",
   authenticate({ optional: false }),
   requireRolle([USER_ROLE.SUPER_ADMIN]),
   withAsync(approveAllAdmins)
 );
 
 authRouter.post(
-  "/reject-amdins",
+  "/reject-admins",
   authenticate({ optional: false }),
   requireRolle([USER_ROLE.SUPER_ADMIN]),
   withAsync(rejectAllAdmins)
