@@ -46,7 +46,7 @@ describe("User & Auth Integration Tests", () => {
         },
       });
 
-      const signupResponse = await request(app).post("/auth/signup").send({
+      const signupResponse = await request(app).post("/api/auth/signup").send({
         username: "testuser",
         password: "password123!",
         name: "테스트유저",
@@ -68,7 +68,7 @@ describe("User & Auth Integration Tests", () => {
         data: { joinStatus: JOIN_STATUS.APPROVED },
       });
 
-      const loginResponse = await request(app).post("/auth/login").send({
+      const loginResponse = await request(app).post("/api/auth/login").send({
         username: "testuser",
         password: "password123!",
       });
@@ -80,14 +80,14 @@ describe("User & Auth Integration Tests", () => {
       expect(cookies).toBeDefined();
 
       const refreshResponse = await request(app)
-        .post("/auth/refresh")
+        .post("/api/auth/refresh")
         .set("cookie", cookies);
 
       expect(refreshResponse.status).toBe(200);
       expect(refreshResponse.body.message).toBe("토큰 갱신이 완료되었습니다");
 
       const logoutResponse = await request(app)
-        .post("/auth/logout")
+        .post("/api/auth/logout")
         .set("cookie", cookies);
 
       expect(logoutResponse.status).toBe(200);
@@ -98,7 +98,7 @@ describe("User & Auth Integration Tests", () => {
   describe("User Management Flow", () => {
     test("슈퍼관리자 -> 관리자 승인 -> 관리자 -> 사용자 승인", async () => {
       const superAdminResponse = await request(app)
-        .post("/auth/signup/super-admin")
+        .post("/api/auth/signup/super-admin")
         .send({
           username: "superadmin",
           password: "password123!",
@@ -119,33 +119,35 @@ describe("User & Auth Integration Tests", () => {
         data: { joinStatus: JOIN_STATUS.APPROVED },
       });
 
-      const superAdminLogin = await request(app).post("/auth/login").send({
+      const superAdminLogin = await request(app).post("/api/auth/login").send({
         username: "superadmin",
         password: "password123!",
       });
 
       const superAdminCookies = superAdminLogin.headers["set-cookie"];
 
-      const adminResponse = await request(app).post("/auth/signup/admin").send({
-        username: "admin",
-        password: "password123!",
-        name: "관리자",
-        contact: "01011111111",
-        email: "admin@test.com",
-        role: "ADMIN",
-        apartmentName: "관리아파트",
-        apartmentAddress: "서울시 서초구",
-        apartmentManagementNumber: "02-1234-5678",
-        description: "관리아파트 설명",
-        startComplexNumber: "1",
-        endComplexNumber: "10",
-        startDongNumber: "1",
-        endDongNumber: "10",
-        startFloorNumber: "1",
-        endFloorNumber: "10",
-        startHoNumber: "1",
-        endHoNumber: "10",
-      });
+      const adminResponse = await request(app)
+        .post("/api/auth/signup/admin")
+        .send({
+          username: "admin",
+          password: "password123!",
+          name: "관리자",
+          contact: "01011111111",
+          email: "admin@test.com",
+          role: "ADMIN",
+          apartmentName: "관리아파트",
+          apartmentAddress: "서울시 서초구",
+          apartmentManagementNumber: "02-1234-5678",
+          description: "관리아파트 설명",
+          startComplexNumber: "1",
+          endComplexNumber: "10",
+          startDongNumber: "1",
+          endDongNumber: "10",
+          startFloorNumber: "1",
+          endFloorNumber: "10",
+          startHoNumber: "1",
+          endHoNumber: "10",
+        });
 
       expect(adminResponse.status).toBe(201);
 
@@ -154,7 +156,7 @@ describe("User & Auth Integration Tests", () => {
       });
 
       const approveAdminResponse = await request(app)
-        .post("/auth/approve-amdin")
+        .post("/api/auth/approve-admin") // 오타 수정
         .set("cookie", superAdminCookies)
         .send({ id: admin!.id });
 
@@ -217,7 +219,7 @@ describe("User & Auth Integration Tests", () => {
         },
       });
 
-      const loginResponse = await request(app).post("/auth/login").send({
+      const loginResponse = await request(app).post("/api/auth/login").send({
         username: "testuser",
         password: "oldpassword123!",
       });
@@ -237,7 +239,7 @@ describe("User & Auth Integration Tests", () => {
       expect(updatePasswordResponse.status).toBe(200);
       expect(updatePasswordResponse.body.message).toBe("비밀번호 변경 완료");
 
-      const newLoginResponse = await request(app).post("/auth/login").send({
+      const newLoginResponse = await request(app).post("/api/auth/login").send({
         username: "testuser",
         password: "newpassword123!",
       });
@@ -298,7 +300,7 @@ describe("User & Auth Integration Tests", () => {
         },
       });
 
-      const loginResponse = await request(app).post("/auth/login").send({
+      const loginResponse = await request(app).post("/api/auth/login").send({
         username: "testuser",
         password: "password123!",
       });
@@ -362,14 +364,14 @@ describe("User & Auth Integration Tests", () => {
         },
       });
 
-      const superAdminLogin = await request(app).post("/auth/login").send({
+      const superAdminLogin = await request(app).post("/api/auth/login").send({
         username: "superadmin",
         password: "password123!",
       });
       const superAdminCookies = superAdminLogin.headers["set-cookie"];
 
       const updateAdminResponse = await request(app)
-        .patch("/auth/update-admin")
+        .patch("/api/auth/update-admin")
         .set("Cookie", superAdminCookies)
         .send({
           id: admin.id,
@@ -385,7 +387,7 @@ describe("User & Auth Integration Tests", () => {
       expect(updateAdminResponse.status).toBe(200);
 
       const deleteAdminResponse = await request(app)
-        .delete(`/auth/deleted-admin/${admin.id}`)
+        .delete(`/api/auth/deleted-admin/${admin.id}`) // 오타 수정
         .set("Cookie", superAdminCookies);
 
       expect(deleteAdminResponse.status).toBe(200);
@@ -419,14 +421,14 @@ describe("User & Auth Integration Tests", () => {
         },
       });
 
-      const superAdminLogin = await request(app).post("/auth/login").send({
+      const superAdminLogin = await request(app).post("/api/auth/login").send({
         username: "superadmin",
         password: "password123!",
       });
       const superAdminCookies = superAdminLogin.headers["set-cookie"];
 
       const rejectAdminResponse = await request(app)
-        .post("/auth/reject-amdin")
+        .post("/api/auth/reject-admin") // 오타 수정
         .set("Cookie", superAdminCookies)
         .send({ id: admin.id });
 
@@ -436,7 +438,7 @@ describe("User & Auth Integration Tests", () => {
       );
 
       const approveAllResponse = await request(app)
-        .post("/auth/approve-amdins")
+        .post("/api/auth/approve-admins") // 오타 수정
         .set("Cookie", superAdminCookies);
 
       expect(approveAllResponse.status).toBe(200);
@@ -445,7 +447,7 @@ describe("User & Auth Integration Tests", () => {
       );
 
       const rejectAllResponse = await request(app)
-        .post("/auth/reject-amdins")
+        .post("/api/auth/reject-admins") // 오타 수정
         .set("Cookie", superAdminCookies);
 
       expect(rejectAllResponse.status).toBe(200);
@@ -506,14 +508,14 @@ describe("User & Auth Integration Tests", () => {
         },
       });
 
-      const adminLogin = await request(app).post("/auth/login").send({
+      const adminLogin = await request(app).post("/api/auth/login").send({
         username: "admin",
         password: "password123!",
       });
       const adminCookies = adminLogin.headers["set-cookie"];
 
       const rejectUserResponse = await request(app)
-        .post(`/auth/reject-user/${user.id}`)
+        .post(`/api/auth/reject-user/${user.id}`)
         .set("Cookie", adminCookies);
 
       expect(rejectUserResponse.status).toBe(200);
@@ -522,7 +524,7 @@ describe("User & Auth Integration Tests", () => {
       );
 
       const approveAllUsersResponse = await request(app)
-        .post("/auth/approve-users")
+        .post("/api/auth/approve-users")
         .set("Cookie", adminCookies);
 
       expect(approveAllUsersResponse.status).toBe(200);
@@ -531,7 +533,7 @@ describe("User & Auth Integration Tests", () => {
       );
 
       const rejectAllUsersResponse = await request(app)
-        .post("/auth/reject-users")
+        .post("/api/auth/reject-users")
         .set("Cookie", adminCookies);
 
       expect(rejectAllUsersResponse.status).toBe(200);
@@ -555,14 +557,14 @@ describe("User & Auth Integration Tests", () => {
         },
       });
 
-      const superAdminLogin = await request(app).post("/auth/login").send({
+      const superAdminLogin = await request(app).post("/api/auth/login").send({
         username: "superadmin",
         password: "password123!",
       });
       const superAdminCookies = superAdminLogin.headers["set-cookie"];
 
       const cleanupResponse = await request(app)
-        .post("/auth/cleanup")
+        .post("/api/auth/cleanup")
         .set("Cookie", superAdminCookies);
 
       expect(cleanupResponse.status).toBe(200);
@@ -601,14 +603,14 @@ describe("User & Auth Integration Tests", () => {
         },
       });
 
-      const adminLogin = await request(app).post("/auth/login").send({
+      const adminLogin = await request(app).post("/api/auth/login").send({
         username: "admin",
         password: "password123!",
       });
       const adminCookies = adminLogin.headers["set-cookie"];
 
       const cleanupResponse = await request(app)
-        .post("/auth/cleanup")
+        .post("/api/auth/cleanup")
         .set("Cookie", adminCookies);
 
       expect(cleanupResponse.status).toBe(200);
@@ -669,7 +671,7 @@ describe("User & Auth Integration Tests", () => {
         },
       });
 
-      const loginResponse = await request(app).post("/auth/login").send({
+      const loginResponse = await request(app).post("/api/auth/login").send({
         username: "pendinguser",
         password: "password123!",
       });
@@ -678,7 +680,7 @@ describe("User & Auth Integration Tests", () => {
     });
 
     test("존재하지 않는 사용자 로그인 시도", async () => {
-      const loginResponse = await request(app).post("/auth/login").send({
+      const loginResponse = await request(app).post("/api/auth/login").send({
         username: "nonexistentuser",
         password: "password123!",
       });
@@ -736,7 +738,7 @@ describe("User & Auth Integration Tests", () => {
         },
       });
 
-      const loginResponse = await request(app).post("/auth/login").send({
+      const loginResponse = await request(app).post("/api/auth/login").send({
         username: "testuser",
         password: "wrongpassword",
       });
@@ -745,7 +747,7 @@ describe("User & Auth Integration Tests", () => {
     });
 
     test("존재하지 않는 아파트로 회원가입 시도", async () => {
-      const signupResponse = await request(app).post("/auth/signup").send({
+      const signupResponse = await request(app).post("/api/auth/signup").send({
         username: "testuser",
         password: "password123!",
         name: "테스트유저",
@@ -822,7 +824,7 @@ describe("User & Auth Integration Tests", () => {
         },
       });
 
-      const userLogin = await request(app).post("/auth/login").send({
+      const userLogin = await request(app).post("/api/auth/login").send({
         username: "normaluser",
         password: "password123!",
       });
@@ -830,7 +832,7 @@ describe("User & Auth Integration Tests", () => {
       expect(userCookies).toBeDefined();
 
       const approveResponse = await request(app)
-        .post("/auth/approve-amdin")
+        .post("/api/auth/approve-admin") // 오타 수정
         .set("Cookie", userCookies)
         .send({ id: admin.id });
 
@@ -839,14 +841,14 @@ describe("User & Auth Integration Tests", () => {
 
     test("잘못된 리프레시 토큰으로 갱신 시도", async () => {
       const refreshResponse = await request(app)
-        .post("/auth/refresh")
+        .post("/api/auth/refresh")
         .set("Cookie", ["refreshToken=invalid-token"]);
 
       expect(refreshResponse.status).toBe(401);
     });
 
     test("리프레시 토큰 없이 갱신 시도", async () => {
-      const refreshResponse = await request(app).post("/auth/refresh");
+      const refreshResponse = await request(app).post("/api/auth/refresh");
 
       expect(refreshResponse.status).toBe(401);
     });
@@ -864,14 +866,14 @@ describe("User & Auth Integration Tests", () => {
         },
       });
 
-      const superAdminLogin = await request(app).post("/auth/login").send({
+      const superAdminLogin = await request(app).post("/api/auth/login").send({
         username: "superadmin",
         password: "password123!",
       });
       const superAdminCookies = superAdminLogin.headers["set-cookie"];
 
       const updateResponse = await request(app)
-        .patch("/auth/update-admin")
+        .patch("/api/auth/update-admin")
         .set("Cookie", superAdminCookies)
         .send({
           id: "nonexistent-id",
@@ -912,14 +914,14 @@ describe("User & Auth Integration Tests", () => {
         },
       });
 
-      const superAdminLogin = await request(app).post("/auth/login").send({
+      const superAdminLogin = await request(app).post("/api/auth/login").send({
         username: "superadmin",
         password: "password123!",
       });
       const superAdminCookies = superAdminLogin.headers["set-cookie"];
 
       const updateResponse = await request(app)
-        .patch("/auth/update-admin")
+        .patch("/api/auth/update-admin")
         .set("Cookie", superAdminCookies)
         .send({
           id: user.id,
@@ -948,14 +950,14 @@ describe("User & Auth Integration Tests", () => {
         },
       });
 
-      const superAdminLogin = await request(app).post("/auth/login").send({
+      const superAdminLogin = await request(app).post("/api/auth/login").send({
         username: "superadmin",
         password: "password123!",
       });
       const superAdminCookies = superAdminLogin.headers["set-cookie"];
 
       const deleteResponse = await request(app)
-        .delete("/auth/deleted-admin/nonexistent-id")
+        .delete("/api/auth/deleted-admin/nonexistent-id")
         .set("Cookie", superAdminCookies);
 
       expect(deleteResponse.status).toBe(401);
@@ -986,14 +988,14 @@ describe("User & Auth Integration Tests", () => {
         },
       });
 
-      const superAdminLogin = await request(app).post("/auth/login").send({
+      const superAdminLogin = await request(app).post("/api/auth/login").send({
         username: "superadmin",
         password: "password123!",
       });
       const superAdminCookies = superAdminLogin.headers["set-cookie"];
 
       const deleteResponse = await request(app)
-        .delete(`/auth/deleted-admin/${user.id}`)
+        .delete(`/api/auth/deleted-admin/${user.id}`)
         .set("Cookie", superAdminCookies);
 
       expect(deleteResponse.status).toBe(401);
@@ -1049,7 +1051,7 @@ describe("User & Auth Integration Tests", () => {
         },
       });
 
-      const loginResponse = await request(app).post("/auth/login").send({
+      const loginResponse = await request(app).post("/api/auth/login").send({
         username: "fakeuser",
         password: "password123!",
       });
@@ -1117,7 +1119,7 @@ describe("User & Auth Integration Tests", () => {
         },
       });
 
-      const loginResponse = await request(app).post("/auth/login").send({
+      const loginResponse = await request(app).post("/api/auth/login").send({
         username: "testuser",
         password: "password123!",
       });
@@ -1184,14 +1186,14 @@ describe("User & Auth Integration Tests", () => {
         },
       });
 
-      const userLogin = await request(app).post("/auth/login").send({
+      const userLogin = await request(app).post("/api/auth/login").send({
         username: "normaluser",
         password: "password123!",
       });
       const userCookies = userLogin.headers["set-cookie"];
 
       const cleanupResponse = await request(app)
-        .post("/auth/cleanup")
+        .post("/api/auth/cleanup")
         .set("Cookie", userCookies);
 
       expect(cleanupResponse.status).toBe(401);
@@ -1210,14 +1212,14 @@ describe("User & Auth Integration Tests", () => {
         },
       });
 
-      const superAdminLogin = await request(app).post("/auth/login").send({
+      const superAdminLogin = await request(app).post("/api/auth/login").send({
         username: "superadmin",
         password: "password123!",
       });
       const superAdminCookies = superAdminLogin.headers["set-cookie"];
 
       const approveResponse = await request(app)
-        .post("/auth/approve-amdin")
+        .post("/api/auth/approve-admin") // 오타 수정
         .set("Cookie", superAdminCookies)
         .send({ id: "nonexistent-id" });
 
@@ -1249,14 +1251,14 @@ describe("User & Auth Integration Tests", () => {
         },
       });
 
-      const superAdminLogin = await request(app).post("/auth/login").send({
+      const superAdminLogin = await request(app).post("/api/auth/login").send({
         username: "superadmin",
         password: "password123!",
       });
       const superAdminCookies = superAdminLogin.headers["set-cookie"];
 
       const approveResponse = await request(app)
-        .post("/auth/approve-amdin")
+        .post("/api/auth/approve-admin") // 오타 수정
         .set("Cookie", superAdminCookies)
         .send({ id: user.id });
 
@@ -1293,14 +1295,14 @@ describe("User & Auth Integration Tests", () => {
         },
       });
 
-      const adminLogin = await request(app).post("/auth/login").send({
+      const adminLogin = await request(app).post("/api/auth/login").send({
         username: "admin",
         password: "password123!",
       });
       const adminCookies = adminLogin.headers["set-cookie"];
 
       const approveResponse = await request(app)
-        .post("/auth/approve-user/nonexistent-id")
+        .post("/api/auth/approve-user/nonexistent-id")
         .set("Cookie", adminCookies);
 
       expect(approveResponse.status).toBe(401);
@@ -1348,14 +1350,14 @@ describe("User & Auth Integration Tests", () => {
         },
       });
 
-      const adminLogin = await request(app).post("/auth/login").send({
+      const adminLogin = await request(app).post("/api/auth/login").send({
         username: "admin",
         password: "password123!",
       });
       const adminCookies = adminLogin.headers["set-cookie"];
 
       const approveResponse = await request(app)
-        .post(`/auth/approve-user/${admin2.id}`)
+        .post(`/api/auth/approve-user/${admin2.id}`)
         .set("Cookie", adminCookies);
 
       expect(approveResponse.status).toBe(401);
