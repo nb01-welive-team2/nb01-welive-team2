@@ -1,12 +1,15 @@
 import residentsService from "../../../src/services/residentsService";
 import residentsRepository from "../../../src/repositories/residentsRepository";
+import { parseResidentsCsv } from "@/lib/utils/parseResidentsCsv";
 import {
   APPROVAL_STATUS,
   HOUSEHOLDER_STATUS,
   RESIDENCE_STATUS,
 } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
 jest.mock("../../../src/repositories/residentsRepository");
+jest.mock("@/lib/utils/parseResidentsCsv");
 
 describe("Residents Service", () => {
   const mockResidents = {
@@ -61,6 +64,93 @@ describe("Residents Service", () => {
     });
   });
 
+  describe("uploadResidentsCsvFile", () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      jest
+        .spyOn(prisma, "$transaction")
+        .mockImplementation(async (callback) => {
+          return await callback({} as any);
+        });
+    });
+
+    test("CSV 텍스트로 입주민 여러 명 등록 성공", async () => {
+      const mockCsvText = "CSV TEXT";
+      const mockApartmentId = "apt-id-123";
+
+      const parsedCsvData = [
+        {
+          name: "디지몬",
+          building: 108,
+          unitNumber: 1502,
+          contact: "010-1111-2222",
+          email: "example@test.com",
+          isHouseholder: "MEMBER",
+        },
+      ];
+
+      jest.mocked(parseResidentsCsv).mockReturnValue(parsedCsvData);
+
+      const expectedResident = {
+        id: "mocked-id",
+        apartmentId: "apt-id-123",
+        building: 108,
+        unitNumber: 1502,
+        contact: "010-1111-2222",
+        name: "디지몬",
+        email: "example@test.com",
+        residenceStatus: RESIDENCE_STATUS.RESIDENCE,
+        isHouseholder: HOUSEHOLDER_STATUS.MEMBER,
+        isRegistered: false,
+        approvalStatus: APPROVAL_STATUS.PENDING,
+      };
+
+      jest
+        .mocked(residentsRepository.uploadResident)
+        .mockResolvedValue(expectedResident);
+
+      const result = await residentsService.uploadResidentsFromCsv(
+        mockCsvText,
+        mockApartmentId
+      );
+
+      expect(parseResidentsCsv).toHaveBeenCalledWith(mockCsvText);
+      expect(residentsRepository.uploadResident).toHaveBeenCalledWith(
+        expect.anything(), // tx
+        expect.objectContaining({
+          name: "디지몬",
+          building: 108,
+          unitNumber: 1502,
+          contact: "010-1111-2222",
+          email: "example@test.com",
+          apartmentId: mockApartmentId,
+          isHouseholder: HOUSEHOLDER_STATUS.MEMBER,
+        })
+      );
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual(expectedResident);
+    });
+
+    test("필수 필드 누락 시 에러 발생", async () => {
+      const invalidData = [
+        {
+          name: "",
+          building: 101,
+          unitNumber: 202,
+          contact: "010-1234-5678",
+          email: "test@example.com",
+          isHouseholder: "MEMBER",
+        },
+      ];
+
+      jest.mocked(parseResidentsCsv).mockReturnValue(invalidData);
+
+      await expect(
+        residentsService.uploadResidentsFromCsv("csv text", "apt-id-123")
+      ).rejects.toThrow("필수 항목 누락");
+    });
+  });
+
   describe("getResidentsList", () => {
     test("입주민 리스트 조회", async () => {
       const mockResidentsList = [mockResidents];
@@ -92,6 +182,10 @@ describe("Residents Service", () => {
       );
       expect(result).toEqual(mockResidents);
     });
+  });
+
+  describe("uploadResidentsCsvFile", () => {
+    test("csv 입주민 등록 성공", async () => {});
   });
 
   describe("patchResident", () => {
