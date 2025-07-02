@@ -30,7 +30,7 @@ describe("Notice API Integration Test", () => {
     const rawAgent = request.agent(app);
     const login = await rawAgent
       .post("/api/auth/login")
-      .send({ username: mockUsers[0].username, password: "adminpassword" });
+      .send({ username: mockUsers[1].username, password: "bobpassword" });
 
     agent = authAgent(rawAgent, login.body.accessToken);
   });
@@ -96,16 +96,16 @@ describe("Notice API Integration Test", () => {
         content: "수정된 내용",
         category: NOTICE_CATEGORY.MAINTENANCE,
         isPinned: true,
-        startDate: "2025-06-01T00:00:00Z",
-        endDate: "2025-06-30T00:00:00Z",
       });
 
       expect(res.status).toBe(200);
       expect(res.body.data.title).toBe("수정된 제목");
+      console.log(res.body);
     });
 
     it("없는 공지 ID 수정 시 404 반환", async () => {
-      const res = await agent.put("/api/notices/nonexistent-id").send({
+      const fakeId = "8f09eabc-1234-4abc-bdef-000000000000"; // uuid
+      const res = await agent.put(`/api/notices/${fakeId}`).send({
         title: "수정 불가",
         content: "내용",
         category: NOTICE_CATEGORY.ETC,
@@ -124,7 +124,8 @@ describe("Notice API Integration Test", () => {
     });
 
     it("없는 공지 ID 삭제 시 404 반환", async () => {
-      const res = await agent.delete("/api/notices/invalid-id");
+      const fakeId = "8f09eabc-1234-4abc-bdef-000000000000"; // uuid
+      const res = await agent.delete(`/api/notices/${fakeId}`);
       expect(res.status).toBe(404);
     });
 
