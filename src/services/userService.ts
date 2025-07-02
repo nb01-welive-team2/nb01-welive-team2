@@ -13,13 +13,14 @@ import { USER_ROLE, Users } from "@prisma/client";
 import bcrypt from "bcrypt";
 
 export const signupUser = async (data: SignupUserRequestDTO) => {
-  const { username, password, contact, email } = data;
+  const { password } = data;
 
   const apartment = await userRepository.findApartment(data.apartmentName);
   if (!apartment) throw new BadRequestError("존재하지 않는 아파트입니다.");
 
   const encryptedPassword = await hashPassword(password);
   const user = {
+    isActive: true,
     ...data,
     password: encryptedPassword,
   };
@@ -30,10 +31,11 @@ export const signupUser = async (data: SignupUserRequestDTO) => {
 };
 
 export const signupAdmin = async (data: SignupAdminRequestDTO) => {
-  const { username, password, contact, email } = data;
+  const { password } = data;
 
   const encryptedPassword = await hashPassword(password);
   const user = {
+    isActive: true,
     ...data,
     password: encryptedPassword,
   };
@@ -44,10 +46,11 @@ export const signupAdmin = async (data: SignupAdminRequestDTO) => {
 };
 
 export const signupSuperAdmin = async (data: SignupSuperAdminRequestDTO) => {
-  const { username, contact, email, password } = data;
+  const { password } = data;
 
   const encryptedPassword = await hashPassword(password);
   const user = {
+    isActive: true,
     ...data,
     password: encryptedPassword,
   };

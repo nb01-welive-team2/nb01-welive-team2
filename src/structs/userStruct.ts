@@ -11,6 +11,7 @@ import {
   partial,
   nullable,
   assign,
+  boolean,
 } from "superstruct";
 
 const strictEmailRegex = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
@@ -36,6 +37,7 @@ const baseUserStruct = object({
   email: pattern(string(), strictEmailRegex),
   role: enums(["USER", "ADMIN", "SUPER_ADMIN"]),
   profileImage: optional(size(string(), 0, 2048)),
+  isActive: optional(require("superstruct").defaulted(boolean(), true)),
 });
 
 export const signupUserStruct = object({

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import * as userService from "@/services/userService";
-import { userResponseDTO } from "@/dto/userDTO";
+import { SignupResponseDTO, userResponseDTO } from "@/dto/userDTO";
 import { UserType } from "@/types/User";
 import { create } from "superstruct";
 import {
@@ -11,6 +11,7 @@ import {
   UpdateUserBodyStruct,
 } from "@/structs/userStruct";
 import { AuthenticatedRequest } from "@/types/express";
+import { UUID } from "@/structs/commonStructs";
 
 export const signupUser = async (
   req: Request,
@@ -23,8 +24,16 @@ export const signupUser = async (
     apartmentHo: Number(data.apartmentHo),
   };
   const user = await userService.signupUser(fixedData);
+  const newUser = new SignupResponseDTO({
+    id: user.id,
+    name: user.name,
+    role: user.role,
+    email: user.email,
+    joinStatus: user.joinStatus,
+    isActive: true,
+  });
 
-  res.status(201).json(userResponseDTO(user as UserType));
+  res.status(201).json(newUser);
 };
 
 export const signupAdmin = async (
@@ -44,8 +53,16 @@ export const signupAdmin = async (
     endHoNumber: Number(data.endHoNumber),
   };
   const user = await userService.signupAdmin(fixedData);
+  const newAdmin = new SignupResponseDTO({
+    id: user.id,
+    name: user.name,
+    role: user.role,
+    email: user.email,
+    joinStatus: user.joinStatus,
+    isActive: true,
+  });
 
-  res.status(201).json(userResponseDTO(user as UserType));
+  res.status(201).json(newAdmin);
 };
 
 export const signupSuperAdmin = async (
@@ -55,7 +72,16 @@ export const signupSuperAdmin = async (
   const data = create(req.body, signupSuperAdminStruct);
   const user = await userService.signupSuperAdmin(data);
 
-  res.status(201).json(userResponseDTO(user as UserType));
+  const newSuperAdmin = new SignupResponseDTO({
+    id: user.id,
+    name: user.name,
+    role: user.role,
+    email: user.email,
+    joinStatus: user.joinStatus,
+    isActive: true,
+  });
+
+  res.status(201).json(newSuperAdmin);
 };
 
 export const updateAdminController = async (

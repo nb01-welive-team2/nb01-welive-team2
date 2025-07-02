@@ -8,12 +8,34 @@ import {
 } from "../structs/userStruct";
 import { create } from "superstruct";
 import { AuthenticatedRequest } from "@/types/express";
+import { loginResponseDTO } from "@/dto/userDTO";
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   const data = create(req.body, loginBodyStruct);
-  const { accessToken, refreshToken } = await authService.login(data);
+  const { accessToken, refreshToken, user } = await authService.login(data);
   setTokenCookies(res, accessToken, refreshToken);
-  res.status(200).json({ message: "로그인이 완료되었습니다" });
+
+  console.log("user", user); //
+
+  const loginData = new loginResponseDTO({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    username: user.username,
+    contact: user.contact,
+    profileImage: user.profileImage ?? "",
+    joinStatus: user.joinStatus,
+    isActive: true,
+    apartmentId: user.apartmentInfo?.id ?? user.userInfo?.apartmentId,
+    apartmentName:
+      user.apartmentInfo?.apartmentName ?? user.userInfo?.apartmentName,
+    apartmentDong:
+      user.apartmentInfo?.userInfo[0].apartmentDong ??
+      user.userInfo?.apartmentDong,
+  });
+
+  res.status(200).json(loginData);
 };
 
 export const logout = async (req: Request, res: Response): Promise<void> => {
