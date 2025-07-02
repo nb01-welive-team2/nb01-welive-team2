@@ -1,3 +1,4 @@
 name,building,unitNumber,contact,email,isHouseholder
-김입주,101,101,01012347678,resident@example1.com,HOUSEHOLDER
-박세대원,102,202,01087654321,member@example1.com,MEMBER
+디지몬,101,201,01098765431,test996@gmail.com,MEMBER
+포켓몬,102,202,01012123431,test995@gmail.com,MEMBER
+자르반,103,303,01019281281,test994@gmail.com,MEMBER

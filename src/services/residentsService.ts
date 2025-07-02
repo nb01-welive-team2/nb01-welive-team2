@@ -128,7 +128,6 @@ async function getResidentsCsv(query: ResidentsFilter) {
   const rows = residents.map((resident) => [
     resident.name,
     resident.building,
-    resident.building,
     resident.unitNumber,
     resident.contact,
     resident.email,

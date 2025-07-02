@@ -13,18 +13,6 @@ export interface CreateOneResidentDto {
   isHouseholder: RESIDENCE_STATUS;
 }
 
-export interface UpdateResidentDataDto {
-  building?: number;
-  unitNumber?: number;
-  contact?: string;
-  name?: string;
-  email?: string;
-  residenceStatus?: RESIDENCE_STATUS;
-  isHouseholder?: HOUSEHOLDER_STATUS;
-  isRegistered?: boolean;
-  approvalStatus?: APPROVAL_STATUS;
-}
-
 export type ResidentUploadInputDto = {
   name: string;
   email: string;
@@ -45,42 +33,17 @@ export type UploadResidentsInput = {
   isHouseholder: HOUSEHOLDER_STATUS;
 };
 
-export class ResidentResponseDto {
-  id!: string;
-  name!: string;
-  apartmentId!: string;
-  building!: number;
-  unitNumber!: number;
-  contact!: string;
-  email!: string;
-  residenceStatus!: RESIDENCE_STATUS;
-  isHouseholder!: HOUSEHOLDER_STATUS;
-  isRegistered!: boolean;
-  approvalStatus!: APPROVAL_STATUS;
-
-  constructor(partial: Partial<ResidentResponseDto>) {
-    Object.assign(this, partial);
-  }
+export interface UpdateResidentDataDto {
+  building?: number;
+  unitNumber?: number;
+  contact?: string;
+  name?: string;
+  email?: string;
+  residenceStatus?: RESIDENCE_STATUS;
+  isHouseholder?: HOUSEHOLDER_STATUS;
+  isRegistered?: boolean;
+  approvalStatus?: APPROVAL_STATUS;
 }
-
-export class ResidentsListResponseDto {
-  id!: string;
-  name!: string;
-  apartmentId!: string;
-  building!: number;
-  unitNumber!: number;
-  contact!: string;
-  email!: string;
-  residenceStatus!: RESIDENCE_STATUS;
-  isRegistered!: boolean;
-  approvalStatus!: APPROVAL_STATUS;
-  isHouseholder!: HOUSEHOLDER_STATUS;
-
-  constructor(partial: Partial<ResidentsListResponseDto>) {
-    Object.assign(this, partial);
-  }
-}
-
 export class UpdateResidentResponseDto {
   name?: string;
   contact?: string;
@@ -92,5 +55,89 @@ export class UpdateResidentResponseDto {
 
   constructor(partial: Partial<UpdateResidentResponseDto>) {
     Object.assign(this, partial);
+  }
+}
+
+interface ResidentResponseDtoProps {
+  id: string;
+  name: string;
+  apartmentId: string;
+  building: number;
+  unitNumber: number;
+  contact: string;
+  email: string;
+  residenceStatus: RESIDENCE_STATUS;
+  isHouseholder: HOUSEHOLDER_STATUS;
+  isRegistered: boolean;
+  approvalStatus: APPROVAL_STATUS;
+}
+
+export class ResidentResponseDto implements ResidentResponseDtoProps {
+  id: string;
+  name: string;
+  apartmentId: string;
+  building: number;
+  unitNumber: number;
+  contact: string;
+  email: string;
+  residenceStatus: RESIDENCE_STATUS;
+  isHouseholder: HOUSEHOLDER_STATUS;
+  isRegistered: boolean;
+  approvalStatus: APPROVAL_STATUS;
+
+  constructor(props: ResidentResponseDtoProps) {
+    this.id = props.id;
+    this.name = props.name;
+    this.apartmentId = props.apartmentId;
+    this.building = props.building;
+    this.unitNumber = props.unitNumber;
+    this.contact = props.contact;
+    this.email = props.email;
+    this.residenceStatus = props.residenceStatus;
+    this.isHouseholder = props.isHouseholder;
+    this.isRegistered = props.isRegistered;
+    this.approvalStatus = props.approvalStatus;
+  }
+}
+
+interface ResidentsListResponseDtoProps {
+  id: string;
+  name: string;
+  apartmentId: string;
+  building: number;
+  unitNumber: number;
+  contact: string;
+  email: string;
+  residenceStatus: RESIDENCE_STATUS;
+  isRegistered: boolean;
+  approvalStatus: APPROVAL_STATUS;
+  isHouseholder: HOUSEHOLDER_STATUS;
+}
+
+export class ResidentsListResponseDto implements ResidentsListResponseDtoProps {
+  id: string;
+  name: string;
+  apartmentId: string;
+  building: number;
+  unitNumber: number;
+  contact: string;
+  email: string;
+  residenceStatus: RESIDENCE_STATUS;
+  isRegistered: boolean;
+  approvalStatus: APPROVAL_STATUS;
+  isHouseholder: HOUSEHOLDER_STATUS;
+
+  constructor(props: ResidentsListResponseDtoProps) {
+    this.id = props.id;
+    this.name = props.name;
+    this.apartmentId = props.apartmentId;
+    this.building = props.building;
+    this.unitNumber = props.unitNumber;
+    this.contact = props.contact;
+    this.email = props.email;
+    this.residenceStatus = props.residenceStatus;
+    this.isRegistered = props.isRegistered;
+    this.approvalStatus = props.approvalStatus;
+    this.isHouseholder = props.isHouseholder;
   }
 }

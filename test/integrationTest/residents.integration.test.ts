@@ -160,20 +160,6 @@ describe("입주민 API 통합 테스트", () => {
     });
   });
 
-  describe("GET /api/residents/download", () => {
-    test("입주민 명부 다운로드", async () => {
-      const res = await adminAgent
-        .get("/api/residents/download")
-        .expect("Content-Type", "text/csv; charset=utf-8")
-        .expect("Content-Disposition", /attachment; filename=.*\.csv/)
-        .expect(200);
-
-      expect(res.text).toContain(
-        '"name","building","unitNumber","contact","email","isHouseholder"'
-      );
-    });
-  });
-
   describe("GET /api/residents/template", () => {
     test("입주민 명부 양식 다운로드", async () => {
       const res = await adminAgent
@@ -187,24 +173,56 @@ describe("입주민 API 통합 테스트", () => {
     });
   });
 
-  describe("POST /api/upload", () => {
-    test("입주민 명부 파일 업로드", async () => {
-      const filePath = path.join(__dirname, "fixtures", "test-residents.csv");
+  describe("입주민 명부 업로드 및 다운로드 통합 테스트", () => {
+    const validCsvPath = path.join(__dirname, "fixtures", "test-residents.csv");
+    const invalidCsvPath = path.join(
+      __dirname,
+      "fixtures",
+      "error-residents.csv"
+    );
 
-      const res = await adminAgent
+    test("GET /api/residents/upload  정상 CSV 업로드 후 전체 명부 다운로드", async () => {
+      const uploadRes = await adminAgent
         .post("/api/residents/upload")
-        .attach("file", filePath)
+        .attach("file", validCsvPath)
         .expect(201);
 
-      expect(Array.isArray(res.body.data)).toBe(true);
-      expect(res.body.data.length).toBeGreaterThan(0);
+      expect(Array.isArray(uploadRes.body.data)).toBe(true);
+      expect(uploadRes.body.data.length).toBeGreaterThan(0);
+
+      const downloadRes = await adminAgent
+        .get("/api/residents/download")
+        .expect("Content-Type", "text/csv; charset=utf-8")
+        .expect("Content-Disposition", /attachment; filename=.*\.csv/)
+        .expect(200);
+
+      expect(downloadRes.text).toContain(
+        '"name","building","unitNumber","contact","email","isHouseholder"'
+      );
+    });
+
+    test("GET /api/residents/download 정상 CSV 업로드 후 name=몬 포함된 명부만 다운로드", async () => {
+      await adminAgent
+        .post("/api/residents/upload")
+        .attach("file", validCsvPath)
+        .expect(201);
+
+      const filteredDownload = await adminAgent
+        .get("/api/residents/download")
+        .query({ name: "몬" })
+        .expect("Content-Type", "text/csv; charset=utf-8")
+        .expect("Content-Disposition", /attachment; filename=.*\.csv/)
+        .expect(200);
+
+      expect(filteredDownload.text).toContain('"포켓몬"');
+      expect(filteredDownload.text).not.toContain('"자르반"');
+      expect(filteredDownload.text).not.toContain('"Charlie Chaplin"');
     });
 
     test("잘못된 CSV 형식 업로드 시 400 응답", async () => {
-      const filePath = path.join(__dirname, "fixtures", "error-residents.csv");
       const res = await adminAgent
         .post("/api/residents/upload")
-        .attach("file", filePath)
+        .attach("file", invalidCsvPath)
         .expect(400);
 
       expect(res.body.message).toContain("형식 오류");
