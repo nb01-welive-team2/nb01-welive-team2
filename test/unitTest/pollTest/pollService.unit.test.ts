@@ -1,6 +1,6 @@
 import * as pollService from "@/services/pollService";
 import * as pollRepo from "@/repositories/pollRepository";
-import { CreatePollRequestDto } from "@/dto/pollDto";
+import { CreatePollRequestDto, UpdatePollRequestDto } from "@/dto/pollDto";
 import NotFoundError from "@/errors/NotFoundError";
 import ForbiddenError from "@/errors/ForbiddenError";
 import { $Enums } from "@prisma/client";
@@ -11,6 +11,7 @@ jest.mock("@/repositories/pollRepository");
 describe("pollService.createPoll", () => {
   const mockUserId = "user-uuid";
   const mockDto: CreatePollRequestDto = {
+    boardId: "9f3a1e30-0f6e-4a9a-b3d4-cb0a978b0fd6",
     apartmentId: "apartment-uuid",
     title: "테스트 투표",
     content: "테스트 설명",
@@ -145,6 +146,7 @@ it("should apply userId for filtering if provided", async () => {
     page: 1,
     limit: 10,
     userId: "user-123",
+    role: "ADMIN",
   });
 });
 
@@ -322,8 +324,7 @@ it("should update the poll if user is owner and poll has not started", async () 
     userId: "user-abc",
   });
 
-  const dto: CreatePollRequestDto = {
-    apartmentId: "apt-1",
+  const dto: UpdatePollRequestDto = {
     title: "수정된 제목",
     content: "수정된 설명",
     startDate: new Date(Date.now() + 10000).toISOString(),

@@ -3,6 +3,8 @@ import {
   PollResponseDto,
   PollDetailResponseDto,
   GetPollListParams,
+  UpdatePollRequestDto,
+  PollUpdateResponseDto,
 } from "../dto/pollDto";
 import * as pollRepo from "../repositories/pollRepository";
 import { getPagination } from "../utils/pagination";
@@ -14,9 +16,9 @@ import { assert } from "superstruct";
 const toISO = (d: Date) => d.toISOString();
 
 const mapToPollResponse = (poll: any): PollResponseDto => ({
+  boardId: poll.boardId,
   id: poll.id,
   title: poll.title,
-  author: poll.user.name,
   content: poll.content,
   status: poll.status,
   buildingPermission: poll.buildingPermission,
@@ -119,10 +121,10 @@ export const getPoll = async (
 // 투표 수정
 export const editPoll = async (
   pollId: string,
-  dto: CreatePollRequestDto,
+  dto: UpdatePollRequestDto,
   userId: string,
   role: string
-): Promise<PollResponseDto> => {
+): Promise<PollUpdateResponseDto> => {
   const poll = await pollRepo.findPollForEdit(pollId);
 
   if (!poll) throw new NotFoundError("Poll", "투표를 찾을 수 없습니다.");
@@ -147,7 +149,6 @@ export const editPoll = async (
   return {
     id: updated.id,
     title: updated.title,
-    author: updated.user?.name ?? "",
     content: updated.content,
     startDate: toISO(updated.startDate),
     endDate: toISO(updated.endDate),
