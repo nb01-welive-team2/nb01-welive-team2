@@ -1,22 +1,27 @@
 import * as authService from "@/services/authService";
 import * as userRepository from "@/repositories/userRepository";
 import * as tokenUtils from "@/lib/utils/token";
+import * as hashUtils from "@/lib/utils/hash";
 import bcrypt from "bcrypt";
 import { LoginRequestDTO } from "@/structs/userStruct";
 import BadRequestError from "@/errors/BadRequestError";
+import UnauthError from "@/errors/UnauthError";
+import { JOIN_STATUS, USER_ROLE } from "@prisma/client";
 
 jest.mock("@/repositories/userRepository");
 jest.mock("@/lib/utils/token");
+jest.mock("@/lib/utils/hash");
 jest.mock("bcrypt");
 
 describe("authService", () => {
   const mockUser = {
     id: "user-uuid",
-    usernmae: "alice123",
-    encryptedPassword:
-      "$2a$10$G68FzGayQhBUnQw05b.bQuhr0tQMaACu1iXTTBCRHSxRNzGVUuRRO",
-    role: "USER",
-    apartmentInfo: [{ id: "apartment-id-123" }],
+    username: "alice123",
+    encryptedPassword: "$2a$10$G68FzGayQhBUnQw05b.bQuhr0tQMaACu1iXTTBCRHSxRNzGVUuRRO",
+    role: USER_ROLE.USER,
+    joinStatus: JOIN_STATUS.APPROVED,
+    userInfo: { apartmentId: "apartment-id-123" },
+    apartmentInfo: null,
   };
 
   afterEach(() => {
@@ -52,15 +57,15 @@ describe("authService", () => {
       );
     });
 
-    test("존재하지 않는 사용자일 경우 BadRequestError", async () => {
+    test("존재하지 않는 사용자일 경우 UnauthError", async () => {
       (userRepository.getUserByUsername as jest.Mock).mockResolvedValue(null);
 
       await expect(
         authService.login({ username: "non-user-id", password: "password" })
-      ).rejects.toThrow(BadRequestError);
+      ).rejects.toThrow(UnauthError);
     });
 
-    test("비밀번호 불일치 시 BadRequestError", async () => {
+    test("비밀번호 불일치 시 UnauthError", async () => {
       (userRepository.getUserByUsername as jest.Mock).mockResolvedValue(
         mockUser
       );
@@ -68,7 +73,7 @@ describe("authService", () => {
 
       await expect(
         authService.login({ username: "alice123", password: "wrongpassword" })
-      ).rejects.toThrow(BadRequestError);
+      ).rejects.toThrow(UnauthError);
     });
   });
 
@@ -110,6 +115,41 @@ describe("authService", () => {
       await expect(authService.refreshToken("invalid-token")).rejects.toThrow(
         BadRequestError
       );
+    });
+  });
+
+  describe("updatePassword", () => {
+    test("비밀번호 변경 성공", async () => {
+      (userRepository.getUserId as jest.Mock).mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      (hashUtils.hashPassword as jest.Mock).mockResolvedValue("hashed-new-password");
+      (userRepository.updateUser as jest.Mock).mockResolvedValue(undefined);
+
+      await authService.updatePassword("user-uuid", "currentPassword", "newPassword");
+
+      expect(userRepository.getUserId).toHaveBeenCalledWith("user-uuid");
+      expect(bcrypt.compare).toHaveBeenCalledWith("currentPassword", mockUser.encryptedPassword);
+      expect(hashUtils.hashPassword).toHaveBeenCalledWith("newPassword");
+      expect(userRepository.updateUser).toHaveBeenCalledWith("user-uuid", {
+        encryptedPassword: "hashed-new-password"
+      });
+    });
+
+    test("존재하지 않는 사용자일 경우 UnauthError", async () => {
+      (userRepository.getUserId as jest.Mock).mockResolvedValue(null);
+
+      await expect(
+        authService.updatePassword("invalid-id", "currentPassword", "newPassword")
+      ).rejects.toThrow(UnauthError);
+    });
+
+    test("현재 비밀번호 불일치 시 UnauthError", async () => {
+      (userRepository.getUserId as jest.Mock).mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+      await expect(
+        authService.updatePassword("user-uuid", "wrongPassword", "newPassword")
+      ).rejects.toThrow(UnauthError);
     });
   });
 });
