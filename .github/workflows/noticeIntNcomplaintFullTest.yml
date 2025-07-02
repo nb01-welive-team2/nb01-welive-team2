@@ -78,6 +78,9 @@ jobs:
       - name: Run notice unit tests
         run: npm run test-notice-unit
 
+      - name: Run notice integration tests
+        run: npm run test-notice-int
+
       - name: Run complaint unit tests
         run: npm run test-complaint-unit
 

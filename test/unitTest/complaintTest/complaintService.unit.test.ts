@@ -78,10 +78,15 @@ describe("complaintService", () => {
         params
       );
 
-      expect(buildSearchCondition).toHaveBeenCalledWith(params, {
-        userId,
-        role,
-      });
+      expect(buildSearchCondition).toHaveBeenCalledWith(
+        params.page,
+        params.limit,
+        "",
+        {
+          userId,
+          role,
+        }
+      );
       expect(complaintRepository.getCount).toHaveBeenCalledWith({
         where: mockSearchCondition.whereCondition,
       });

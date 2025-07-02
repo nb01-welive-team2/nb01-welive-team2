@@ -103,7 +103,7 @@ describe("Notice API Integration Test", () => {
       });
 
       expect(res.status).toBe(200);
-      expect(res.body.data.title).toBe("수정된 제목");
+      expect(res.body.title).toBe("수정된 제목");
     });
 
     it("없는 공지 ID 수정 시 404 반환", async () => {
