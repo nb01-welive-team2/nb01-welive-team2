@@ -43,10 +43,6 @@ export const login = async (data: LoginRequestDTO) => {
     throw new UnauthError();
   }
 
-  const userInfo = user.userInfo; //
-  console.log("apartmentId: ", apartmentId); //
-  console.log("userInfo: ", userInfo); //
-
   const { accessToken, refreshToken } = generateTokens(
     userId,
     role,

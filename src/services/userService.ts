@@ -20,7 +20,6 @@ export const signupUser = async (data: SignupUserRequestDTO) => {
 
   const encryptedPassword = await hashPassword(password);
   const user = {
-    isActive: true,
     ...data,
     password: encryptedPassword,
   };
@@ -35,7 +34,6 @@ export const signupAdmin = async (data: SignupAdminRequestDTO) => {
 
   const encryptedPassword = await hashPassword(password);
   const user = {
-    isActive: true,
     ...data,
     password: encryptedPassword,
   };
@@ -50,7 +48,6 @@ export const signupSuperAdmin = async (data: SignupSuperAdminRequestDTO) => {
 
   const encryptedPassword = await hashPassword(password);
   const user = {
-    isActive: true,
     ...data,
     password: encryptedPassword,
   };

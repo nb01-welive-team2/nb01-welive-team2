@@ -15,15 +15,14 @@ export const getUserByUsername = async (username: string) => {
         select: {
           id: true,
           apartmentName: true,
-          userInfo: { select: { apartmentDong: true } },
         },
       },
       userInfo: {
         select: {
           id: true,
           apartmentId: true,
-          apartmentDong: true,
           apartmentName: true,
+          apartmentDong: true,
         },
       },
     },

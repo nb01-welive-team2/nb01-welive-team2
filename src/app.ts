@@ -29,12 +29,7 @@ import { PUBLIC_PATH, STATIC_PATH } from "./lib/constance";
 
 const app = express();
 
-app.use(
-  cors({
-    origin: "http://localhost:3001",
-    credentials: true,
-  })
-);
+app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 app.use(STATIC_PATH, express.static(PUBLIC_PATH));

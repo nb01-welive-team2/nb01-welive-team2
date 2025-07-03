@@ -1,5 +1,11 @@
 import { Admin, ResidentUser, SuperAdmin, UserType } from "@/types/User";
-import { JOIN_STATUS, USER_ROLE } from "@prisma/client";
+import {
+  ApartmentInfo,
+  JOIN_STATUS,
+  USER_ROLE,
+  UserInfo,
+  Users,
+} from "@prisma/client";
 
 export interface userRequestDTO {
   id?: string;
@@ -93,20 +99,15 @@ export class SignupResponseDTO {
   joinStatus: JOIN_STATUS;
   isActive: boolean;
 
-  constructor(data: {
-    id: string;
-    name: string;
-    role: USER_ROLE;
-    email: string;
-    joinStatus: JOIN_STATUS;
-    isActive: boolean;
-  }) {
-    this.id = data.id;
-    this.name = data.name;
-    this.role = data.role;
-    this.email = data.email;
-    this.joinStatus = data.joinStatus;
-    this.isActive = data.isActive;
+  constructor(
+    user: Pick<Users, "id" | "name" | "role" | "email" | "joinStatus">
+  ) {
+    this.id = user.id;
+    this.name = user.name;
+    this.role = user.role;
+    this.email = user.email;
+    this.joinStatus = user.joinStatus;
+    this.isActive = true;
   }
 }
 
@@ -124,31 +125,29 @@ export class loginResponseDTO {
   apartmentName?: string;
   residentDong?: number;
 
-  constructor(data: {
-    id: string;
-    name: string;
-    email: string;
-    role: USER_ROLE;
-    username: string;
-    contact: string;
-    profileImage: string;
-    joinStatus: JOIN_STATUS;
-    isActive: boolean;
-    apartmentId?: string;
-    apartmentName?: string;
-    apartmentDong?: number;
-  }) {
-    this.id = data.id;
-    this.name = data.name;
-    this.email = data.email;
-    this.role = data.role;
-    this.username = data.username;
-    this.contact = data.contact;
-    this.avatar = data.profileImage;
-    this.joinStatus = data.joinStatus;
-    this.isActive = data.isActive;
-    this.apartmentId = data.apartmentId;
-    this.apartmentName = data.apartmentName;
-    this.residentDong = data.apartmentDong;
+  constructor(
+    user: Users & {
+      apartmentInfo?: { id: string; apartmentName: string } | null;
+    } & {
+      userInfo?: {
+        apartmentId: string;
+        apartmentName: string;
+        apartmentDong: number;
+      } | null;
+    }
+  ) {
+    this.id = user.id;
+    this.name = user.name;
+    this.email = user.email;
+    this.role = user.role;
+    this.username = user.username;
+    this.contact = user.contact;
+    this.avatar = user.profileImage ?? "";
+    this.joinStatus = user.joinStatus;
+    this.isActive = true;
+    this.apartmentId = user.apartmentInfo?.id ?? user.userInfo?.apartmentId;
+    this.apartmentName =
+      user.apartmentInfo?.apartmentName ?? user.userInfo?.apartmentName;
+    this.residentDong = user.userInfo?.apartmentDong;
   }
 }

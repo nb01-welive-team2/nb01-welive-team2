@@ -32,5 +32,7 @@ export default async function uploadImage(
     url = `http://${filePath}`;
   }
 
-  res.status(200).json({ url });
+  res
+    .status(200)
+    .json({ url, message: "아바타가 성공적으로 업데이트되었습니다." });
 }

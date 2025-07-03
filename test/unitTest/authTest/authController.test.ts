@@ -6,13 +6,10 @@ import {
 } from "@/controllers/authController";
 import * as authService from "@/services/authService";
 import * as authUtil from "@/lib/utils/auth";
-import {
-  ACCESS_TOKEN_COOKIE_NAME,
-  REFRESH_TOKEN_COOKIE_NAME,
-} from "@/lib/constance";
+import { REFRESH_TOKEN_COOKIE_NAME } from "@/lib/constance";
 import { Request, Response } from "express";
 import { AuthenticatedRequest } from "@/types/express";
-import { USER_ROLE } from "@prisma/client";
+import { JOIN_STATUS, USER_ROLE } from "@prisma/client";
 
 jest.mock("@/services/authService");
 jest.mock("@/lib/utils/auth");
@@ -35,12 +32,38 @@ describe("authController", () => {
     jest.clearAllMocks();
   });
 
+  const mockUser = {
+    id: "user-id-123",
+    name: "Alice",
+    email: "alice@example.com",
+    role: USER_ROLE.USER,
+    username: "alice123",
+    contact: "01012345678",
+    profileImage: null,
+    joinStatus: JOIN_STATUS.APPROVED,
+    apartmentInfo: {
+      id: "apt-id-001",
+      apartmentName: "테스트아파트",
+      userInfo: [
+        {
+          apartmentDong: "101",
+        },
+      ],
+    },
+    userInfo: {
+      apartmentId: "apt-id-001",
+      apartmentName: "테스트아파트",
+      apartmentDong: "101",
+    },
+  };
+
   describe("login", () => {
     test("로그인 성공 시 쿠키에 토큰 설정 및 상태코드 200 반환", async () => {
       req.body = { username: "alice123", password: "alicepassword" };
       (authService.login as jest.Mock).mockResolvedValue({
         accessToken: "access-token",
         refreshToken: "refresh-token",
+        user: mockUser,
       });
 
       await login(req as Request, res as Response);
@@ -52,9 +75,22 @@ describe("authController", () => {
         "refresh-token"
       );
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        message: "로그인이 완료되었습니다",
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: mockUser.id,
+          name: mockUser.name,
+          email: mockUser.email,
+          role: mockUser.role,
+          username: mockUser.username,
+          contact: mockUser.contact,
+          avatar: "",
+          joinStatus: mockUser.joinStatus,
+          isActive: true,
+          apartmentId: mockUser.apartmentInfo.id,
+          apartmentName: mockUser.apartmentInfo.apartmentName,
+          residentDong: mockUser.apartmentInfo.userInfo[0].apartmentDong,
+        })
+      );
     });
   });
 
@@ -116,7 +152,9 @@ describe("authController", () => {
         "newPassword"
       );
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ message: "비밀번호 변경 완료" });
+      expect(res.json).toHaveBeenCalledWith({
+        message: "비밀번호가 변경되었습니다. 다시 로그인해주세요.",
+      });
     });
   });
 });

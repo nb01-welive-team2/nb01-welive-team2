@@ -17,7 +17,8 @@ describe("authService", () => {
   const mockUser = {
     id: "user-uuid",
     username: "alice123",
-    encryptedPassword: "$2a$10$G68FzGayQhBUnQw05b.bQuhr0tQMaACu1iXTTBCRHSxRNzGVUuRRO",
+    encryptedPassword:
+      "$2a$10$G68FzGayQhBUnQw05b.bQuhr0tQMaACu1iXTTBCRHSxRNzGVUuRRO",
     role: USER_ROLE.USER,
     joinStatus: JOIN_STATUS.APPROVED,
     userInfo: { apartmentId: "apartment-id-123" },
@@ -37,6 +38,7 @@ describe("authService", () => {
       (tokenUtils.generateTokens as jest.Mock).mockReturnValue({
         accessToken: "access-token",
         refreshToken: "refresh-token",
+        user: mockUser,
       });
 
       const data: LoginRequestDTO = {
@@ -49,6 +51,7 @@ describe("authService", () => {
       expect(result).toEqual({
         accessToken: "access-token",
         refreshToken: "refresh-token",
+        user: mockUser,
       });
       expect(userRepository.getUserByUsername).toHaveBeenCalledWith("alice123");
       expect(bcrypt.compare).toHaveBeenCalledWith(
@@ -122,16 +125,25 @@ describe("authService", () => {
     test("비밀번호 변경 성공", async () => {
       (userRepository.getUserId as jest.Mock).mockResolvedValue(mockUser);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-      (hashUtils.hashPassword as jest.Mock).mockResolvedValue("hashed-new-password");
+      (hashUtils.hashPassword as jest.Mock).mockResolvedValue(
+        "hashed-new-password"
+      );
       (userRepository.updateUser as jest.Mock).mockResolvedValue(undefined);
 
-      await authService.updatePassword("user-uuid", "currentPassword", "newPassword");
+      await authService.updatePassword(
+        "user-uuid",
+        "currentPassword",
+        "newPassword"
+      );
 
       expect(userRepository.getUserId).toHaveBeenCalledWith("user-uuid");
-      expect(bcrypt.compare).toHaveBeenCalledWith("currentPassword", mockUser.encryptedPassword);
+      expect(bcrypt.compare).toHaveBeenCalledWith(
+        "currentPassword",
+        mockUser.encryptedPassword
+      );
       expect(hashUtils.hashPassword).toHaveBeenCalledWith("newPassword");
       expect(userRepository.updateUser).toHaveBeenCalledWith("user-uuid", {
-        encryptedPassword: "hashed-new-password"
+        encryptedPassword: "hashed-new-password",
       });
     });
 
@@ -139,7 +151,11 @@ describe("authService", () => {
       (userRepository.getUserId as jest.Mock).mockResolvedValue(null);
 
       await expect(
-        authService.updatePassword("invalid-id", "currentPassword", "newPassword")
+        authService.updatePassword(
+          "invalid-id",
+          "currentPassword",
+          "newPassword"
+        )
       ).rejects.toThrow(UnauthError);
     });
 

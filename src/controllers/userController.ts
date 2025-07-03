@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import * as userService from "@/services/userService";
-import { SignupResponseDTO, userResponseDTO } from "@/dto/userDTO";
-import { UserType } from "@/types/User";
+import { SignupResponseDTO } from "@/dto/userDTO";
 import { create } from "superstruct";
 import {
   signupAdminStruct,
@@ -11,7 +10,6 @@ import {
   UpdateUserBodyStruct,
 } from "@/structs/userStruct";
 import { AuthenticatedRequest } from "@/types/express";
-import { UUID } from "@/structs/commonStructs";
 
 export const signupUser = async (
   req: Request,
@@ -24,16 +22,8 @@ export const signupUser = async (
     apartmentHo: Number(data.apartmentHo),
   };
   const user = await userService.signupUser(fixedData);
-  const newUser = new SignupResponseDTO({
-    id: user.id,
-    name: user.name,
-    role: user.role,
-    email: user.email,
-    joinStatus: user.joinStatus,
-    isActive: true,
-  });
 
-  res.status(201).json(newUser);
+  res.status(201).json(new SignupResponseDTO(user));
 };
 
 export const signupAdmin = async (
@@ -53,16 +43,8 @@ export const signupAdmin = async (
     endHoNumber: Number(data.endHoNumber),
   };
   const user = await userService.signupAdmin(fixedData);
-  const newAdmin = new SignupResponseDTO({
-    id: user.id,
-    name: user.name,
-    role: user.role,
-    email: user.email,
-    joinStatus: user.joinStatus,
-    isActive: true,
-  });
 
-  res.status(201).json(newAdmin);
+  res.status(201).json(new SignupResponseDTO(user));
 };
 
 export const signupSuperAdmin = async (
@@ -72,16 +54,7 @@ export const signupSuperAdmin = async (
   const data = create(req.body, signupSuperAdminStruct);
   const user = await userService.signupSuperAdmin(data);
 
-  const newSuperAdmin = new SignupResponseDTO({
-    id: user.id,
-    name: user.name,
-    role: user.role,
-    email: user.email,
-    joinStatus: user.joinStatus,
-    isActive: true,
-  });
-
-  res.status(201).json(newSuperAdmin);
+  res.status(201).json(new SignupResponseDTO(user));
 };
 
 export const updateAdminController = async (
@@ -91,7 +64,9 @@ export const updateAdminController = async (
   const data = create(req.body, updateAdminStruct);
   const updated = await userService.updateAdmin(data);
 
-  res.status(200).json(updated);
+  res.status(200).json({
+    message: "[슈퍼관리자] 관리자 정보를 수정했습니다.",
+  });
 };
 
 export const deleteAdmin = async (
@@ -101,9 +76,7 @@ export const deleteAdmin = async (
   const { id: userId } = req.params;
   await userService.deleteAdmin(userId);
 
-  res
-    .status(200)
-    .json({ message: "관리자 정보(아파트 정보 포함) 삭제가 완료되었습니다" });
+  res.status(200).json({ message: "[슈퍼관리자] 관리자 정보를 삭제했습니다." });
 };
 
 export const updateUser = async (
@@ -115,7 +88,9 @@ export const updateUser = async (
   const userId = request.user.userId;
   await userService.updateUser(userId, data);
 
-  res.status(200).json({ message: "유저 정보 수정 성공" });
+  res.status(200).json({
+    message: "정보가 성공적으로 업데이트되었습니다. 다시 로그인해주세요.",
+  });
 };
 
 export const deleteRejectedUsers = async (
@@ -127,9 +102,7 @@ export const deleteRejectedUsers = async (
 
   await userService.deleteRejectedUsersByRole(role);
 
-  res
-    .status(200)
-    .json({ message: "관리자 정보(아파트 정보 포함) 삭제가 완료되었습니다" });
+  res.status(200).json({ message: "거절한 사용자 정보를 일괄 정리했습니다." });
 };
 
 export const approveAdmin = async (
