@@ -57,7 +57,8 @@ describe("apartmentInfoService", () => {
       const result = await apartmentInfoService.getApartmentsList({}, false);
 
       expect(apartmentInfoRepository.findApartmentsList).toHaveBeenCalledWith(
-        {}
+        {},
+        false
       );
 
       expect(result).toHaveLength(2);
@@ -82,7 +83,8 @@ describe("apartmentInfoService", () => {
       const result = await apartmentInfoService.getApartmentsList({}, true);
 
       expect(apartmentInfoRepository.findApartmentsList).toHaveBeenCalledWith(
-        {}
+        {},
+        true
       );
       expect(result[0]).toMatchObject({
         id: mockApartments[0].id,
