@@ -9,8 +9,20 @@ import { RESIDENCE_STATUS, APPROVAL_STATUS } from "@prisma/client";
 async function createResident(data: Prisma.ResidentsCreateInput) {
   const resident = await prisma.residents.create({
     data,
+    include: {
+      Users: {
+        select: {
+          id: true,
+        },
+      },
+    },
   });
-  return resident;
+  const userId = resident.Users?.[0]?.id ?? null;
+  const { Users, ...rest } = resident;
+  return {
+    ...rest,
+    userId,
+  };
 }
 
 // 입주민 목록 조회 (관리자)
@@ -38,6 +50,13 @@ async function getResidentsFiltered(filters: ResidentsFilter) {
     orderBy: {
       name: "asc",
     },
+    include: {
+      Users: {
+        select: {
+          id: true,
+        },
+      },
+    },
   });
 }
 
@@ -45,8 +64,21 @@ async function getResidentsFiltered(filters: ResidentsFilter) {
 async function getResidentById(id: string) {
   const resident = await prisma.residents.findUnique({
     where: { id },
+    include: {
+      Users: {
+        select: {
+          id: true,
+        },
+      },
+    },
   });
-  return resident;
+  if (!resident) return null;
+  const userId = resident?.Users?.[0]?.id ?? null;
+  const { Users, ...rest } = resident;
+  return {
+    ...rest,
+    userId,
+  };
 }
 
 // 입주민 정보 수정 (관리자)
@@ -54,8 +86,20 @@ async function updateResidentInfo(id: string, data: Partial<Residents>) {
   const resident = await prisma.residents.update({
     where: { id },
     data,
+    include: {
+      Users: {
+        select: {
+          id: true,
+        },
+      },
+    },
   });
-  return resident;
+  const userId = resident?.Users?.[0]?.id ?? null;
+  const { Users, ...rest } = resident;
+  return {
+    ...rest,
+    userId,
+  };
 }
 
 // 입주민 정보 삭제 (관리자)

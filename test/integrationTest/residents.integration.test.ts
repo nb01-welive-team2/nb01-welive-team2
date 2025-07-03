@@ -61,7 +61,7 @@ describe("입주민 API 통합 테스트", () => {
       });
     });
 
-    test("관리자 외에 유저 개별 등록 403 반환", async () => {
+    test("관리자 외에 유저 개별 등록 실패 403 반환", async () => {
       const newResident = {
         building: 108,
         unitNumber: 1503,
@@ -81,16 +81,16 @@ describe("입주민 API 통합 테스트", () => {
     test("입주민 목록 조회", async () => {
       const response = await adminAgent.get("/api/residents");
       expect(response.status).toBe(200);
-      expect(Array.isArray(response.body)).toBe(true);
-      expect(response.body.length).toBeGreaterThan(0);
+      expect(Array.isArray(response.body.residents)).toBe(true);
+      expect(response.body.residents.length).toBeGreaterThan(0);
     });
 
-    test("일반유저 입주민 목록 조회 403", async () => {
+    test("일반유저 입주민 목록 조회 실패 403", async () => {
       const response = await userAgent.get("/api/residents");
       expect(response.status).toBe(403);
     });
 
-    test("슈퍼관리자 입주민 목록 조회 403", async () => {
+    test("슈퍼관리자 입주민 목록 조회 실패 403", async () => {
       const response = await superAdminAgent.get("/api/residents");
       expect(response.status).toBe(403);
     });
@@ -107,13 +107,13 @@ describe("입주민 API 통합 테스트", () => {
       });
     });
 
-    test("일반유저 입주민 목록 조회 403", async () => {
+    test("일반유저 입주민 목록 조회 실패 403", async () => {
       const response = await userAgent.get(
         "/api/residents/69f298ce-5775-4206-b377-d083313e4946"
       );
       expect(response.status).toBe(403);
     });
-    test("슈퍼관리자 입주민 목록 조회 403", async () => {
+    test("슈퍼관리자 입주민 목록 조회 실패 403", async () => {
       const response = await superAdminAgent.get(
         "/api/residents/69f298ce-5775-4206-b377-d083313e4946"
       );

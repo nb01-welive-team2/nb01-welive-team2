@@ -30,7 +30,16 @@ async function uploadResident(data: ResidentUploadInputDto) {
 // 입주민 목록 조회
 async function getResidentsList(query: ResidentsFilter) {
   const residents = await residentsRepository.getResidentsFiltered(query);
-  return residents;
+  const formatted = residents.map((resident) => ({
+    ...resident,
+    userId:
+      resident.Users && resident.Users.length > 0 ? resident.Users[0].id : null,
+    Users: undefined,
+  }));
+  return {
+    residents: formatted,
+    count: formatted.length,
+  };
 }
 
 // 입주민 상세 조회

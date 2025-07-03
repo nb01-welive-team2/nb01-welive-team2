@@ -24,6 +24,8 @@ describe("Residents Service", () => {
     isHouseholder: HOUSEHOLDER_STATUS.HOUSEHOLDER,
     isRegistered: true,
     approvalStatus: APPROVAL_STATUS.APPROVED,
+    userId: "user-id-1",
+    Users: [{ id: "user-id-1" }],
   };
 
   const mockResidentInput = {
@@ -156,6 +158,15 @@ describe("Residents Service", () => {
       const mockResidentsList = [mockResidents];
       const query = { apartmentId: "mock-apartment-id" };
 
+      const expectedResult = {
+        residents: mockResidentsList.map((resident) => ({
+          ...resident,
+          userId: resident.Users?.[0]?.id ?? null,
+          Users: undefined,
+        })),
+        count: mockResidentsList.length,
+      };
+
       jest
         .mocked(residentsRepository.getResidentsFiltered)
         .mockResolvedValue(mockResidentsList);
@@ -165,7 +176,7 @@ describe("Residents Service", () => {
       expect(residentsRepository.getResidentsFiltered).toHaveBeenCalledWith(
         query
       );
-      expect(result).toEqual(mockResidentsList);
+      expect(result).toEqual(expectedResult);
     });
   });
 

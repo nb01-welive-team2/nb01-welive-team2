@@ -29,7 +29,10 @@ async function getApartmentsList(
     }),
   };
 
-  const apartments = await apartmentInfoRepository.findApartmentsList(where);
+  const apartments = await apartmentInfoRepository.findApartmentsList(
+    where,
+    isAuthenticated
+  );
 
   if (isAuthenticated) {
     return apartments.map(

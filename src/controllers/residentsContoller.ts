@@ -7,10 +7,7 @@ import {
   UpdateResidentBodyStruct,
 } from "../structs/residentStruct";
 import { AuthenticatedRequest } from "@/types/express";
-import {
-  ResidentResponseDto,
-  ResidentsListResponseDto,
-} from "@/dto/residents.dto";
+import {} from "@/dto/residents.dto";
 import { RESIDENCE_STATUS } from "@prisma/client";
 
 // 입주민 명부 개별 등록
@@ -28,7 +25,7 @@ export async function uploadResidentController(req: Request, res: Response) {
     apartmentId,
   });
 
-  res.status(201).json(new ResidentResponseDto(residents));
+  res.status(201).json(residents);
 }
 
 // 입주민 목록 조회
@@ -42,14 +39,16 @@ export async function getResidentsListFilteredController(
     throw new CommonError("권한이 없습니다.", 403);
   }
 
-  const residents = await residentsService.getResidentsList({
+  const { residents, count } = await residentsService.getResidentsList({
     ...req.query,
     apartmentId,
   });
 
-  res
-    .status(200)
-    .json(residents.map((resident) => new ResidentsListResponseDto(resident)));
+  res.status(200).json({
+    residents: residents,
+    message: `조회된 입주민 결과가 ${count}건 입니다.`,
+    count: count,
+  });
 }
 
 // 입주민 상세 조회
@@ -67,7 +66,7 @@ export async function getResidentByIdController(req: Request, res: Response) {
     throw new CommonError("입주민이 존재 하지 않습니다.", 404);
   }
 
-  res.status(200).json(new ResidentResponseDto(resident));
+  res.status(200).json(resident);
 }
 
 // 입주민 정보 수정

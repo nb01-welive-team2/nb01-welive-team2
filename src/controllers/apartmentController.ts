@@ -21,19 +21,7 @@ export async function getApartmentsListController(req: Request, res: Response) {
     isAuthenticated
   );
 
-  res.status(200).json(
-    apartments.map((apartment) => {
-      if (isAuthenticated) {
-        return new ApartmentsListResponseDto(
-          apartment as ApartmentsListResponseDtoProps
-        );
-      } else {
-        return new ApartmentsListPublicResponseDto(
-          apartment as ApartmentDtoBaseProps
-        );
-      }
-    })
-  );
+  res.status(200).json(apartments);
 }
 
 export async function getApartmentDetailController(
