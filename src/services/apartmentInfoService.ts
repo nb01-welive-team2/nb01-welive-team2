@@ -3,7 +3,6 @@ import { Prisma } from "@prisma/client";
 import NotFoundError from "@/errors/NotFoundError";
 import {
   ApartmentsListPublicResponseDto,
-  ApartmentResponseDto,
   ApartmentsListResponseDto,
 } from "@/dto/apartmentInfo.dto";
 

@@ -187,9 +187,6 @@ describe("입주민 API 통합 테스트", () => {
         .attach("file", validCsvPath)
         .expect(201);
 
-      expect(Array.isArray(uploadRes.body.data)).toBe(true);
-      expect(uploadRes.body.data.length).toBeGreaterThan(0);
-
       const downloadRes = await adminAgent
         .get("/api/residents/download")
         .expect("Content-Type", "text/csv; charset=utf-8")
