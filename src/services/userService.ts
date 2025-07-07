@@ -86,9 +86,9 @@ export const updateUser = async (
   data: Partial<UpdateUserDTO>
 ): Promise<Users> => {
   const user = await userRepository.getUserId(id);
-  if (!user) {
-    throw new UnauthError();
-  }
+  // if (!user) {
+  //   throw new UnauthError();
+  // }
 
   const { currentPassword, newPassword, profileImage } = data;
   const updateData: Partial<Users> = {};
@@ -96,7 +96,7 @@ export const updateUser = async (
   if (currentPassword && newPassword) {
     const isPasswordValid = await bcrypt.compare(
       currentPassword,
-      user.encryptedPassword
+      user!.encryptedPassword
     );
 
     if (!isPasswordValid) {

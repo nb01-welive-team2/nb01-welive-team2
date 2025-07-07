@@ -1,3 +1,4 @@
+import { getUserId } from "@/repositories/userRepository";
 import UnauthError from "../errors/UnauthError";
 import {
   ACCESS_TOKEN_COOKIE_NAME,
@@ -5,6 +6,7 @@ import {
 } from "../lib/constance";
 import { verifyAccessToken, verifyRefreshToken } from "../lib/utils/token";
 import { NextFunction, Request, RequestHandler, Response } from "express";
+import { AuthenticatedUser } from "@/types/User";
 
 /**
  * authenticate 미들웨어 사용방법
@@ -27,7 +29,19 @@ function authenticate(options = { optional: false }): RequestHandler {
 
       try {
         const { userId, role, apartmentId } = verifyAccessToken(accessToken);
-        req.user = { userId, role, apartmentId };
+        const user = await getUserId(userId);
+
+        if (
+          !user ||
+          user.id !== userId ||
+          user.role !== role ||
+          user.apartmentInfo?.id !== apartmentId
+        ) {
+          return next(new UnauthError());
+        }
+
+        req.user = { userId, role, apartmentId } as AuthenticatedUser;
+
         return next();
       } catch (error) {
         return next(new UnauthError());
@@ -39,7 +53,18 @@ function authenticate(options = { optional: false }): RequestHandler {
 
       try {
         const { userId, role, apartmentId } = verifyRefreshToken(refreshToken);
-        req.user = { userId, role, apartmentId };
+        const user = await getUserId(userId);
+
+        if (
+          !user ||
+          user.id !== userId ||
+          user.role !== role ||
+          user.apartmentInfo?.id !== apartmentId
+        ) {
+          return next(new UnauthError());
+        }
+
+        req.user = { userId, role, apartmentId } as AuthenticatedUser;
         return next();
       } catch (error) {
         return next(new UnauthError());
