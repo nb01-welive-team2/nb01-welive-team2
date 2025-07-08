@@ -1,4 +1,9 @@
-import { login, logout, refreshToken } from "@/controllers/authController";
+import {
+  login,
+  logout,
+  refreshToken,
+  updatePassword,
+} from "@/controllers/authController";
 import * as authService from "@/services/authService";
 import * as authUtil from "@/lib/utils/auth";
 import {
@@ -6,11 +11,13 @@ import {
   REFRESH_TOKEN_COOKIE_NAME,
 } from "@/lib/constance";
 import { Request, Response } from "express";
+import { AuthenticatedRequest } from "@/types/express";
+import { USER_ROLE } from "@prisma/client";
 
 jest.mock("@/services/authService");
 jest.mock("@/lib/utils/auth");
 
-describe("authContoroller", () => {
+describe("authController", () => {
   let req: Partial<Request>;
   let res: Partial<Response>;
 
@@ -18,7 +25,7 @@ describe("authContoroller", () => {
     req = {};
     res = {
       status: jest.fn().mockReturnThis(),
-      send: jest.fn(),
+      json: jest.fn(),
       cookie: jest.fn(),
       clearCookie: jest.fn(),
     };
@@ -29,11 +36,11 @@ describe("authContoroller", () => {
   });
 
   describe("login", () => {
-    test("로그인 성곡 시 쿠키에 토큰 설정 및 상태코드 200 반환", async () => {
+    test("로그인 성공 시 쿠키에 토큰 설정 및 상태코드 200 반환", async () => {
       req.body = { username: "alice123", password: "alicepassword" };
       (authService.login as jest.Mock).mockResolvedValue({
-        accessToken: ACCESS_TOKEN_COOKIE_NAME,
-        refreshToken: REFRESH_TOKEN_COOKIE_NAME,
+        accessToken: "access-token",
+        refreshToken: "refresh-token",
       });
 
       await login(req as Request, res as Response);
@@ -41,11 +48,13 @@ describe("authContoroller", () => {
       expect(authService.login).toHaveBeenCalledWith(req.body);
       expect(authUtil.setTokenCookies).toHaveBeenCalledWith(
         res,
-        ACCESS_TOKEN_COOKIE_NAME,
-        REFRESH_TOKEN_COOKIE_NAME
+        "access-token",
+        "refresh-token"
       );
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.send).toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith({
+        message: "로그인이 완료되었습니다",
+      });
     });
   });
 
@@ -55,7 +64,9 @@ describe("authContoroller", () => {
 
       expect(authUtil.clearTokenCookies).toHaveBeenCalledWith(res);
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.send).toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith({
+        message: "로그아웃이 완료되었습니다",
+      });
     });
   });
 
@@ -76,7 +87,36 @@ describe("authContoroller", () => {
         "new-refresh-token"
       );
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.send).toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith({
+        message: "토큰 갱신이 완료되었습니다",
+      });
+    });
+  });
+
+  describe("updatePassword", () => {
+    test("비밀번호 변경 성공 시 상태코드 200 반환", async () => {
+      const request = req as AuthenticatedRequest;
+      request.body = {
+        currentPassword: "currentPassword",
+        newPassword: "newPassword",
+      };
+      request.user = {
+        userId: "user-uuid",
+        role: USER_ROLE.USER,
+        apartmentId: "101",
+      };
+
+      (authService.updatePassword as jest.Mock).mockResolvedValue(undefined);
+
+      await updatePassword(request as Request, res as Response);
+
+      expect(authService.updatePassword).toHaveBeenCalledWith(
+        "user-uuid",
+        "currentPassword",
+        "newPassword"
+      );
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({ message: "비밀번호 변경 완료" });
     });
   });
 });

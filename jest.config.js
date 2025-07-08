@@ -39,9 +39,24 @@ module.exports = {
       testMatch: ["**/unitTest/authTest/auth*.test.ts"],
     },
     {
-      displayName: "auth-api",
+      displayName: "user-unit",
       ...commonConfig,
-      testMatch: ["**/integrationTest/auth*.test.ts"],
+      testMatch: ["**/unitTest/userTest/user*.test.ts"],
+    },
+    {
+      displayName: "userAuth-integration",
+      ...commonConfig,
+      testMatch: ["**/integrationTest/user*.test.ts"],
+    },
+    {
+      displayName: "image-unit",
+      ...commonConfig,
+      testMatch: ["**/unitTest/imageTest/image*.test.ts"],
+    },
+    {
+      displayName: "image-integration",
+      ...commonConfig,
+      testMatch: ["**/integrationTest/image*.test.ts"],
     },
   ],
 };
