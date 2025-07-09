@@ -7,6 +7,7 @@ import {
 import { NOTIFICATION_TYPE, USER_ROLE, Notifications } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 import { getIO } from "../sockets/registerSocketServer";
+import { CreateNotificationRequestDto } from "../dto/notificationDto";
 
 export const getNotifications = async (
   userId: string,
@@ -28,12 +29,9 @@ export const getNotificationById = async (
   return findNotificationById(id);
 };
 
-export const createNotification = async (data: {
-  userId: string;
-  type: NOTIFICATION_TYPE;
-  content: string;
-  referenceId?: string;
-}): Promise<Notifications> => {
+export const createNotification = async (
+  data: CreateNotificationRequestDto
+): Promise<Notifications> => {
   const notification = await createNotificationInDb(data);
   const io = getIO();
   io.to(notification.userId).emit("notification", {
