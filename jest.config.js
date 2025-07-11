@@ -48,5 +48,15 @@ module.exports = {
       ...commonConfig,
       testMatch: ["**/integrationTest/auth*.test.ts"],
     },
+    {
+      displayName: "notification-unit",
+      ...commonConfig,
+      testMatch: ["**/unitTest/notificationTest/notification*.test.ts"],
+    },
+    {
+      displayName: "notification-integration",
+      ...commonConfig,
+      testMatch: ["**/integrationTest/notification*.test.ts"],
+    },
   ],
 };
