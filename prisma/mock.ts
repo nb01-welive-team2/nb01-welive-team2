@@ -8,6 +8,7 @@ import {
   POLL_STATUS,
   NOTICE_CATEGORY,
   NOTIFICATION_TYPE,
+  EVENT_TYPE,
 } from "@prisma/client";
 
 interface Users {
@@ -86,6 +87,7 @@ interface Polls {
   endDate: Date;
   status: POLL_STATUS;
   buildingPermission: number;
+  eventId: string;
 }
 
 interface PollOptions {
@@ -110,6 +112,13 @@ interface Notices {
   isPinned: boolean;
   category: NOTICE_CATEGORY;
   viewCount: number;
+  eventId: string;
+}
+
+interface Events {
+  id: string;
+  eventType: EVENT_TYPE;
+  isActive: boolean;
 }
 
 interface Notifications {
@@ -227,6 +236,19 @@ const mockComplaints: Complaints[] = [
   },
 ];
 
+const mockEvents: Events[] = [
+  {
+    id: "b1c2d3e4-f5a6-7b8c-9d0e-f1g2h3i4j5k6",
+    eventType: EVENT_TYPE.POLL,
+    isActive: true,
+  },
+  {
+    id: "a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6",
+    eventType: EVENT_TYPE.NOTICE,
+    isActive: false,
+  },
+];
+
 const mockPolls: Polls[] = [
   {
     id: "8b83f903-5ede-476d-86a4-a4e20f9c99ac",
@@ -238,6 +260,7 @@ const mockPolls: Polls[] = [
     endDate: new Date("2025-12-10T00:00:00Z"),
     status: POLL_STATUS.IN_PROGRESS,
     buildingPermission: 1,
+    eventId: "b1c2d3e4-f5a6-7b8c-9d0e-f1g2h3i4j5k6", // Poll event
   },
 ];
 
@@ -273,6 +296,7 @@ const mockNotices: Notices[] = [
     isPinned: true,
     category: NOTICE_CATEGORY.COMMUNITY,
     viewCount: 50,
+    eventId: "a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6", // Notice event
   },
 ];
 
@@ -306,6 +330,7 @@ export {
   mockApartmentInfo,
   mockUserInfo,
   mockResidents,
+  mockEvents,
   mockComplaints,
   mockPolls,
   mockPollOptions,

@@ -141,6 +141,9 @@ model Polls {
   notifications      Notifications[]
   ApartmentInfo      ApartmentInfo   @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
   apartmentId        String
+
+  eventId String?
+  event   Events? @relation(fields: [eventId], references: [id], onDelete: Cascade)
 }
 
 model PollOptions {
@@ -181,6 +184,9 @@ model Notices {
   NoticeComments NoticeComments[]
   ApartmentInfo  ApartmentInfo    @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
   apartmentId    String
+
+  eventId String?
+  event   Events? @relation(fields: [eventId], references: [id], onDelete: Cascade)
 }
 
 model NoticeComments {
@@ -210,6 +216,19 @@ model Notifications {
   complaint Complaints? @relation(fields: [complaintId], references: [id], onDelete: Cascade)
   notice    Notices?    @relation(fields: [noticeId], references: [id], onDelete: Cascade)
   poll      Polls?      @relation(fields: [pollId], references: [id], onDelete: Cascade)
+}
+
+model Events {
+  id        String     @id @default(uuid())
+  isActive  Boolean    @default(false)
+  eventType EVENT_TYPE
+  Notices   Notices[]
+  Polls     Polls[]
+}
+
+enum EVENT_TYPE {
+  NOTICE
+  POLL
 }
 
 enum USER_ROLE {
