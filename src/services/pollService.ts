@@ -34,9 +34,15 @@ export const createPoll = async (
   apartmentId: string
 ): Promise<void> => {
   assert(dto, createPollSchema);
+
+  const event = await pollRepo.createEvent({
+    eventType: "POLL",
+    isActive: true,
+  });
   const poll = await pollRepo.createPollEntry({
     title: dto.title,
     content: dto.content || "",
+    eventId: event.id,
     startDate: new Date(dto.startDate),
     endDate: new Date(dto.endDate),
     buildingPermission: dto.buildingPermission,
@@ -172,5 +178,10 @@ export const removePoll = async (
   if (poll.startDate <= new Date()) {
     throw new ForbiddenError("이미 시작된 투표는 삭제할 수 없습니다.");
   }
+
   await pollRepo.deletePollById(pollId);
+
+  if (poll.eventId) {
+    await pollRepo.deleteEventById(poll.eventId);
+  }
 };

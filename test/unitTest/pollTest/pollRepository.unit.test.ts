@@ -39,6 +39,7 @@ describe("pollRepository", () => {
       buildingPermission: 0,
       userId: "user-id",
       apartmentId: "apt-100",
+      eventId: "event-123",
       user: { name: "관리자" },
     };
 
@@ -53,6 +54,7 @@ describe("pollRepository", () => {
       buildingPermission: 0,
       userId: "user-id",
       apartmentId: "apt-100",
+      eventId: "event-123",
     };
 
     const result = await pollRepo.createPollEntry(data);
@@ -70,6 +72,9 @@ describe("pollRepository", () => {
         },
         ApartmentInfo: {
           connect: { id: data.apartmentId },
+        },
+        event: {
+          connect: { id: data.eventId },
         },
       },
       include: {
@@ -353,4 +358,45 @@ it("findPollForEdit: 수정용 투표 정보 조회", async () => {
   });
 
   expect(result).toEqual(mockPoll);
+});
+
+it("createEvent: 이벤트 생성", async () => {
+  const mockEvent = {
+    id: "event-123",
+    eventType: $Enums.EVENT_TYPE.POLL,
+    isActive: true,
+  };
+
+  (prisma.events.create as jest.Mock).mockResolvedValue(mockEvent);
+
+  const data = {
+    eventType: $Enums.EVENT_TYPE.POLL,
+    isActive: true,
+  };
+
+  const result = await pollRepo.createEvent(data);
+
+  expect(prisma.events.create).toHaveBeenCalledWith({
+    data,
+  });
+
+  expect(result).toEqual(mockEvent);
+});
+
+it("deleteEventById: 이벤트 삭제", async () => {
+  const deletedEvent = {
+    id: "event-123",
+    eventType: $Enums.EVENT_TYPE.POLL,
+    isActive: false,
+  };
+
+  (prisma.events.delete as jest.Mock).mockResolvedValue(deletedEvent);
+
+  const result = await pollRepo.deleteEventById("event-123");
+
+  expect(prisma.events.delete).toHaveBeenCalledWith({
+    where: { id: "event-123" },
+  });
+
+  expect(result).toEqual(deletedEvent);
 });

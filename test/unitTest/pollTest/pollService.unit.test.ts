@@ -10,6 +10,9 @@ jest.mock("@/repositories/pollRepository");
 // 투표 등록 테스트
 describe("pollService.createPoll", () => {
   const mockUserId = "user-uuid";
+  const apartmentId = "test-apartment-id-123";
+  const eventId = "event-uuid";
+  const pollId = "poll-uuid";
   const mockDto: CreatePollRequestDto = {
     boardId: "9f3a1e30-0f6e-4a9a-b3d4-cb0a978b0fd6",
     apartmentId: "apartment-uuid",
@@ -21,15 +24,15 @@ describe("pollService.createPoll", () => {
     buildingPermission: 0,
     status: $Enums.POLL_STATUS.IN_PROGRESS,
   };
-  const apartmentId = "test-apartment-id-123";
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it("should create a poll and return expected structure", async () => {
+    (pollRepo.createEvent as jest.Mock).mockResolvedValue({ id: eventId });
     (pollRepo.createPollEntry as jest.Mock).mockResolvedValue({
-      id: "poll-id",
+      id: pollId,
       title: mockDto.title,
       content: mockDto.content,
       startDate: new Date(mockDto.startDate),
@@ -38,8 +41,27 @@ describe("pollService.createPoll", () => {
       status: mockDto.status,
       user: { name: "관리자" },
     });
-
     (pollRepo.createPollOptions as jest.Mock).mockResolvedValue(undefined);
+
+    await pollService.createPoll(mockDto, mockUserId, apartmentId);
+    // 이벤트 생성 테스트
+    expect(pollRepo.createEvent).toHaveBeenCalledWith({
+      eventType: $Enums.EVENT_TYPE.POLL,
+      isActive: true,
+    });
+    // 이벤트 ID 포함된 투표 생성
+    expect(pollRepo.createPollEntry).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: mockDto.title,
+        content: mockDto.content,
+        eventId: eventId,
+      })
+    );
+    // 옵션 생성
+    expect(pollRepo.createPollOptions).toHaveBeenCalledWith(
+      pollId,
+      mockDto.options
+    );
   });
 
   it("should throw an error if options are empty", async () => {
@@ -378,21 +400,26 @@ it("should throw ForbiddenError if poll already started", async () => {
 });
 
 // 투표 삭제 테스트
-it("should delete the poll if user is owner and poll has not started", async () => {
+it("should delete the poll and its event if user is owner and poll has not started", async () => {
   const futureDate = new Date(Date.now() + 60_000); // 1분 후
 
   (pollRepo.findPollWithAuthor as jest.Mock).mockResolvedValue({
     id: "poll-100",
     userId: "user-abc",
     startDate: futureDate,
+    eventId: "event-100",
     user: { name: "작성자" },
   });
 
   (pollRepo.deletePollById as jest.Mock).mockResolvedValue(undefined);
+  (pollRepo.deleteEventById as jest.Mock).mockResolvedValue(undefined);
 
   await expect(
     pollService.removePoll("poll-100", "user-abc", "USER")
   ).resolves.toBeUndefined();
+
+  expect(pollRepo.deletePollById).toHaveBeenCalledWith("poll-100");
+  expect(pollRepo.deleteEventById).toHaveBeenCalledWith("event-100");
 });
 
 it("should throw NotFoundError if poll does not exist", async () => {
