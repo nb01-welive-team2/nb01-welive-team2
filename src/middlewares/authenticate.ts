@@ -35,7 +35,7 @@ function authenticate(options = { optional: false }): RequestHandler {
           !user ||
           user.id !== userId ||
           user.role !== role ||
-          user.apartmentInfo?.id !== apartmentId
+          user.apartmentId !== apartmentId
         ) {
           return next(new UnauthError());
         }

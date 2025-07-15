@@ -40,7 +40,12 @@ export const getUserId = async (id: string) => {
       },
     },
   });
-  return user;
+  return user
+    ? {
+        ...user,
+        apartmentId: user.apartmentInfo?.id ?? null,
+      }
+    : null;
 };
 
 export const createUser = async (input: SignupUserRequestDTO) => {
