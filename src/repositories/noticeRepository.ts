@@ -66,6 +66,7 @@ async function getList(params: Prisma.NoticesFindManyArgs) {
           username: true,
         },
       },
+      event: true,
       _count: {
         select: {
           NoticeComments: true,

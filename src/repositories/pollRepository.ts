@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { $Enums } from "@prisma/client";
+import { $Enums, Prisma } from "@prisma/client";
 
 jest.mock("@/lib/prisma", () => ({
   prisma: {
@@ -36,6 +36,15 @@ export const findPolls = async (where: any, skip: number, take: number) => {
     take,
     orderBy: {
       startDate: "desc",
+    },
+  });
+};
+
+export const findPollsForEvent = async (params: Prisma.PollsFindManyArgs) => {
+  return await prisma.polls.findMany({
+    ...params,
+    include: {
+      event: true,
     },
   });
 };
@@ -180,6 +189,16 @@ export const updatePoll = async (
     include: {
       user: true,
     },
+  });
+};
+
+export const updatePollForEvent = async (
+  pollId: string,
+  data: Prisma.PollsUpdateInput
+) => {
+  return await prisma.polls.update({
+    where: { id: pollId },
+    data,
   });
 };
 

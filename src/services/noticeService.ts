@@ -10,7 +10,7 @@ import userInfoRepository from "@/repositories/userInfoRepository";
 import { getUserId } from "@/repositories/userRepository";
 import NotFoundError from "@/errors/NotFoundError";
 import ForbiddenError from "@/errors/ForbiddenError";
-import { createEvent, editEvent } from "@/repositories/eventRepository";
+import { createEvent, updateEvent } from "@/repositories/eventRepository";
 
 async function createNotice(
   notice: CreateNoticeBodyType,
@@ -93,7 +93,7 @@ async function updateNotice(
   if (!notice?.event) {
     throw new NotFoundError("Notice Or Event", noticeId);
   }
-  await editEvent(notice.event.id, {
+  await updateEvent(notice.event.id, {
     isActive: isEvent,
   });
   return await noticeRepository.update(noticeId, body);

@@ -142,8 +142,8 @@ model Polls {
   ApartmentInfo      ApartmentInfo   @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
   apartmentId        String
 
-  eventId String?
-  event   Events? @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId String
+  event   Events @relation(fields: [eventId], references: [id], onDelete: Cascade)
 }
 
 model PollOptions {
@@ -185,8 +185,8 @@ model Notices {
   ApartmentInfo  ApartmentInfo    @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
   apartmentId    String
 
-  eventId String?
-  event   Events? @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId String
+  event   Events @relation(fields: [eventId], references: [id], onDelete: Cascade)
 }
 
 model NoticeComments {

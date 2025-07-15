@@ -9,9 +9,9 @@ export const createEvent = async (data: {
   return await prisma.events.create({ data });
 };
 
-export const editEvent = async (
+export const updateEvent = async (
   eventId: string,
-  data: { isActive?: boolean }
+  data: { isActive: boolean }
 ) => {
   return await prisma.events.update({
     where: { id: eventId },
