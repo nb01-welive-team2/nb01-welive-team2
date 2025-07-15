@@ -1,30 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { $Enums } from "@prisma/client";
 
-jest.mock("@/lib/prisma", () => ({
-  prisma: {
-    polls: {
-      create: jest.fn(),
-      findUnique: jest.fn(),
-      delete: jest.fn(),
-      update: jest.fn(),
-      findMany: jest.fn(),
-    },
-    pollOptions: {
-      create: jest.fn(),
-      createMany: jest.fn(),
-      deleteMany: jest.fn(),
-    },
-    events: {
-      create: jest.fn(),
-      delete: jest.fn(),
-    },
-    userInfo: {
-      findFirst: jest.fn(),
-    },
-  },
-}));
-
 export const findPolls = async (where: any, skip: number, take: number) => {
   return await prisma.polls.findMany({
     where,
