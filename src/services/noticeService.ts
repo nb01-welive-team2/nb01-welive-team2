@@ -4,18 +4,24 @@ import {
   NoticePageParamsType,
   PatchNoticeBodyType,
 } from "../structs/noticeStructs";
-import { USER_ROLE } from "@prisma/client";
+import { EVENT_TYPE, USER_ROLE } from "@prisma/client";
 import { buildSearchCondition } from "../lib/searchCondition";
 import userInfoRepository from "@/repositories/userInfoRepository";
 import { getUserId } from "@/repositories/userRepository";
 import NotFoundError from "@/errors/NotFoundError";
 import ForbiddenError from "@/errors/ForbiddenError";
+import { createEvent, editEvent } from "@/repositories/eventRepository";
 
 async function createNotice(
   notice: CreateNoticeBodyType,
   userId: string,
-  apartmentId: string
+  apartmentId: string,
+  isEvent: boolean
 ) {
+  const event = await createEvent({
+    eventType: EVENT_TYPE.NOTICE,
+    isActive: isEvent,
+  });
   await noticeRepository.create({
     user: { connect: { id: userId } },
     ApartmentInfo: { connect: { id: apartmentId } },
@@ -23,6 +29,7 @@ async function createNotice(
     content: notice.content,
     isPinned: notice.isPinned,
     category: notice.category,
+    event: { connect: { id: event.id } },
     ...(notice.startDate && { startDate: notice.startDate }),
     ...(notice.endDate && { endDate: notice.endDate }),
   });
@@ -77,7 +84,18 @@ async function getNotice(noticeId: string, userId: string, role: USER_ROLE) {
   return notice;
 }
 
-async function updateNotice(noticeId: string, body: PatchNoticeBodyType) {
+async function updateNotice(
+  noticeId: string,
+  body: PatchNoticeBodyType,
+  isEvent: boolean
+) {
+  const notice = await noticeRepository.findById(noticeId);
+  if (!notice?.event) {
+    throw new NotFoundError("Notice Or Event", noticeId);
+  }
+  await editEvent(notice.event.id, {
+    isActive: isEvent,
+  });
   return await noticeRepository.update(noticeId, body);
 }
 

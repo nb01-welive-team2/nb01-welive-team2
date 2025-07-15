@@ -205,6 +205,3 @@ export const deletePollById = async (pollId: string) => {
     where: { id: pollId },
   });
 };
-export function createEvent(arg0: { eventType: string; isActive: boolean }) {
-  throw new Error("Function not implemented.");
-}

@@ -9,6 +9,16 @@ export const createEvent = async (data: {
   return await prisma.events.create({ data });
 };
 
+export const editEvent = async (
+  eventId: string,
+  data: { isActive?: boolean }
+) => {
+  return await prisma.events.update({
+    where: { id: eventId },
+    data,
+  });
+};
+
 export const deleteEventById = async (eventId: string) => {
   return await prisma.events.delete({ where: { id: eventId } });
 };

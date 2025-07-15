@@ -52,6 +52,7 @@ async function findById(noticeId: string) {
           },
         },
       },
+      event: true,
     },
   });
 }

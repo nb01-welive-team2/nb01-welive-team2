@@ -76,10 +76,13 @@ export async function createNotice(req: Request, res: Response) {
     throw new ForbiddenError();
   }
 
+  const isEvent = Boolean(data.startDate && data.endDate);
+
   await noticeService.createNotice(
     data,
     reqWithPayload.user.userId,
-    reqWithPayload.user.apartmentId
+    reqWithPayload.user.apartmentId,
+    isEvent
   );
 
   res.status(201).send(new registerSuccessMessage());
@@ -130,8 +133,7 @@ export async function getNoticeList(req: Request, res: Response) {
   }
   const data = create(req.query, NoticePageParamsStruct);
   const result = await noticeService.getNoticeList(
-    reqWithPayload.user.userId,
-    reqWithPayload.user.role as USER_ROLE,
+    reqWithPayload.user.apartmentId,
     data
   );
   res.send(new ResponseNoticeListDTO(result));
@@ -202,7 +204,8 @@ export async function editNotice(req: Request, res: Response) {
   }
   const data = create(req.body, PatchNoticeBodyStruct);
   const { noticeId } = create(req.params, NoticeIdParamStruct);
-  const notice = await noticeService.updateNotice(noticeId, data);
+  const isEvent = Boolean(data.startDate && data.endDate);
+  const notice = await noticeService.updateNotice(noticeId, data, isEvent);
   res.status(200).send(new ResponseNoticeDTO(notice));
 }
 
