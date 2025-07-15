@@ -7,12 +7,12 @@ import {
   PollUpdateResponseDto,
 } from "../dto/pollDto";
 import * as pollRepo from "../repositories/pollRepository";
-import { createEvent, deleteEventById } from "@/repositories/eventRepository";
 import { getPagination } from "../utils/pagination";
 import NotFoundError from "../errors/NotFoundError";
 import ForbiddenError from "../errors/ForbiddenError";
 import { createPollSchema } from "../structs/pollStructs";
 import { assert } from "superstruct";
+import { createEvent, deleteEventById } from "../repositories/pollRepository";
 
 const toISO = (d: Date) => d.toISOString();
 

@@ -224,3 +224,15 @@ export const deletePollById = async (pollId: string) => {
     where: { id: pollId },
   });
 };
+
+// 일정 관련
+export const createEvent = async (data: {
+  eventType: $Enums.EVENT_TYPE;
+  isActive: boolean;
+}) => {
+  return await prisma.events.create({ data });
+};
+
+export const deleteEventById = async (eventId: string) => {
+  return await prisma.events.delete({ where: { id: eventId } });
+};

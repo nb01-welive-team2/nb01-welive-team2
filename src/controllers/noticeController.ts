@@ -9,7 +9,6 @@ import {
 } from "../structs/noticeStructs";
 import noticeService from "../services/noticeService";
 import registerSuccessMessage from "../lib/responseJson/registerSuccess";
-import { PageParamsStruct } from "../structs/commonStructs";
 import {
   ResponseNoticeCommentDTO,
   ResponseNoticeDTO,

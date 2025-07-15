@@ -41,9 +41,8 @@ describe("complaintService", () => {
 
   describe("getComplaintList", () => {
     it("should return complaints and totalCount with valid userInfo", async () => {
-      const userId = "user-1";
-      const role = USER_ROLE.USER;
       const params = { page: 1, limit: 10 };
+      const apartmentId = "apt-1";
 
       const mockSearchCondition = {
         whereCondition: {},
@@ -58,7 +57,7 @@ describe("complaintService", () => {
       const mockComplaints = [
         {
           id: "c1",
-          userId,
+          userId: "user-1",
           user: {
             userInfo: {
               apartmentId: "apt1",
@@ -73,8 +72,7 @@ describe("complaintService", () => {
       );
 
       const result = await complaintService.getComplaintList(
-        userId,
-        role,
+        apartmentId,
         params
       );
 
@@ -82,10 +80,7 @@ describe("complaintService", () => {
         params.page,
         params.limit,
         "",
-        {
-          userId,
-          role,
-        }
+        { apartmentId }
       );
       expect(complaintRepository.getCount).toHaveBeenCalledWith({
         where: mockSearchCondition.whereCondition,
@@ -100,9 +95,8 @@ describe("complaintService", () => {
     });
 
     it("should throw NotFoundError if complaint userInfo is missing", async () => {
-      const userId = "user-1";
-      const role = USER_ROLE.USER;
       const params = { page: 1, limit: 10 };
+      const apartmentId = "apt-1";
 
       (buildSearchCondition as jest.Mock).mockResolvedValue({
         whereCondition: {},
@@ -110,11 +104,11 @@ describe("complaintService", () => {
       });
       (complaintRepository.getCount as jest.Mock).mockResolvedValue(1);
       (complaintRepository.getList as jest.Mock).mockResolvedValue([
-        { id: "c1", userId, user: { userInfo: null } },
+        { id: "c1", userId: "user-1", user: { userInfo: null } },
       ]);
 
       await expect(
-        complaintService.getComplaintList(userId, role, params)
+        complaintService.getComplaintList(apartmentId, params)
       ).rejects.toThrow(NotFoundError);
     });
   });
@@ -160,10 +154,7 @@ describe("complaintService", () => {
       });
 
       it("should return complaint if all checks pass", async () => {
-        const mockComplaint = {
-          id: complaintId,
-          apartmentId: "apt1",
-        };
+        const mockComplaint = { id: complaintId, apartmentId: "apt1" };
         (userInfoRepository.findByUserId as jest.Mock).mockResolvedValue({
           apartmentId: "apt1",
         });
@@ -218,10 +209,7 @@ describe("complaintService", () => {
       });
 
       it("should return complaint if all checks pass", async () => {
-        const mockComplaint = {
-          id: complaintId,
-          apartmentId: "apt1",
-        };
+        const mockComplaint = { id: complaintId, apartmentId: "apt1" };
         (getUserId as jest.Mock).mockResolvedValue({
           apartmentInfo: { id: "apt1" },
         });
