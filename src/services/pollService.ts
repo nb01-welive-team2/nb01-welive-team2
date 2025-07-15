@@ -7,6 +7,7 @@ import {
   PollUpdateResponseDto,
 } from "../dto/pollDto";
 import * as pollRepo from "../repositories/pollRepository";
+import { createEvent, deleteEventById } from "@/repositories/eventRepository";
 import { getPagination } from "../utils/pagination";
 import NotFoundError from "../errors/NotFoundError";
 import ForbiddenError from "../errors/ForbiddenError";
@@ -35,7 +36,7 @@ export const createPoll = async (
 ): Promise<void> => {
   assert(dto, createPollSchema);
 
-  const event = await pollRepo.createEvent({
+  const event = await createEvent({
     eventType: "POLL",
     isActive: true,
   });
@@ -182,6 +183,6 @@ export const removePoll = async (
   await pollRepo.deletePollById(pollId);
 
   if (poll.eventId) {
-    await pollRepo.deleteEventById(poll.eventId);
+    await deleteEventById(poll.eventId);
   }
 };

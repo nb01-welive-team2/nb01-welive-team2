@@ -5,7 +5,6 @@ import {
   PatchNoticeBodyType,
 } from "../structs/noticeStructs";
 import { USER_ROLE } from "@prisma/client";
-import { PageParamsType } from "../structs/commonStructs";
 import { buildSearchCondition } from "../lib/searchCondition";
 import userInfoRepository from "@/repositories/userInfoRepository";
 import { getUserId } from "@/repositories/userRepository";
@@ -30,8 +29,7 @@ async function createNotice(
 }
 
 async function getNoticeList(
-  userId: string,
-  role: USER_ROLE,
+  apartmentId: string,
   params: NoticePageParamsType
 ) {
   const additionalCondition = {
@@ -41,8 +39,7 @@ async function getNoticeList(
     params.page,
     params.limit,
     params.keyword,
-    { userId, role },
-    additionalCondition
+    { apartmentId, ...additionalCondition }
   );
 
   const totalCount = await noticeRepository.getCount({
