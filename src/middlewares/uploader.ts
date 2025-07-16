@@ -7,13 +7,9 @@ import { v4 as uuidv4 } from "uuid";
 const isProduction = NODE_ENV === "production";
 const ALLOWED_MIME_TYPES = [
   "image/jpeg",
+  "image/jpg",
   "image/png",
-  "image/webp",
   "image/gif",
-  "image/avif",
-  "image/bmp",
-  "image/svg+xml",
-  "image/vnd.microsoft.icon",
 ];
 const FILE_SIZE_LIMIT = 5 * 1024 * 1024;
 
@@ -34,7 +30,9 @@ export const uploader = multer({
   limits: { fieldSize: FILE_SIZE_LIMIT },
   fileFilter(req, file, callback) {
     if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
-      const err = new BadRequestError("Only png, jpeg, and jpg are allowed");
+      const err = new BadRequestError(
+        "Only png, jpeg, jpg and gif are allowed"
+      );
       return callback(err);
     }
 

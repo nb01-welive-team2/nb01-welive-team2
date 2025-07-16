@@ -8,9 +8,7 @@ import {
   size,
   Infer,
   pattern,
-  partial,
   nullable,
-  assign,
   boolean,
 } from "superstruct";
 

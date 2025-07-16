@@ -38,19 +38,24 @@ export const getUserId = async (id: string) => {
       apartmentInfo: {
         select: { id: true },
       },
+      userInfo: {
+        select: { apartmentId: true },
+      },
     },
   });
   return user
     ? {
         ...user,
-        apartmentId: user.apartmentInfo?.id ?? null,
+        apartmentId:
+          user.role === USER_ROLE.USER
+            ? (user.userInfo?.apartmentId ?? null)
+            : (user.apartmentInfo?.id ?? null),
       }
     : null;
 };
 
 export const createUser = async (input: SignupUserRequestDTO) => {
-  const apartment = await findApartment(input.apartmentName); // TODO: 프로젝트 합친 후 apartment관련 리포지토리 있으면 거기에 맞춰 수정
-
+  const apartment = await findApartment(input.apartmentName);
   const user = await prisma.users.create({
     data: {
       id: input.id,

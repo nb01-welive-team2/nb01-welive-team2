@@ -7,6 +7,7 @@ import {
 import { verifyAccessToken, verifyRefreshToken } from "../lib/utils/token";
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { AuthenticatedUser } from "@/types/User";
+import { redis } from "@/lib/redis";
 
 /**
  * authenticate 미들웨어 사용방법
@@ -28,7 +29,14 @@ function authenticate(options = { optional: false }): RequestHandler {
       }
 
       try {
-        const { userId, role, apartmentId } = verifyAccessToken(accessToken);
+        const { userId, role, apartmentId, jti } =
+          verifyAccessToken(accessToken);
+        const isBlacklisted = await redis.get(`blacklist:access_token:${jti}`);
+
+        if (isBlacklisted) {
+          return next(new UnauthError());
+        }
+
         const user = await getUserId(userId);
 
         if (
@@ -59,7 +67,7 @@ function authenticate(options = { optional: false }): RequestHandler {
           !user ||
           user.id !== userId ||
           user.role !== role ||
-          user.apartmentInfo?.id !== apartmentId
+          user.apartmentId !== apartmentId
         ) {
           return next(new UnauthError());
         }

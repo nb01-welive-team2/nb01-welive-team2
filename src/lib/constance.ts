@@ -25,6 +25,10 @@ export const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID || "";
 export const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY || "";
 export const AWS_S3_BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME || "";
 
+export const UPSTASH_REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL || "";
+export const UPSTASH_REDIS_REST_TOKEN =
+  process.env.UPSTASH_REDIS_REST_TOKEN || "";
+
 if (NODE_ENV === "production") {
   if (
     !AWS_REGION ||

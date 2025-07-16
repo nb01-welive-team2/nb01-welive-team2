@@ -19,6 +19,12 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const logout = async (req: Request, res: Response): Promise<void> => {
+  const refreshToken = req.cookies[REFRESH_TOKEN_COOKIE_NAME];
+  const authHeader = req.headers.authorization;
+  const accessToken = authHeader && authHeader.split(" ")[1];
+
+  await authService.logout(refreshToken, accessToken);
+
   clearTokenCookies(res);
   res.status(200).json({ message: "로그아웃이 완료되었습니다" });
 };
