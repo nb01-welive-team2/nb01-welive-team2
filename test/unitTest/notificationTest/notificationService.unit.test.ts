@@ -8,13 +8,18 @@ import {
   getNotifications,
   getNotificationById,
   updateNotification,
+  countUnreadNotifications,
+  markAllNotificationsAsRead,
 } from "@/services/notificationService";
 import { getIO } from "@/sockets/registerSocketServer";
+import * as notificationRepository from "@/repositories/notificationRepository";
 import {
   createNotificationInDb,
   findNotifications,
   findNotificationById,
   updateNotificationById,
+  countUnreadNotificationsInDb,
+  markAllNotificationsAsReadInDb,
 } from "@/repositories/notificationRepository";
 import { NOTIFICATION_TYPE, USER_ROLE } from "@prisma/client";
 import { CreateNotificationRequestDto } from "@/dto/notificationDto";
@@ -448,5 +453,42 @@ describe("notificationService - updateNotification", () => {
 
     expect(updateNotificationById).toHaveBeenCalledWith("noti-1", true);
     expect(result).toEqual(mockUpdatedNotification);
+  });
+});
+
+describe("notificationService", () => {
+  describe("countUnreadNotifications", () => {
+    beforeEach(() => {
+      (countUnreadNotificationsInDb as jest.Mock).mockResolvedValue(7);
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("should return the count of unread notifications", async () => {
+      const result = await countUnreadNotifications("user-123");
+
+      expect(result).toBe(7);
+      expect(countUnreadNotificationsInDb).toHaveBeenCalledWith("user-123");
+    });
+  });
+
+  describe("markAllNotificationsAsRead", () => {
+    beforeEach(() => {
+      (markAllNotificationsAsReadInDb as jest.Mock).mockResolvedValue(
+        undefined
+      );
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("should call repository to mark all notifications as read", async () => {
+      await markAllNotificationsAsRead("user-123");
+
+      expect(markAllNotificationsAsReadInDb).toHaveBeenCalledWith("user-123");
+    });
   });
 });

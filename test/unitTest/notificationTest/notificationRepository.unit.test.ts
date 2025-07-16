@@ -3,6 +3,8 @@ import {
   findNotificationById,
   updateNotificationById,
   createNotificationInDb,
+  countUnreadNotificationsInDb,
+  markAllNotificationsAsReadInDb,
 } from "@/repositories/notificationRepository";
 import { prisma } from "@/lib/prisma";
 import { NOTIFICATION_TYPE } from "@prisma/client";
@@ -14,6 +16,8 @@ jest.mock("@/lib/prisma", () => ({
       findUnique: jest.fn(),
       update: jest.fn(),
       create: jest.fn(),
+      count: jest.fn(),
+      updateMany: jest.fn(),
     },
   },
 }));
@@ -131,6 +135,54 @@ describe("notificationRepository", () => {
         data: expect.objectContaining({
           complaintId: "complaint-123",
         }),
+      });
+    });
+  });
+
+  describe("countUnreadNotificationsInDb", () => {
+    beforeEach(() => {
+      (prisma.notifications.count as jest.Mock).mockResolvedValue(4);
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("should return the count of unread notifications for a user", async () => {
+      const result = await countUnreadNotificationsInDb("user-123");
+
+      expect(result).toBe(4);
+      expect(prisma.notifications.count).toHaveBeenCalledWith({
+        where: {
+          userId: "user-123",
+          isChecked: false,
+        },
+      });
+    });
+  });
+
+  describe("markAllNotificationsAsReadInDb", () => {
+    beforeEach(() => {
+      (prisma.notifications.updateMany as jest.Mock).mockResolvedValue(
+        undefined
+      );
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("should mark all unread notifications as read for a user", async () => {
+      await markAllNotificationsAsReadInDb("user-456");
+
+      expect(prisma.notifications.updateMany).toHaveBeenCalledWith({
+        where: {
+          userId: "user-456",
+          isChecked: false,
+        },
+        data: {
+          isChecked: true,
+        },
       });
     });
   });
