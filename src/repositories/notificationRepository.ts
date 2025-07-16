@@ -53,3 +53,28 @@ export const createNotificationInDb = async (data: {
     },
   });
 };
+
+export const countUnreadNotificationsInDb = async (
+  userId: string
+): Promise<number> => {
+  return prisma.notifications.count({
+    where: {
+      userId,
+      isChecked: false,
+    },
+  });
+};
+
+export const markAllNotificationsAsReadInDb = async (
+  userId: string
+): Promise<void> => {
+  await prisma.notifications.updateMany({
+    where: {
+      userId,
+      isChecked: false,
+    },
+    data: {
+      isChecked: true,
+    },
+  });
+};

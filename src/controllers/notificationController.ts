@@ -5,6 +5,8 @@ import {
   updateNotification,
   getNotificationById,
   createNotification,
+  countUnreadNotifications,
+  markAllNotificationsAsRead,
 } from "../services/notificationService";
 import {
   CreateNotificationStruct,
@@ -178,5 +180,39 @@ export const createNotificationHandler = async (
       createdAt: created.notifiedAt,
       updatedAt: null,
     },
+  });
+};
+
+// 읽지 않은 알림 반환
+export const getUnreadNotificationCountHandler = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const userId = (req as any).user.id;
+
+  const count = await countUnreadNotifications(userId);
+
+  res.status(200).json({
+    code: 200,
+    message: "읽지 않은 알림 개수 조회에 성공했습니다.",
+    data: {
+      count,
+    },
+  });
+};
+
+// 모든 알림 읽음 상태 변경
+export const markAllNotificationsAsReadHandler = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const userId = (req as any).user.id;
+
+  await markAllNotificationsAsRead(userId);
+
+  res.status(200).json({
+    code: 200,
+    message: "모든 알림이 읽음 처리되었습니다.",
+    data: null,
   });
 };

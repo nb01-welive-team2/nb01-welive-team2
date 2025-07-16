@@ -3,6 +3,8 @@ import {
   updateNotificationById,
   findNotificationById,
   createNotificationInDb,
+  countUnreadNotificationsInDb,
+  markAllNotificationsAsReadInDb,
 } from "../repositories/notificationRepository";
 import { NOTIFICATION_TYPE, USER_ROLE, Notifications } from "@prisma/client";
 import { prisma } from "../lib/prisma";
@@ -196,4 +198,18 @@ export const notifyResidentsOfNewNotice = async (noticeId?: string) => {
       });
     })
   );
+};
+
+// 사용자가 읽지 않은 알림 총 개수 반환
+export const countUnreadNotifications = async (
+  userId: string
+): Promise<number> => {
+  return countUnreadNotificationsInDb(userId);
+};
+
+// 모든 알림을 읽음 상태로 변경
+export const markAllNotificationsAsRead = async (
+  userId: string
+): Promise<void> => {
+  await markAllNotificationsAsReadInDb(userId);
 };
