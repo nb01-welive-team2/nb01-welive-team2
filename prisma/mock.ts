@@ -238,12 +238,12 @@ const mockComplaints: Complaints[] = [
 
 const mockEvents: Events[] = [
   {
-    id: "b1c2d3e4-f5a6-7b8c-9d0e-f1g2h3i4j5k6",
+    id: "3f8d3f9e-5b6a-4c4e-8a3b-1c7a7e5e7c2f",
     eventType: EVENT_TYPE.POLL,
     isActive: true,
   },
   {
-    id: "a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6",
+    id: "a7e21d2d-0b49-4e9a-97cb-66df3e3bfb74",
     eventType: EVENT_TYPE.NOTICE,
     isActive: false,
   },
@@ -260,7 +260,7 @@ const mockPolls: Polls[] = [
     endDate: new Date("2025-12-10T00:00:00Z"),
     status: POLL_STATUS.IN_PROGRESS,
     buildingPermission: 1,
-    eventId: "b1c2d3e4-f5a6-7b8c-9d0e-f1g2h3i4j5k6", // Poll event
+    eventId: "3f8d3f9e-5b6a-4c4e-8a3b-1c7a7e5e7c2f", // Poll event
   },
 ];
 
@@ -296,7 +296,7 @@ const mockNotices: Notices[] = [
     isPinned: true,
     category: NOTICE_CATEGORY.COMMUNITY,
     viewCount: 50,
-    eventId: "a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6", // Notice event
+    eventId: "a7e21d2d-0b49-4e9a-97cb-66df3e3bfb74", // Notice event
   },
 ];
 

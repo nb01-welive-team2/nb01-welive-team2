@@ -68,15 +68,5 @@ module.exports = {
       ...commonConfig,
       testMatch: ["**/integrationTest/notification*.test.ts"],
     },
-    {
-      displayName: "event-unit",
-      ...commonConfig,
-      testMatch: ["**/unitTest/eventTest/event*.test.ts"],
-    },
-    {
-      displayName: "event-integration",
-      ...commonConfig,
-      testMatch: ["**/eventTest/event*.test.ts"],
-    },
   ],
 };

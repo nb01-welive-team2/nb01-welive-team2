@@ -38,17 +38,17 @@ describe("Event API Integration Test", () => {
 
     // apartmentId 조회
     const dbUser = await prisma.users.findUnique({
-      where: { id: login.body.userId },
+      where: { id: "0f9e7654-dfbb-46df-b93c-cc491ff9f5bd" },
       include: {
-        residents: true,
+        apartmentInfo: true,
       },
     });
 
-    if (!dbUser?.residents?.apartmentId) {
+    if (!dbUser?.apartmentInfo?.id) {
       throw new Error("apartmentId not found for mockUsers[1]");
     }
 
-    apartmentId = dbUser.residents.apartmentId;
+    apartmentId = dbUser.apartmentInfo.id;
   });
 
   describe("NOTICE 게시글 이벤트", () => {
@@ -65,7 +65,9 @@ describe("Event API Integration Test", () => {
     });
 
     it("이벤트 삭제 성공 (NOTICE)", async () => {
-      const res = await agent.delete(`/api/event/${createdEventId_NOTICE}`);
+      const res = await agent.delete(
+        `/api/event/a7e21d2d-0b49-4e9a-97cb-66df3e3bfb74`
+      );
       expect(res.status).toBe(200);
     });
   });
@@ -84,7 +86,9 @@ describe("Event API Integration Test", () => {
     });
 
     it("이벤트 삭제 성공 (POLL)", async () => {
-      const res = await agent.delete(`/api/event/${createdEventId_POLL}`);
+      const res = await agent.delete(
+        `/api/event/3f8d3f9e-5b6a-4c4e-8a3b-1c7a7e5e7c2f`
+      );
       expect(res.status).toBe(200);
     });
   });

@@ -109,7 +109,7 @@ export async function editEvent(req: Request, res: Response) {
   if (reqWithPayload.user.role !== USER_ROLE.ADMIN) {
     throw new ForbiddenError();
   }
-  const data = create(req.body, UpdateEventStruct);
+  const data = create(req.query, UpdateEventStruct);
   const event = await eventService.editEvent(data);
   res.status(200).send(new ResponseEventDTO(event));
 }
