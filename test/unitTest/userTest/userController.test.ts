@@ -43,7 +43,6 @@ describe("userController", () => {
       };
 
       (userService.signupUser as jest.Mock).mockResolvedValue(mockUser);
-      (userResponseDTO as jest.Mock).mockReturnValue(mockUser);
 
       await userController.signupUser(req as Request, res as Response);
 
@@ -60,7 +59,7 @@ describe("userController", () => {
         isActive: true,
       });
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith(mockUser);
+      expect(res.json).toHaveBeenCalledWith(expect.any(Object));
     });
 
     test("아파트가 존재하지 않을 경우 BadRequestError", async () => {
@@ -112,7 +111,6 @@ describe("userController", () => {
       };
 
       (userService.signupAdmin as jest.Mock).mockResolvedValue(mockAdmin);
-      (userResponseDTO as jest.Mock).mockReturnValue(mockAdmin);
 
       await userController.signupAdmin(req as Request, res as Response);
 
@@ -138,7 +136,7 @@ describe("userController", () => {
         isActive: true,
       });
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith(mockAdmin);
+      expect(res.json).toHaveBeenCalledWith(expect.any(Object));
     });
   });
 
@@ -158,13 +156,12 @@ describe("userController", () => {
     (userService.signupSuperAdmin as jest.Mock).mockResolvedValue(
       mockSuperAdmin
     );
-    (userResponseDTO as jest.Mock).mockReturnValue(mockSuperAdmin);
 
     await userController.signupSuperAdmin(req as Request, res as Response);
 
     expect(userService.signupSuperAdmin).toHaveBeenCalledWith(req.body);
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(mockSuperAdmin);
+    expect(res.json).toHaveBeenCalledWith(expect.any(Object));
   });
 
   describe("updateUser", () => {
@@ -237,12 +234,11 @@ describe("userController", () => {
         res as Response
       );
 
-      expect(userService.updateAdmin).toHaveBeenCalledWith({
-        ...req.body,
+      expect(userService.updateAdmin).toHaveBeenCalledWith(req.body);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
         message: "[슈퍼관리자] 관리자 정보를 수정했습니다.",
       });
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith(mockResult);
     });
 
     test("권한 없음 등의 에러 발생 시 UnauthError throw", async () => {

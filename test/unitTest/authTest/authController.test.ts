@@ -41,19 +41,10 @@ describe("authController", () => {
     contact: "01012345678",
     profileImage: null,
     joinStatus: JOIN_STATUS.APPROVED,
-    apartmentInfo: {
-      id: "apt-id-001",
-      apartmentName: "테스트아파트",
-      userInfo: [
-        {
-          apartmentDong: "101",
-        },
-      ],
-    },
     userInfo: {
       apartmentId: "apt-id-001",
       apartmentName: "테스트아파트",
-      apartmentDong: "101",
+      apartmentDong: 101,
     },
   };
 
@@ -86,9 +77,9 @@ describe("authController", () => {
           avatar: "",
           joinStatus: mockUser.joinStatus,
           isActive: true,
-          apartmentId: mockUser.apartmentInfo.id,
-          apartmentName: mockUser.apartmentInfo.apartmentName,
-          residentDong: mockUser.apartmentInfo.userInfo[0].apartmentDong,
+          apartmentId: mockUser.userInfo.apartmentId,
+          apartmentName: mockUser.userInfo.apartmentName,
+          residentDong: mockUser.userInfo.apartmentDong,
         })
       );
     });
@@ -96,8 +87,13 @@ describe("authController", () => {
 
   describe("logout", () => {
     test("로그아웃 시 쿠키의 토큰 제거 및 상태코드 200 반환", async () => {
+      req.cookies = { [REFRESH_TOKEN_COOKIE_NAME]: "refresh-token" };
+      req.headers = { authorization: "Bearer access-token" };
+      (authService.logout as jest.Mock).mockResolvedValue(undefined);
+
       await logout(req as Request, res as Response);
 
+      expect(authService.logout).toHaveBeenCalledWith("refresh-token", "access-token");
       expect(authUtil.clearTokenCookies).toHaveBeenCalledWith(res);
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
