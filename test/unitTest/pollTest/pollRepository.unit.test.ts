@@ -22,6 +22,10 @@ jest.mock("@/lib/prisma", () => ({
     users: {
       findFirst: jest.fn(),
     },
+    events: {
+      create: jest.fn(),
+      delete: jest.fn(),
+    },
   },
 }));
 
