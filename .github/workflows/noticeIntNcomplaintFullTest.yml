@@ -54,8 +54,8 @@ jobs:
       JWT_ACCESS_TOKEN_SECRET: your-access-token-secret
       JWT_REFRESH_TOKEN_SECRET: your-refresh-token-secret
 
-      UPSTASH_REDIS_REST_URL: https://test-redis-url.upstash.io
-      UPSTASH_REDIS_REST_TOKEN: your-upstash-redis-rest-token
+      UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+      UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
 
     steps:
       - name: Checkout code
