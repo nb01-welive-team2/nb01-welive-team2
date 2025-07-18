@@ -3,6 +3,8 @@ import {
   PollResponseDto,
   PollDetailResponseDto,
   GetPollListParams,
+  UpdatePollRequestDto,
+  PollUpdateResponseDto,
 } from "../dto/pollDto";
 import * as pollRepo from "../repositories/pollRepository";
 import { getPagination } from "../utils/pagination";
@@ -10,13 +12,14 @@ import NotFoundError from "../errors/NotFoundError";
 import ForbiddenError from "../errors/ForbiddenError";
 import { createPollSchema } from "../structs/pollStructs";
 import { assert } from "superstruct";
+import { createEvent, deleteEventById } from "../repositories/pollRepository";
 
 const toISO = (d: Date) => d.toISOString();
 
 const mapToPollResponse = (poll: any): PollResponseDto => ({
+  boardId: poll.boardId,
   id: poll.id,
   title: poll.title,
-  author: poll.user.name,
   content: poll.content,
   status: poll.status,
   buildingPermission: poll.buildingPermission,
@@ -32,9 +35,15 @@ export const createPoll = async (
   apartmentId: string
 ): Promise<void> => {
   assert(dto, createPollSchema);
+
+  const event = await createEvent({
+    eventType: "POLL",
+    isActive: true,
+  });
   const poll = await pollRepo.createPollEntry({
     title: dto.title,
     content: dto.content || "",
+    eventId: event.id,
     startDate: new Date(dto.startDate),
     endDate: new Date(dto.endDate),
     buildingPermission: dto.buildingPermission,
@@ -59,9 +68,13 @@ export const getPollList = async (
         contains: keyword,
         mode: "insensitive",
       },
+      // content: {
+      //   contains: keyword,
+      //   mode: "insensitive",
+      // }, < content 추가되면 주석 해제 >
     }),
-    ...(userId && { userId }),
-  };
+    ...(role === "ADMIN" && userId && { userId }),
+  }; // 관리자인 경우에만 userId 필터 적용
 
   const isUserRole = role === "USER";
   if (isUserRole && userId) {
@@ -115,10 +128,10 @@ export const getPoll = async (
 // 투표 수정
 export const editPoll = async (
   pollId: string,
-  dto: CreatePollRequestDto,
+  dto: UpdatePollRequestDto,
   userId: string,
   role: string
-): Promise<PollResponseDto> => {
+): Promise<PollUpdateResponseDto> => {
   const poll = await pollRepo.findPollForEdit(pollId);
 
   if (!poll) throw new NotFoundError("Poll", "투표를 찾을 수 없습니다.");
@@ -143,7 +156,6 @@ export const editPoll = async (
   return {
     id: updated.id,
     title: updated.title,
-    author: updated.user?.name ?? "",
     content: updated.content,
     startDate: toISO(updated.startDate),
     endDate: toISO(updated.endDate),
@@ -167,5 +179,10 @@ export const removePoll = async (
   if (poll.startDate <= new Date()) {
     throw new ForbiddenError("이미 시작된 투표는 삭제할 수 없습니다.");
   }
+
   await pollRepo.deletePollById(pollId);
+
+  if (poll.eventId) {
+    await deleteEventById(poll.eventId);
+  }
 };

@@ -1,98 +1,23 @@
 import { create } from "superstruct";
 import { Request, Response } from "express";
 import { USER_ROLE } from "@prisma/client";
-import {
-  CreateComplaintBodyStruct,
-  ComplaintIdParamStruct,
-  PatchComplaintBodyStruct,
-} from "../structs/complaintStructs";
-import complaintService from "../services/complaintService";
-import registerSuccessMessage from "../lib/responseJson/registerSuccess";
-import { PageParamsStruct } from "../structs/commonStructs";
-import {
-  ResponseComplaintCommentDTO,
-  ResponseComplaintDTO,
-  ResponseComplaintListDTO,
-} from "../dto/complaintDTO";
+import { EventIdParamStruct, UpdateEventStruct } from "../structs/eventStructs";
+import eventService from "../services/eventService";
+import { ResponseEventDTO, ResponseEventListDTO } from "../dto/eventDTO";
 import removeSuccessMessage from "../lib/responseJson/removeSuccess";
 import { AuthenticatedRequest } from "@/types/express";
 import ForbiddenError from "@/errors/ForbiddenError";
+import { GetEventStruct } from "@/structs/eventStructs";
 
 /**
  * @openapi
- * /articles:
- *   post:
- *     summary: 공지사항 생성
- *     description: 관리자가 공지 카테고리, 제목, 내용 등을 입력하여 새로운 공지사항을 생성합니다.
- *     tags:
- *       - Complaints
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               category:
- *                 type: string
- *                 description: 공지 카테고리
- *                 example: "MAINTENANCE"
- *               title:
- *                 type: string
- *                 description: 공지사항 제목
- *                 example: "서비스 점검 안내"
- *               content:
- *                 type: string
- *                 description: 공지사항 내용
- *                 example: "2025년 6월 20일 02:00 ~ 04:00 시스템 점검이 예정되어 있습니다."
- *               isPinned:
- *                 type: boolean
- *                 description: 상단 고정 여부
- *                 example: true
- *     responses:
- *       201:
- *         description: 공지사항 생성 성공
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: 정상적으로 등록 처리되었습니다.
- *       400:
- *         description: 잘못된 요청. 입력 데이터가 유효하지 않습니다.
- *       401:
- *         description: 인증되지 않음. 관리자만 공지사항을 생성할 수 있습니다.
- */
-export async function createComplaint(req: Request, res: Response) {
-  const reqWithPayload = req as AuthenticatedRequest;
-  const data = create(req.body, CreateComplaintBodyStruct);
-
-  if (reqWithPayload.user.role !== USER_ROLE.USER) {
-    throw new ForbiddenError();
-  }
-
-  await complaintService.createComplaint(
-    data,
-    reqWithPayload.user.userId,
-    reqWithPayload.user.apartmentId
-  );
-
-  res.status(201).send(new registerSuccessMessage());
-}
-
-/**
- * @openapi
- * /complaints:
+ * /events:
  *   get:
  *     summary: 공지사항 목록 조회
  *     description: 사용자 권한에 따라 공지사항 목록을 페이지 단위로 조회합니다.
  *                  SUPER_ADMIN 권한 사용자는 접근이 제한됩니다.
  *     tags:
- *       - Complaints
+ *       - Events
  *     parameters:
  *       - in: query
  *         name: page
@@ -114,7 +39,7 @@ export async function createComplaint(req: Request, res: Response) {
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ResponseComplaintListDTO'
+ *               $ref: '#/components/schemas/ResponseEventListDTO'
  *       401:
  *         description: 권한이 없는 사용자입니다.
  *       400:
@@ -122,31 +47,17 @@ export async function createComplaint(req: Request, res: Response) {
  *       500:
  *         description: 서버 오류가 발생했습니다.
  */
-export async function getComplaintList(req: Request, res: Response) {
+export async function getEventList(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
   if ((reqWithPayload.user.role as string) === USER_ROLE.SUPER_ADMIN) {
     throw new ForbiddenError();
   }
-  const data = create(req.query, PageParamsStruct);
-  const result = await complaintService.getComplaintList(
-    reqWithPayload.user.apartmentId,
-    data
-  );
-  res.send(new ResponseComplaintListDTO(result));
-}
-
-export async function getComplaint(req: Request, res: Response) {
-  const reqWithPayload = req as AuthenticatedRequest;
-  if ((reqWithPayload.user.role as string) === USER_ROLE.SUPER_ADMIN) {
+  const data = create(req.query, GetEventStruct);
+  if (data.apartmentId !== reqWithPayload.user.apartmentId) {
     throw new ForbiddenError();
   }
-  const { complaintId } = create(req.params, ComplaintIdParamStruct);
-  const result = await complaintService.getComplaint(
-    complaintId,
-    reqWithPayload.user.userId,
-    reqWithPayload.user.role as USER_ROLE
-  );
-  res.send(new ResponseComplaintCommentDTO(result));
+  const result = await eventService.getEventList(data);
+  res.send(ResponseEventListDTO(result));
 }
 
 /**
@@ -193,15 +104,14 @@ export async function getComplaint(req: Request, res: Response) {
  *       500:
  *         description: 서버 오류가 발생했습니다.
  */
-export async function editComplaint(req: Request, res: Response) {
+export async function editEvent(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
-  if (reqWithPayload.user.role !== USER_ROLE.USER) {
+  if (reqWithPayload.user.role !== USER_ROLE.ADMIN) {
     throw new ForbiddenError();
   }
-  const data = create(req.body, PatchComplaintBodyStruct);
-  const { complaintId } = create(req.params, ComplaintIdParamStruct);
-  const complaint = await complaintService.updateComplaint(complaintId, data);
-  res.status(200).send(new ResponseComplaintDTO(complaint));
+  const data = create(req.query, UpdateEventStruct);
+  const event = await eventService.editEvent(data);
+  res.status(200).send(new ResponseEventDTO(event));
 }
 
 /**
@@ -235,12 +145,12 @@ export async function editComplaint(req: Request, res: Response) {
  *       500:
  *         description: 서버 오류가 발생했습니다.
  */
-export async function removeComplaint(req: Request, res: Response) {
+export async function removeEvent(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
   if (reqWithPayload.user.role !== USER_ROLE.ADMIN) {
     throw new ForbiddenError();
   }
-  const { complaintId } = create(req.params, ComplaintIdParamStruct);
-  await complaintService.removeComplaint(complaintId);
+  const { eventId } = create(req.params, EventIdParamStruct);
+  await eventService.removeEvent(eventId);
   res.status(200).send(new removeSuccessMessage());
 }

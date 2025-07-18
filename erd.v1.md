@@ -68,6 +68,7 @@ Complaints {
   Varchar title
   Varchar content
   Datetime createdAt
+  Datetime updatedAt
   Bool isPublic
   APPROVAL_STATUS approvalStatus
   Int viewCount
@@ -83,14 +84,25 @@ ComplaintComments {
   Datetime updatedAt
 }
 
+Events {
+  UUID id PK
+  Bool isActive
+  EVENT_TYPE eventType
+}
+%% isActive @default(false)
+%% EVENT_TYPE : NOTICE, POLL
+
 Polls {
   UUID id PK
   UUID userId FK
   UUID apartmentId FK
+  UUID eventId FK
   Varchar title
   Varchar content
   Datetime startDate
   Datetime endDate
+  Datetime createdAt
+  Datetime updatedAt
   POLL_STATUS status
   Int buildingPermission
 }
@@ -116,6 +128,8 @@ Notices {
   Varchar content
   Datetime startDate
   Datetime endDate
+  Datetime createdAt
+  Datetime updatedAt
   Bool isPinned
   NOTICE_CATEGORY category
   Int viewCount
@@ -150,22 +164,26 @@ Notifications {
 
 Users ||--o| ApartmentInfo : "관리자 계정"
 Users ||--o| UserInfo : "입주민 계정"
-Users ||--o| Residents : "입주민 목록의 입주민"
+Users |o--o| Residents : "입주민 목록의 입주민"
 ApartmentInfo ||--o{ UserInfo : "아파트의 입주민 계정"
-ApartmentInfo ||--o| Residents : "입주민 목록"
+ApartmentInfo ||--o{ Residents : "입주민 목록"
 Users ||--o{ Complaints : "민원"
+Users ||--o{ ComplaintComments : "작성 민원 댓글"
 Complaints ||--o{ ComplaintComments : "민원 댓글"
 ApartmentInfo ||--o{ Complaints : "아파트 민원"
 ApartmentInfo ||--o{ Polls : "아파트 투표"
 ApartmentInfo ||--o{ Notices : "아파트 공지"
 Users ||--o{ Polls : "투표 등록"
-Polls ||--|{ PollOptions : "투표 선택지"
+Polls ||--o{ PollOptions : "투표 선택지"
 Users ||--o{ Votes : "투표"
 PollOptions ||--o{ Votes : "투표 결과"
 Users ||--o{ Notices : "공지"
+Users ||--o{ NoticeComments : "작성 공지 댓글"
 Notices ||--o{ NoticeComments : "공지 댓글"
 Users ||--o{ Notifications : "알림 수신"
 Complaints ||--o{ Notifications : "민원 알림"
 Notices ||--o{ Notifications : "공지 알림"
 Polls ||--o{ Notifications : "투표 알림"
+Events ||--o{ Notices : "공지 일정"
+Events ||--o{ Polls : "투표 일정"
 ```

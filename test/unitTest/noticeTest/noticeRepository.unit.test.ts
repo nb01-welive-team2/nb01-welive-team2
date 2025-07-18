@@ -30,6 +30,7 @@ describe("noticeRepository", () => {
         category: "MAINTENANCE" as const,
         user: { connect: { id: "user-uuid" } },
         ApartmentInfo: { connect: { id: "apt-uuid" } },
+        event: { connect: { id: "event-uuid" } },
       };
       const expectedResult = { id: "1", ...input };
 
@@ -81,6 +82,7 @@ describe("noticeRepository", () => {
         NoticeComments: [
           { id: "comment-1", user: { username: "user2" }, content: "comment" },
         ],
+        event: { id: "event-1", title: "Test Event" },
       };
 
       (prisma.notices.findUnique as jest.Mock).mockResolvedValue(
@@ -98,6 +100,7 @@ describe("noticeRepository", () => {
           NoticeComments: {
             include: { user: { select: { username: true } } },
           },
+          event: true,
         },
       });
       expect(result).toBe(expectedResult);
@@ -111,11 +114,13 @@ describe("noticeRepository", () => {
         {
           id: "notice1",
           user: { username: "user1" },
+          event: { id: "event-1" },
           _count: { NoticeComments: 2 },
         },
         {
           id: "notice2",
           user: { username: "user2" },
+          event: null,
           _count: { NoticeComments: 1 },
         },
       ];
@@ -128,6 +133,7 @@ describe("noticeRepository", () => {
         ...params,
         include: {
           user: { select: { username: true } },
+          event: true,
           _count: { select: { NoticeComments: true } },
         },
       });
