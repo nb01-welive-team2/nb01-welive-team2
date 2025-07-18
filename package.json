@@ -20,7 +20,7 @@
     "test-notification-unit": "jest --selectProjects notification-unit --runInBand --detectOpenHandles --coverage",
     "test-notification-int": "jest --selectProjects notification-integration --runInBand --detectOpenHandles --coverage",
     "test-event-unit": "jest --selectProjects event-unit --runInBand --detectOpenHandles --coverage",
-    "test-event-int": "jest --selectProjects event-integration --runInBand --detectOpenHandles --coverage"
+    "test-event-int": "jest --selectProjects event-integration --runInBand --detectOpenHandles --coverage",
     "test-auth-unit": "jest --selectProjects auth-unit --runInBand --detectOpenHandles --coverage",
     "test-user-unit": "jest --selectProjects user-unit --runInBand --detectOpenHandles --coverage",
     "test-userAuth-int": "jest --selectProjects userAuth-integration --runInBand --detectOpenHandles --coverage",
