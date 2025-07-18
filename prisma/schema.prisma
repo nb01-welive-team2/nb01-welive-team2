@@ -6,10 +6,286 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Users {
+  id                String      @id @default(uuid())
+  username          String      @unique @db.VarChar(50)
+  encryptedPassword String      @db.VarChar(100)
+  contact           String      @unique @db.VarChar(20)
+  name              String      @db.VarChar(50)
+  email             String      @unique @db.VarChar(320)
+  residentId        String?     @unique
+  role              USER_ROLE
+  joinStatus        JOIN_STATUS
+  profileImage      String?     @db.VarChar(255)
+
+  residents Residents? @relation(fields: [residentId], references: [id], onDelete: Cascade)
+
+  apartmentInfo ApartmentInfo?
+  userInfo      UserInfo?
+  complaints    Complaints[]
+  polls         Polls[]
+  notices       Notices[]
+  votes         Votes[]
+  notifications Notifications[]
+
+  NoticeComments    NoticeComments[]
+  ComplaintComments ComplaintComments[]
+}
+
+model ApartmentInfo {
+  id                        String          @id @default(uuid())
+  userId                    String          @unique
+  approvalStatus            APPROVAL_STATUS
+  apartmentName             String          @db.VarChar(100)
+  apartmentAddress          String          @db.VarChar(255)
+  apartmentManagementNumber String          @db.VarChar(100)
+  description               String
+  startComplexNumber        Int
+  endComplexNumber          Int
+  startDongNumber           Int
+  endDongNumber             Int
+  startFloorNumber          Int
+  endFloorNumber            Int
+  startHoNumber             Int
+  endHoNumber               Int
+  createdAt                 DateTime        @default(now())
+
+  user       Users        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userInfo   UserInfo[]
+  residents  Residents[]
+  notices    Notices[]
+  complaints Complaints[]
+  polls      Polls[]
+}
+
+model UserInfo {
+  id            String @id @default(uuid())
+  userId        String @unique
+  apartmentId   String
+  apartmentName String @db.VarChar(100)
+  apartmentDong Int
+  apartmentHo   Int
+
+  user          Users         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  apartmentInfo ApartmentInfo @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+}
+
+model Residents {
+  id              String             @id @default(uuid())
+  apartmentId     String
+  building        Int
+  unitNumber      Int
+  contact         String             @db.VarChar(20)
+  name            String             @db.VarChar(50)
+  email           String             @unique @db.VarChar(320)
+  residenceStatus RESIDENCE_STATUS
+  isHouseholder   HOUSEHOLDER_STATUS
+  isRegistered    Boolean
+  approvalStatus  APPROVAL_STATUS
+
+  apartmentInfo ApartmentInfo @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  Users         Users?
+}
+
+model Complaints {
+  id              String           @id @default(uuid())
+  userId          String
+  apartmentId     String
+  title           String           @db.VarChar(100)
+  content         String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @default(now()) @updatedAt
+  isPublic        Boolean
+  complaintStatus COMPLAINT_STATUS @default(PENDING)
+  viewCount       Int              @default(0)
+
+  user              Users               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notifications     Notifications[]
+  ComplaintComments ComplaintComments[]
+  ApartmentInfo     ApartmentInfo       @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+}
+
+model ComplaintComments {
+  id          String   @id @default(uuid())
+  complaintId String
+  userId      String
+  content     String   @db.VarChar(255)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  complaint Complaints @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  user      Users      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Polls {
+  id                 String      @id @default(uuid())
+  userId             String
+  apartmentId        String
+  eventId            String
+  title              String      @db.VarChar(100)
+  content            String
+  startDate          DateTime    @default(now())
+  endDate            DateTime    @default(now())
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @default(now()) @updatedAt
+  status             POLL_STATUS
+  buildingPermission Int
+
+  user          Users           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pollOptions   PollOptions[]
+  notifications Notifications[]
+  ApartmentInfo ApartmentInfo   @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  event         Events          @relation(fields: [eventId], references: [id], onDelete: Cascade)
+}
+
+model PollOptions {
+  id     String @id @default(uuid())
+  pollId String
+  title  String @db.VarChar(100)
+
+  poll  Polls   @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  votes Votes[]
+}
+
+model Votes {
+  optionId String
+  userId   String
+
+  option PollOptions @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  user   Users       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([optionId, userId])
+}
+
+model Notices {
+  id          String          @id @default(uuid())
+  userId      String
+  apartmentId String
+  eventId     String
+  title       String          @db.VarChar(100)
+  content     String
+  startDate   DateTime        @default(now())
+  endDate     DateTime        @default(now())
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @default(now()) @updatedAt
+  isPinned    Boolean
+  category    NOTICE_CATEGORY
+  viewCount   Int             @default(0)
+
+  user           Users            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notifications  Notifications[]
+  NoticeComments NoticeComments[]
+  ApartmentInfo  ApartmentInfo    @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  event          Events           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+}
+
+model NoticeComments {
+  id        String   @id @default(uuid())
+  noticeId  String
+  userId    String
+  content   String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  notice Notices @relation(fields: [noticeId], references: [id], onDelete: Cascade)
+  user   Users   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Notifications {
+  id               String            @id @default(uuid())
+  userId           String
+  content          String            @db.VarChar(255)
+  notificationType NOTIFICATION_TYPE
+  notifiedAt       DateTime          @default(now())
+  isChecked        Boolean           @default(false)
+  complaintId      String?
+  noticeId         String?
+  pollId           String?
+
+  user      Users       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  complaint Complaints? @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  notice    Notices?    @relation(fields: [noticeId], references: [id], onDelete: Cascade)
+  poll      Polls?      @relation(fields: [pollId], references: [id], onDelete: Cascade)
+}
+
+model Events {
+  id        String     @id @default(uuid())
+  isActive  Boolean    @default(false)
+  eventType EVENT_TYPE
+  Notices   Notices[]
+  Polls     Polls[]
+}
+
+enum EVENT_TYPE {
+  NOTICE
+  POLL
+}
+
+enum USER_ROLE {
+  SUPER_ADMIN
+  ADMIN
+  USER
+}
+
+enum JOIN_STATUS {
+  APPROVED
+  REJECTED
+  PENDING
+}
+
+enum APPROVAL_STATUS {
+  APPROVED
+  REJECTED
+  PENDING
+}
+
+enum COMPLAINT_STATUS {
+  PENDING
+  IN_PROGRESS
+  CLOSED
+}
+
+enum RESIDENCE_STATUS {
+  RESIDENCE
+  NO_RESIDENCE
+}
+
+enum HOUSEHOLDER_STATUS {
+  HOUSEHOLDER
+  MEMBER
+}
+
+enum BOARD_ID {
+  NOTICE
+  POLL
+}
+
+enum POLL_STATUS {
+  PENDING
+  IN_PROGRESS
+  CLOSED
+}
+
+enum NOTICE_CATEGORY {
+  MAINTENANCE
+  EMERGENCY
+  COMMUNITY
+  RESIDENT_VOTE
+  RESIDENT_COUNCIL
+  ETC
+}
+
+//한글값은 나중에 프론트서버 나오면 어떤 값을 사용하는지 확인해서 변경
+enum NOTIFICATION_TYPE {
+  COMPLAINT_RESOLVED
+  민원_등록
+  공지_등록
+  회원가입신청
 }

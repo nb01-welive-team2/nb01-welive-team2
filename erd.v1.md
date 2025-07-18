@@ -1,112 +1,8 @@
-````mermaid
-erDiagram
-Users {
-  UUID id PK
-  Varchar username UK
-  Varchar encryptedPassword
-  Varchar contact UK
-  Varchar name
-  Varchar email UK
-  USER_ROLE role
-  JOIN_STATUS joinStatus
-  Varchar profileImage
-}
-%% USER_ROLE : SUPER_ADMIN, ADMIN, USER
-%% JOIN_STATUS : APPROVED, REJECTED, PENDING
-%% nullable : profileImage
-
-ApartmentInfo {
-  UUID id PK
-  UUID userId FK
-  APPROVAL_STATUS approvalStatus
-  Varchar apartmentName
-  Varchar apartmentAddress
-  Varchar apartmentManagementNumber
-  Varchar description
-  Int startComplexNumber
-  Int endComplexNumber
-  Int startDongNumber
-  Int endDongNumber
-  Int startFloorNumber
-  Int endFloorNumber
-  Int startHoNumber
-  Int endHoNumber
-  Varchar description
-  Datetime createdAt
-}
-%% APPROVAL_STATUS : UNRECEIVED, PENDING, APPROVED
-%% nullable : startComplexNumber, endComplexNumber
-
-UserInfo {
-  UUID id PK
-  UUID userId FK
-  UUID apartmentId FK
-  Varchar apartmentName
-  Int apartmentDong
-  Int apartmentHo
-}
-
-Residents {
-  UUID id PK
-  UUID apartmentId FK
-  Int building
-  Int unitNumber
-  Varchar contact
-  Varchar name
-  Varchar email UK
-  ResidenceStatus residenceStatus
-  HouseholderStatus isHouseholder
-  Bool  isRegistered
-  APPROVAL_STATUS approvalStatus
-}
-%% ResidenceStatus : RESIDENCE, NO_RESIDENCE
-%% HouseholderStatus : HOUSEHOLDER, MEMBER
-
-Complaints {
-  UUID id PK
-  UUID userId FK
-  Varchar title
-  Varchar content
-  Datetime createdAt
-  Bool isPublic
-  APPROVAL_STATUS approvalStatus
-  Int viewCount
-}
-%% viewCount @default(0)
-
-Articles {
-  UUID id PK
-  UUID userId FK
-  Varchar title
-  Varchar content
-  Datetime startDate
-  Datetime endDate
-  BOARD_ID boardId
-}
-%% BOARD_ID : NOTICE, POLL
-%% startDate, endDate @default(now())
-
-Polls {
-  UUID id PK
-  UUID articleId FK
-  POLL_STATUS status
-  Int buildingPermission
-}
-%% POLL_STATUS : PENDING, IN_PROGRESS, CLOSED
-%% buildingPermission 0이면 전체, 그 이외에는 특정 '동' 하나 선택
-
-PollOptions {
-  UUID id PK
-  UUID pollId FK
-... (50줄 남음)
-접기
-message.txt
-4KB
-﻿
 ```mermaid
 erDiagram
 Users {
   UUID id PK
+  UUID residentId FK
   Varchar username UK
   Varchar encryptedPassword
   Varchar contact UK
@@ -136,11 +32,9 @@ ApartmentInfo {
   Int endFloorNumber
   Int startHoNumber
   Int endHoNumber
-  Varchar description
   Datetime createdAt
 }
 %% APPROVAL_STATUS : UNRECEIVED, PENDING, APPROVED
-%% nullable : startComplexNumber, endComplexNumber
 
 UserInfo {
   UUID id PK
@@ -170,30 +64,45 @@ Residents {
 Complaints {
   UUID id PK
   UUID userId FK
+  UUID apartmentId FK
   Varchar title
   Varchar content
   Datetime createdAt
+  Datetime updatedAt
   Bool isPublic
   APPROVAL_STATUS approvalStatus
   Int viewCount
 }
 %% viewCount @default(0)
 
-Articles {
+ComplaintComments {
+  UUID id PK
+  UUID complaintId FK
+  UUID userId FK
+  Varchar content
+  Datetime createdAt
+  Datetime updatedAt
+}
+
+Events {
+  UUID id PK
+  Bool isActive
+  EVENT_TYPE eventType
+}
+%% isActive @default(false)
+%% EVENT_TYPE : NOTICE, POLL
+
+Polls {
   UUID id PK
   UUID userId FK
+  UUID apartmentId FK
+  UUID eventId FK
   Varchar title
   Varchar content
   Datetime startDate
   Datetime endDate
-  BOARD_ID boardId
-}
-%% BOARD_ID : NOTICE, POLL
-%% startDate, endDate @default(now())
-
-Polls {
-  UUID id PK
-  UUID articleId FK
+  Datetime createdAt
+  Datetime updatedAt
   POLL_STATUS status
   Int buildingPermission
 }
@@ -203,7 +112,7 @@ Polls {
 PollOptions {
   UUID id PK
   UUID pollId FK
-  Varchar Content
+  Varchar title
 }
 
 Votes {
@@ -213,13 +122,29 @@ Votes {
 
 Notices {
   UUID id PK
-  UUID articleId FK
+  UUID userId FK
+  UUID apartmentId FK
+  Varchar title
+  Varchar content
+  Datetime startDate
+  Datetime endDate
+  Datetime createdAt
+  Datetime updatedAt
   Bool isPinned
   NOTICE_CATEGORY category
   Int viewCount
 }
 %% NOTICE_CATEGORY : MAINTENANCE, EMERGENCY, COMMUNITY, RESIDENT_VOTE, ETC
 %% viewCount @default(0)
+
+NoticeComments {
+  UUID id PK
+  UUID noticeId FK
+  UUID userId FK
+  Varchar content
+  Datetime createdAt
+  Datetime updatedAt
+}
 
 Notifications {
   UUID id PK
@@ -237,19 +162,28 @@ Notifications {
 %% notifiedAt @default(now())
 %% nullable : complaintId, noticeId, pollId
 
-Users ||--o{ ApartmentInfo : "관리자 계정"
-Users ||--o{ UserInfo : "입주민 계정"
+Users ||--o| ApartmentInfo : "관리자 계정"
+Users ||--o| UserInfo : "입주민 계정"
+Users |o--o| Residents : "입주민 목록의 입주민"
 ApartmentInfo ||--o{ UserInfo : "아파트의 입주민 계정"
-ApartmentInfo ||--o| Residents : "입주민 목록"
+ApartmentInfo ||--o{ Residents : "입주민 목록"
 Users ||--o{ Complaints : "민원"
-Users ||--o{ Articles : "공지, 투표"
-Articles ||--o{ Polls : "투표 등록"
-Polls ||--|{ PollOptions : "투표 선택지"
+Users ||--o{ ComplaintComments : "작성 민원 댓글"
+Complaints ||--o{ ComplaintComments : "민원 댓글"
+ApartmentInfo ||--o{ Complaints : "아파트 민원"
+ApartmentInfo ||--o{ Polls : "아파트 투표"
+ApartmentInfo ||--o{ Notices : "아파트 공지"
+Users ||--o{ Polls : "투표 등록"
+Polls ||--o{ PollOptions : "투표 선택지"
 Users ||--o{ Votes : "투표"
 PollOptions ||--o{ Votes : "투표 결과"
-Articles ||--o{ Notices : "공지 등록"
+Users ||--o{ Notices : "공지"
+Users ||--o{ NoticeComments : "작성 공지 댓글"
+Notices ||--o{ NoticeComments : "공지 댓글"
 Users ||--o{ Notifications : "알림 수신"
 Complaints ||--o{ Notifications : "민원 알림"
 Notices ||--o{ Notifications : "공지 알림"
 Polls ||--o{ Notifications : "투표 알림"
-````
+Events ||--o{ Notices : "공지 일정"
+Events ||--o{ Polls : "투표 일정"
+```
