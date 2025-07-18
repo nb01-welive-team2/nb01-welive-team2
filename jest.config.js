@@ -19,9 +19,14 @@ module.exports = {
       testMatch: ["**/integrationTest/**/poll*.test.ts"],
     },
     {
-      displayName: "notice-unit",
+      displayName: "residents-api",
       ...commonConfig,
-      testMatch: ["**/unitTest/noticeTest/notice*.test.ts"],
+      testMatch: ["**/integrationTest/**/residents*.test.ts"],
+    },
+    {
+      displayName: "residents-unit",
+      ...commonConfig,
+      testMatch: ["**/unitTest/**/residents*.unit.test.ts"],
     },
     {
       displayName: "notice-integration",
@@ -82,6 +87,21 @@ module.exports = {
       displayName: "notification-integration",
       ...commonConfig,
       testMatch: ["**/integrationTest/notification*.test.ts"],
+    },
+    {
+      displayName: "apartmentInfo-api",
+      ...commonConfig,
+      testMatch: ["**/integrationTest/apartmentInfo*.test.ts"],
+    },
+    {
+      displayName: "apartmentInfo-unit",
+      ...commonConfig,
+      testMatch: ["**/unitTest/**/apartmentInfo*.unit.test.ts"],
+    },
+    {
+      displayName: "notice-unit",
+      ...commonConfig,
+      testMatch: ["**/unitTest/noticeTest/notice*.test.ts"],
     },
   ],
 };

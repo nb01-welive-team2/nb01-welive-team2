@@ -10,7 +10,9 @@ import { hashPassword } from "@/lib/utils/hash";
 
 export const login = async (data: LoginRequestDTO) => {
   const { username, password } = data;
+
   const user = await getUserByUsername(username);
+
   if (!user) {
     throw new UnauthError();
   }

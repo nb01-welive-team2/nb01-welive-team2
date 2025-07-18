@@ -20,7 +20,7 @@ model Users {
   contact           String      @unique @db.VarChar(20)
   name              String      @db.VarChar(50)
   email             String      @unique @db.VarChar(320)
-  residentId        String?
+  residentId        String?     @unique
   role              USER_ROLE
   joinStatus        JOIN_STATUS
   profileImage      String?     @db.VarChar(255)
@@ -91,7 +91,7 @@ model Residents {
   approvalStatus  APPROVAL_STATUS
 
   apartmentInfo ApartmentInfo @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
-  Users         Users[]
+  Users         Users?
 }
 
 model Complaints {

@@ -2,7 +2,6 @@ import express from "express";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./swagger";
 import cors from "cors";
-import path from "path";
 import cookieParser from "cookie-parser";
 // import { UPLOAD_FOLDER, STATIC_PATH } from './config/constants';
 // import usersRouter from './routers/userRouter';
@@ -17,8 +16,10 @@ import {
   defaultNotFoundHandler,
   globalErrorHandler,
 } from "./controllers/errorController";
+import residentsRouter from "./routes/residentsRouter";
 import authRouter from "./routes/authRoute";
 import userRouter from "./routes/userRoute";
+import apartmentsRouter from "./routes/apartmentInfoRoute";
 import pollsRouter from "./routes/pollRouter";
 import imagesRouter from "./routes/imageRouter";
 import { PUBLIC_PATH, STATIC_PATH } from "./lib/constance";
@@ -32,10 +33,14 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(STATIC_PATH, express.static(PUBLIC_PATH));
 
 app.use("/api/auth", authRouter);
+app.use("/api/auth", userRouter);
+app.use("/api/residents", residentsRouter);
+app.use("/api/apartments", apartmentsRouter);
 app.use("/api/users", userRouter);
 app.use("/api/polls", pollsRouter);
 app.use("/api/notices", noticesRouter);
