@@ -17,7 +17,7 @@ export const JWT_ACCESS_TOKEN_SECRET =
 export const JWT_REFRESH_TOKEN_SECRET =
   process.env.JWT_REFRESH_TOKEN_SECRET || "";
 
-export const SERVER_URL = process.env.SERVER_URL || `http://localhost:${PORT}`;
+export const SERVER_URL = process.env.SERVER_URL || "localhost";
 
 export const NODE_ENV = process.env.NODE_ENV || "development";
 export const AWS_REGION = process.env.AWS_REGION || "";
