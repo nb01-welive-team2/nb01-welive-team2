@@ -1,5 +1,4 @@
 import { getUserId } from "@/repositories/userRepository";
-import { optional } from "superstruct";
 import UnauthError from "../errors/UnauthError";
 import {
   ACCESS_TOKEN_COOKIE_NAME,
@@ -19,7 +18,7 @@ import { redis } from "@/lib/redis";
  * [ex] authRouter.post("/refresh", authenticate({ optional: true }), withAsync(refreshToken));
  **/
 
-export function authenticate(options = { optional: false }): RequestHandler {
+function authenticate(options = { optional: false }): RequestHandler {
   return async (req: Request, res: Response, next: NextFunction) => {
     const accessToken = req.cookies[ACCESS_TOKEN_COOKIE_NAME];
     const refreshToken = req.cookies[REFRESH_TOKEN_COOKIE_NAME];
@@ -99,3 +98,5 @@ export function optionalAuth(): RequestHandler {
     return next();
   };
 }
+
+export default authenticate;

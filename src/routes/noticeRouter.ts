@@ -7,7 +7,7 @@ import {
   getNoticeList,
   removeNotice,
 } from "../controllers/noticeController";
-import { authenticate } from "@/middlewares/authenticate";
+import authenticate from "@/middlewares/authenticate";
 
 const noticesRouter = express.Router();
 noticesRouter.get("/:noticeId", authenticate(), withAsync(getNotice));

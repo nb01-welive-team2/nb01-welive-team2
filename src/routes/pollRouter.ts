@@ -7,7 +7,7 @@ import {
   createPoll,
   getPollList,
 } from "../controllers/pollController";
-import { authenticate } from "@/middlewares/authenticate";
+import authenticate from "@/middlewares/authenticate";
 
 const pollsRouter = express.Router();
 pollsRouter.get("/:pollId", authenticate(), withAsync(getPoll));
