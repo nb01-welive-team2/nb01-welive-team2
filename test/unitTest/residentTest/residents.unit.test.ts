@@ -25,7 +25,7 @@ describe("Residents Service", () => {
     isRegistered: true,
     approvalStatus: APPROVAL_STATUS.APPROVED,
     userId: "user-id-1",
-    Users: [{ id: "user-id-1" }],
+    Users: { id: "user-id-1" },
   };
 
   const mockResidentInput = {
@@ -161,7 +161,7 @@ describe("Residents Service", () => {
       const expectedResult = {
         residents: mockResidentsList.map((resident) => ({
           ...resident,
-          userId: resident.Users?.[0]?.id ?? null,
+          userId: resident.Users?.id ?? null,
           Users: undefined,
         })),
         count: mockResidentsList.length,
