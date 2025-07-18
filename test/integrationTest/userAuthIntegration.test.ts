@@ -85,14 +85,14 @@ describe("User & Auth Integration Tests", () => {
         .set("cookie", cookies);
 
       expect(refreshResponse.status).toBe(200);
-      expect(refreshResponse.body.message).toBe("토큰 갱신이 완료되었습니다");
+      expect(refreshResponse.body.message).toBe("토큰 갱신이 완료되었습니다.");
 
       const logoutResponse = await request(app)
         .post("/api/auth/logout")
         .set("cookie", cookies);
 
       expect(logoutResponse.status).toBe(200);
-      expect(logoutResponse.body.message).toBe("로그아웃이 완료되었습니다");
+      expect(logoutResponse.body.message).toBe("로그아웃이 완료되었습니다.");
     });
   });
 
@@ -163,7 +163,7 @@ describe("User & Auth Integration Tests", () => {
 
       expect(approveAdminResponse.status).toBe(200);
       expect(approveAdminResponse.body.message).toBe(
-        "관리자 가입 승인이 완료되었습니다"
+        "관리자 가입 승인이 완료되었습니다."
       );
     });
   });
@@ -238,7 +238,9 @@ describe("User & Auth Integration Tests", () => {
         });
 
       expect(updatePasswordResponse.status).toBe(200);
-      expect(updatePasswordResponse.body.message).toBe("비밀번호가 변경되었습니다. 다시 로그인해주세요.");
+      expect(updatePasswordResponse.body.message).toBe(
+        "비밀번호가 변경되었습니다. 다시 로그인해주세요."
+      );
 
       const newLoginResponse = await request(app).post("/api/auth/login").send({
         username: "testuser",
@@ -318,7 +320,9 @@ describe("User & Auth Integration Tests", () => {
         });
 
       expect(updateResponse.status).toBe(200);
-      expect(updateResponse.body.message).toBe("정보가 성공적으로 업데이트되었습니다. 다시 로그인해주세요.");
+      expect(updateResponse.body.message).toBe(
+        "정보가 성공적으로 업데이트되었습니다. 다시 로그인해주세요."
+      );
     });
   });
 
@@ -435,7 +439,7 @@ describe("User & Auth Integration Tests", () => {
 
       expect(rejectAdminResponse.status).toBe(200);
       expect(rejectAdminResponse.body.message).toBe(
-        "관리자 가입 거절이 완료되었습니다"
+        "관리자 가입 거절이 완료되었습니다."
       );
 
       const approveAllResponse = await request(app)
@@ -444,7 +448,7 @@ describe("User & Auth Integration Tests", () => {
 
       expect(approveAllResponse.status).toBe(200);
       expect(approveAllResponse.body.message).toBe(
-        "관리자 가입 전체 승인이 완료되었습니다"
+        "관리자 가입 전체 승인이 완료되었습니다."
       );
 
       const rejectAllResponse = await request(app)
@@ -453,7 +457,7 @@ describe("User & Auth Integration Tests", () => {
 
       expect(rejectAllResponse.status).toBe(200);
       expect(rejectAllResponse.body.message).toBe(
-        "관리자 가입 전체 거절이 완료되었습니다"
+        "관리자 가입 전체 거절이 완료되었습니다."
       );
     });
   });
@@ -521,7 +525,7 @@ describe("User & Auth Integration Tests", () => {
 
       expect(rejectUserResponse.status).toBe(200);
       expect(rejectUserResponse.body.message).toBe(
-        "사용자 가입 요청 거절 성공"
+        "사용자 가입 요청 거절이 성공했습니다."
       );
 
       const approveAllUsersResponse = await request(app)
@@ -530,7 +534,7 @@ describe("User & Auth Integration Tests", () => {
 
       expect(approveAllUsersResponse.status).toBe(200);
       expect(approveAllUsersResponse.body.message).toBe(
-        "사용자 가입 요청 전체 승인 성공"
+        "사용자 가입 요청 전체 승인이 성공했습니다."
       );
 
       const rejectAllUsersResponse = await request(app)
@@ -539,7 +543,7 @@ describe("User & Auth Integration Tests", () => {
 
       expect(rejectAllUsersResponse.status).toBe(200);
       expect(rejectAllUsersResponse.body.message).toBe(
-        "사용자 가입 요청 전체 거절 성공"
+        "사용자 가입 요청 전체 거절이 성공했습니다."
       );
     });
   });
@@ -1532,7 +1536,7 @@ describe("User & Auth Integration Tests", () => {
       const logoutResponse = await request(app).post("/api/auth/logout");
 
       expect(logoutResponse.status).toBe(200);
-      expect(logoutResponse.body.message).toBe("로그아웃이 완료되었습니다");
+      expect(logoutResponse.body.message).toBe("로그아웃이 완료되었습니다.");
     });
 
     test("액세스 토큰과 함께 로그아웃", async () => {
@@ -1597,7 +1601,7 @@ describe("User & Auth Integration Tests", () => {
         .set("Authorization", "Bearer fake-access-token");
 
       expect(logoutResponse.status).toBe(200);
-      expect(logoutResponse.body.message).toBe("로그아웃이 완료되었습니다");
+      expect(logoutResponse.body.message).toBe("로그아웃이 완료되었습니다.");
     });
 
     test("비밀번호만 변경하는 경우 에러", async () => {
@@ -2070,7 +2074,9 @@ describe("User & Auth Integration Tests", () => {
         });
 
       expect(updateResponse.status).toBe(200);
-      expect(updateResponse.body.message).toBe("정보가 성공적으로 업데이트되었습니다. 다시 로그인해주세요.");
+      expect(updateResponse.body.message).toBe(
+        "정보가 성공적으로 업데이트되었습니다. 다시 로그인해주세요."
+      );
 
       // 새 비밀번호로 로그인 확인
       const newLoginResponse = await request(app).post("/api/auth/login").send({
@@ -2144,7 +2150,9 @@ describe("User & Auth Integration Tests", () => {
         });
 
       expect(updateResponse.status).toBe(200);
-      expect(updateResponse.body.message).toBe("정보가 성공적으로 업데이트되었습니다. 다시 로그인해주세요.");
+      expect(updateResponse.body.message).toBe(
+        "정보가 성공적으로 업데이트되었습니다. 다시 로그인해주세요."
+      );
     });
 
     test("존재하지 않는 사용자 ID로 리프레시 토큰 갱신 시도", async () => {
@@ -2230,7 +2238,7 @@ describe("User & Auth Integration Tests", () => {
         .set("Authorization", "Bearer malformed-access-token");
 
       expect(logoutResponse.status).toBe(200);
-      expect(logoutResponse.body.message).toBe("로그아웃이 완료되었습니다");
+      expect(logoutResponse.body.message).toBe("로그아웃이 완료되었습니다.");
     });
 
     test("사용자 업데이트 실패 시나리오", async () => {

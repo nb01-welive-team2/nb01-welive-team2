@@ -93,11 +93,14 @@ describe("authController", () => {
 
       await logout(req as Request, res as Response);
 
-      expect(authService.logout).toHaveBeenCalledWith("refresh-token", "access-token");
+      expect(authService.logout).toHaveBeenCalledWith(
+        "refresh-token",
+        "access-token"
+      );
       expect(authUtil.clearTokenCookies).toHaveBeenCalledWith(res);
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: "로그아웃이 완료되었습니다",
+        message: "로그아웃이 완료되었습니다.",
       });
     });
   });
@@ -120,7 +123,7 @@ describe("authController", () => {
       );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: "토큰 갱신이 완료되었습니다",
+        message: "토큰 갱신이 완료되었습니다.",
       });
     });
   });

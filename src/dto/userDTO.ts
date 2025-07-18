@@ -1,11 +1,5 @@
 import { Admin, ResidentUser, SuperAdmin, UserType } from "@/types/User";
-import {
-  ApartmentInfo,
-  JOIN_STATUS,
-  USER_ROLE,
-  UserInfo,
-  Users,
-} from "@prisma/client";
+import { JOIN_STATUS, USER_ROLE, Users } from "@prisma/client";
 
 export interface userRequestDTO {
   id?: string;

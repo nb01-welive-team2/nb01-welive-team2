@@ -313,7 +313,7 @@ describe("userController", () => {
       );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: "관리자 가입 승인이 완료되었습니다",
+        message: "관리자 가입 승인이 완료되었습니다.",
       });
     });
 
@@ -339,7 +339,7 @@ describe("userController", () => {
       );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: "관리자 가입 거절이 완료되었습니다",
+        message: "관리자 가입 거절이 완료되었습니다.",
       });
     });
 
@@ -363,7 +363,7 @@ describe("userController", () => {
       );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: "관리자 가입 전체 승인이 완료되었습니다",
+        message: "관리자 가입 전체 승인이 완료되었습니다.",
       });
     });
 
@@ -387,7 +387,7 @@ describe("userController", () => {
       );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: "관리자 가입 전체 거절이 완료되었습니다",
+        message: "관리자 가입 전체 거절이 완료되었습니다.",
       });
     });
 
@@ -436,7 +436,7 @@ describe("userController", () => {
       );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: "사용자 가입 요청 승인 성공",
+        message: "사용자 가입 요청 승인이 성공했습니다.",
       });
     });
 
@@ -462,7 +462,7 @@ describe("userController", () => {
       );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: "사용자 가입 요청 거절 성공",
+        message: "사용자 가입 요청 거절이 성공했습니다.",
       });
     });
 
@@ -484,7 +484,7 @@ describe("userController", () => {
       expect(userService.approveAllUsers).toHaveBeenCalledWith("admin-uuid");
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: "사용자 가입 요청 전체 승인 성공",
+        message: "사용자 가입 요청 전체 승인이 성공했습니다.",
       });
     });
 
@@ -506,7 +506,7 @@ describe("userController", () => {
       expect(userService.rejectAllUsers).toHaveBeenCalledWith("admin-uuid");
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: "사용자 가입 요청 전체 거절 성공",
+        message: "사용자 가입 요청 전체 거절이 성공했습니다.",
       });
     });
   });
