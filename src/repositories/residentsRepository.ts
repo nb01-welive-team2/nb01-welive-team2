@@ -17,7 +17,7 @@ async function createResident(data: Prisma.ResidentsCreateInput) {
       },
     },
   });
-  const userId = resident.Users?.[0]?.id ?? null;
+  const userId = resident.Users?.id ?? null;
   const { Users, ...rest } = resident;
   return {
     ...rest,
@@ -73,7 +73,7 @@ async function getResidentById(id: string) {
     },
   });
   if (!resident) return null;
-  const userId = resident?.Users?.[0]?.id ?? null;
+  const userId = resident?.Users?.id ?? null;
   const { Users, ...rest } = resident;
   return {
     ...rest,
@@ -94,7 +94,7 @@ async function updateResidentInfo(id: string, data: Partial<Residents>) {
       },
     },
   });
-  const userId = resident?.Users?.[0]?.id ?? null;
+  const userId = resident?.Users?.id ?? null;
   const { Users, ...rest } = resident;
   return {
     ...rest,

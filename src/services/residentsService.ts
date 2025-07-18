@@ -32,8 +32,7 @@ async function getResidentsList(query: ResidentsFilter) {
   const residents = await residentsRepository.getResidentsFiltered(query);
   const formatted = residents.map((resident) => ({
     ...resident,
-    userId:
-      resident.Users && resident.Users.length > 0 ? resident.Users[0].id : null,
+    userId: resident.Users ? resident.Users.id : null,
     Users: undefined,
   }));
   return {
