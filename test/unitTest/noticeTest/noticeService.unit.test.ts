@@ -4,13 +4,15 @@ import userInfoRepository from "@/repositories/userInfoRepository";
 import { buildSearchCondition } from "@/lib/searchCondition";
 import NotFoundError from "@/errors/NotFoundError";
 import ForbiddenError from "@/errors/ForbiddenError";
-import { NOTICE_CATEGORY, USER_ROLE } from "@prisma/client";
+import { NOTICE_CATEGORY, USER_ROLE, EVENT_TYPE } from "@prisma/client";
 import * as userRepository from "@/repositories/userRepository";
+import { createEvent, updateEvent } from "@/repositories/eventRepository";
 
 jest.mock("@/repositories/noticeRepository");
 jest.mock("@/repositories/userInfoRepository");
 jest.mock("@/repositories/userRepository");
 jest.mock("@/lib/searchCondition");
+jest.mock("@/repositories/eventRepository");
 
 describe("noticeService", () => {
   afterEach(() => {
@@ -18,7 +20,7 @@ describe("noticeService", () => {
   });
 
   describe("createNotice", () => {
-    it("should call noticeRepository.create with correct params", async () => {
+    it("should create event and call noticeRepository.create with correct params", async () => {
       const mockNotice = {
         title: "title",
         content: "content",
@@ -27,11 +29,23 @@ describe("noticeService", () => {
       };
       const userId = "user-uuid";
       const apartmentId = "apt-uuid";
+      const isEvent = true;
 
+      const mockEvent = { id: "event-uuid", eventType: EVENT_TYPE.NOTICE };
+      (createEvent as jest.Mock).mockResolvedValue(mockEvent);
       (noticeRepository.create as jest.Mock).mockResolvedValue(undefined);
 
-      await noticeService.createNotice(mockNotice, userId, apartmentId);
+      await noticeService.createNotice(
+        mockNotice,
+        userId,
+        apartmentId,
+        isEvent
+      );
 
+      expect(createEvent).toHaveBeenCalledWith({
+        eventType: EVENT_TYPE.NOTICE,
+        isActive: isEvent,
+      });
       expect(noticeRepository.create).toHaveBeenCalledWith({
         user: { connect: { id: userId } },
         ApartmentInfo: { connect: { id: apartmentId } },
@@ -39,15 +53,20 @@ describe("noticeService", () => {
         content: mockNotice.content,
         isPinned: mockNotice.isPinned,
         category: mockNotice.category,
+        event: { connect: { id: mockEvent.id } },
       });
     });
   });
 
   describe("getNoticeList", () => {
     it("should build search condition, get count and list, then return them", async () => {
-      const userId = "user-uuid";
-      const role = USER_ROLE.ADMIN;
-      const params = { page: 1, limit: 10 };
+      const apartmentId = "apt-uuid";
+      const params = {
+        page: 1,
+        limit: 10,
+        category: NOTICE_CATEGORY.MAINTENANCE,
+        keyword: "",
+      };
 
       const searchCondition = {
         whereCondition: { category: "MAINTENANCE" },
@@ -65,19 +84,20 @@ describe("noticeService", () => {
         { id: "notice2", title: "Notice 2" },
       ]);
 
-      const result = await noticeService.getNoticeList(userId, role, params);
+      const result = await noticeService.getNoticeList(apartmentId, params);
 
-      expect(buildSearchCondition).toHaveBeenCalledWith(params, {
-        userId,
-        role,
-      });
-      expect(noticeRepository.getCount).toHaveBeenCalledWith(
-        searchCondition.whereCondition
+      expect(buildSearchCondition).toHaveBeenCalledWith(
+        params.page,
+        params.limit,
+        params.keyword,
+        { apartmentId, category: params.category }
       );
+      expect(noticeRepository.getCount).toHaveBeenCalledWith({
+        where: searchCondition.whereCondition,
+      });
       expect(noticeRepository.getList).toHaveBeenCalledWith(
         searchCondition.bothCondition
       );
-
       expect(result).toEqual({
         totalCount: 42,
         notices: [
@@ -184,18 +204,42 @@ describe("noticeService", () => {
   });
 
   describe("updateNotice", () => {
-    it("should call noticeRepository.update and return result", async () => {
+    it("should update event and notice correctly", async () => {
       const noticeId = "notice-uuid";
       const body = { title: "updated title" };
+      const isEvent = true;
+
+      const mockNotice = {
+        id: noticeId,
+        event: { id: "event-uuid" },
+      };
 
       const updatedNotice = { id: noticeId, title: "updated title" };
 
+      (noticeRepository.findById as jest.Mock).mockResolvedValue(mockNotice);
+      (updateEvent as jest.Mock).mockResolvedValue(undefined);
       (noticeRepository.update as jest.Mock).mockResolvedValue(updatedNotice);
 
-      const result = await noticeService.updateNotice(noticeId, body);
+      const result = await noticeService.updateNotice(noticeId, body, isEvent);
 
+      expect(noticeRepository.findById).toHaveBeenCalledWith(noticeId);
+      expect(updateEvent).toHaveBeenCalledWith("event-uuid", {
+        isActive: isEvent,
+      });
       expect(noticeRepository.update).toHaveBeenCalledWith(noticeId, body);
       expect(result).toBe(updatedNotice);
+    });
+
+    it("should throw NotFoundError if notice or event not found", async () => {
+      const noticeId = "notice-uuid";
+      const body = { title: "updated title" };
+      const isEvent = false;
+
+      (noticeRepository.findById as jest.Mock).mockResolvedValue(null);
+
+      await expect(
+        noticeService.updateNotice(noticeId, body, isEvent)
+      ).rejects.toThrow(NotFoundError);
     });
   });
 

@@ -4,7 +4,7 @@ import path from "path";
 const seedPath = path.resolve(__dirname, "../../prisma/seed");
 const { seedDatabase } = require(seedPath);
 const mockPath = path.resolve(__dirname, "../../prisma/mock");
-const { mockArticles, mockUsers, mockPolls } = require(mockPath);
+const { mockUsers, mockPolls } = require(mockPath);
 
 import TestAgent from "supertest/lib/agent";
 

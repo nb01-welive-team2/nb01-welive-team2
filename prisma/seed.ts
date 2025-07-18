@@ -10,6 +10,7 @@ import {
   mockVotes,
   mockNotices,
   mockNotifications,
+  mockEvents,
 } from "./mock";
 
 const prisma = new PrismaClient();
@@ -22,6 +23,7 @@ export async function seedDatabase(): Promise<void> {
   await prisma.polls.deleteMany();
   await prisma.notices.deleteMany();
   await prisma.complaints.deleteMany();
+  await prisma.events.deleteMany();
   await prisma.userInfo.deleteMany();
   await prisma.residents.deleteMany();
   await prisma.users.deleteMany();
@@ -45,6 +47,11 @@ export async function seedDatabase(): Promise<void> {
 
   await prisma.residents.createMany({
     data: mockResidents,
+    skipDuplicates: false,
+  });
+
+  await prisma.events.createMany({
+    data: mockEvents,
     skipDuplicates: false,
   });
 
@@ -119,6 +126,10 @@ export async function seedDatabase(): Promise<void> {
 // CLI 실행 시 동작
 if (require.main === module) {
   seedDatabase()
+    .then(() => {
+      console.log("Seeding completed successfully.");
+      process.exit(0);
+    })
     .catch((e) => {
       console.error("Seed failed", e);
       process.exit(1);
