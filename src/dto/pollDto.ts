@@ -1,6 +1,7 @@
 import { $Enums } from "@prisma/client";
 
 export interface CreatePollRequestDto {
+  boardId: string;
   title: string;
   content: string;
   status: $Enums.POLL_STATUS;
@@ -9,12 +10,12 @@ export interface CreatePollRequestDto {
   options: { title: string }[];
   buildingPermission: number;
   apartmentId: string;
-} // 투표 생성 시 보내는 데이터
+} // 투표 생성 시 보내는 데이터 ( 투표 등록할 때만 사용 )
 
 export interface PollResponseDto {
+  boardId: string;
   id: string;
   title: string;
-  author: string;
   content: string;
   status: string;
   buildingPermission: number;
@@ -49,3 +50,24 @@ export interface GetPollListParams {
   userId?: string; // 권한 필터링(userInfo, residents 조인 필요)
   role?: string;
 }
+
+export interface UpdatePollRequestDto {
+  title: string;
+  content: string;
+  status: $Enums.POLL_STATUS;
+  startDate: string;
+  endDate: string;
+  options: { title: string }[];
+  buildingPermission: number;
+} // 투표 수정 API 에 사용
+
+export interface PollUpdateResponseDto {
+  id: string;
+  title: string;
+  content: string;
+  status: string;
+  buildingPermission: number;
+  startDate: string;
+  endDate: string;
+  options: { title: string }[];
+} // 투표 수정 API 에 사용

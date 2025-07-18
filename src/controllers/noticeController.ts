@@ -4,11 +4,11 @@ import { USER_ROLE } from "@prisma/client";
 import {
   CreateNoticeBodyStruct,
   NoticeIdParamStruct,
+  NoticePageParamsStruct,
   PatchNoticeBodyStruct,
 } from "../structs/noticeStructs";
 import noticeService from "../services/noticeService";
 import registerSuccessMessage from "../lib/responseJson/registerSuccess";
-import { PageParamsStruct } from "../structs/commonStructs";
 import {
   ResponseNoticeCommentDTO,
   ResponseNoticeDTO,
@@ -75,10 +75,13 @@ export async function createNotice(req: Request, res: Response) {
     throw new ForbiddenError();
   }
 
+  const isEvent = Boolean(data.startDate && data.endDate);
+
   await noticeService.createNotice(
     data,
     reqWithPayload.user.userId,
-    reqWithPayload.user.apartmentId
+    reqWithPayload.user.apartmentId,
+    isEvent
   );
 
   res.status(201).send(new registerSuccessMessage());
@@ -127,10 +130,9 @@ export async function getNoticeList(req: Request, res: Response) {
   if ((reqWithPayload.user.role as string) === USER_ROLE.SUPER_ADMIN) {
     throw new ForbiddenError();
   }
-  const data = create(req.query, PageParamsStruct);
+  const data = create(req.query, NoticePageParamsStruct);
   const result = await noticeService.getNoticeList(
-    reqWithPayload.user.userId,
-    reqWithPayload.user.role as USER_ROLE,
+    reqWithPayload.user.apartmentId,
     data
   );
   res.send(new ResponseNoticeListDTO(result));
@@ -201,7 +203,8 @@ export async function editNotice(req: Request, res: Response) {
   }
   const data = create(req.body, PatchNoticeBodyStruct);
   const { noticeId } = create(req.params, NoticeIdParamStruct);
-  const notice = await noticeService.updateNotice(noticeId, data);
+  const isEvent = Boolean(data.startDate && data.endDate);
+  const notice = await noticeService.updateNotice(noticeId, data, isEvent);
   res.status(200).send(new ResponseNoticeDTO(notice));
 }
 
