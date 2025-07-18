@@ -98,3 +98,18 @@ jobs:
 
       - name: Run event integration tests
         run: npm run test-event-int
+
+      - name: Run auth unit tests
+        run: npm run test-auth-unit
+
+      - name: Run user unit tests
+        run: npm run test-user-unit
+
+      - name: Run userAuth integration tests
+        run: npm run test-userAuth-int
+
+      - name: Run image unit tests
+        run: npm run test-image-unit
+
+      - name: Run image integration tests
+        run: npm run test-image-int
