@@ -1,7 +1,7 @@
 import { updatePassword } from "@/controllers/authController";
 import { updateUser } from "@/controllers/userController";
 import { withAsync } from "@/lib/withAsync";
-import authenticate from "@/middlewares/authenticate";
+import { authenticate } from "@/middlewares/authenticate";
 import express from "express";
 
 const userRouter = express.Router();

@@ -1,6 +1,6 @@
 import uploadImage from "@/controllers/imageController";
 import { withAsync } from "@/lib/withAsync";
-import authenticate from "@/middlewares/authenticate";
+import { authenticate } from "@/middlewares/authenticate";
 import { uploader } from "@/middlewares/uploader";
 import express from "express";
 

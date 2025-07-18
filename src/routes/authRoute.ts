@@ -1,7 +1,7 @@
 import express from "express";
 import { login, logout, refreshToken } from "../controllers/authController";
 import { withAsync } from "../lib/withAsync";
-import authenticate from "../middlewares/authenticate";
+import { authenticate } from "../middlewares/authenticate";
 import {
   approveAdmin,
   approveAllAdmins,

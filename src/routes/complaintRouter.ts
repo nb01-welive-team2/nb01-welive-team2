@@ -7,7 +7,7 @@ import {
   getComplaintList,
   removeComplaint,
 } from "../controllers/complaintController";
-import authenticate from "@/middlewares/authenticate";
+import { authenticate } from "@/middlewares/authenticate";
 
 const complaintsRouter = express.Router();
 complaintsRouter.get("/:complaintId", authenticate(), withAsync(getComplaint));
