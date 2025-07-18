@@ -21,7 +21,7 @@
     "test-complaint-unit": "jest --selectProjects complaint-unit --runInBand --detectOpenHandles --coverage",
     "test-complaint-int": "jest --selectProjects complaint-integration --runInBand --detectOpenHandles --coverage",
     "test-apartmentInfo-api": "jest --selectProjects apartmentInfo-api --runInBand --detectOpenHandles",
-    "test-apartmentInfo-unit": "jest --selectProjects apartmentInfo-unit --runInBand --detectOpenHandles"
+    "test-apartmentInfo-unit": "jest --selectProjects apartmentInfo-unit --runInBand --detectOpenHandles",
     "test-notification-unit": "jest --selectProjects notification-unit --runInBand --detectOpenHandles --coverage",
     "test-notification-int": "jest --selectProjects notification-integration --runInBand --detectOpenHandles --coverage",
     "test-event-unit": "jest --selectProjects event-unit --runInBand --detectOpenHandles --coverage",
