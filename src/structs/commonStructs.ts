@@ -27,7 +27,41 @@ export const integerString = coerce(integer(), string(), (value) =>
   parseInt(value)
 );
 
-// const urlRegExp = /^(https?:\/\/)/;
+export const integerString1 = coerce(integer(), optional(string()), (value) => {
+  if (!value) return 1;
+  return parseInt(value);
+});
+
+export const integerString11 = coerce(
+  integer(),
+  optional(string()),
+  (value) => {
+    if (!value) return 11;
+    return parseInt(value);
+  }
+);
+
+export const searchKeywordStruct = coerce(
+  string(),
+  optional(string()),
+  (value) => {
+    if (!value) return "";
+    return value.trim();
+  }
+);
+
+export const DateTimeStringStruct = define<string>(
+  "DateTimeString",
+  (value) => {
+    if (typeof value !== "string") return false;
+
+    const date = new Date(value);
+    return (
+      !isNaN(date.getTime()) &&
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value)
+    );
+  }
+);
 
 export const PageParamsStruct = object({
   page: defaulted(integerString, 1),

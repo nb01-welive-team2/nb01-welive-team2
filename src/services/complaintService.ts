@@ -25,12 +25,13 @@ async function createComplaint(
   });
 }
 
-async function getComplaintList(
-  userId: string,
-  role: USER_ROLE,
-  params: PageParamsType
-) {
-  const searchCondition = await buildSearchCondition(params, { userId, role });
+async function getComplaintList(apartmentId: string, params: PageParamsType) {
+  const searchCondition = await buildSearchCondition(
+    params.page,
+    params.limit,
+    "",
+    { apartmentId }
+  );
   const totalCount = await complaintRepository.getCount({
     where: searchCondition.whereCondition,
   });

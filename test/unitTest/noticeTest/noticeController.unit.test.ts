@@ -29,7 +29,11 @@ const mockResponse = () => {
   return res;
 };
 
-const mockUser = (role: USER_ROLE, userId = 1, apartmentId = 2) => ({
+const mockUser = (
+  role: USER_ROLE,
+  userId = "user-uuid",
+  apartmentId = "apt-uuid"
+) => ({
   user: {
     role,
     userId,
@@ -47,6 +51,8 @@ describe("Notice Controller", () => {
       (struct.create as jest.Mock).mockReturnValue({
         title: "test",
         content: "test",
+        startDate: "2025-07-10",
+        endDate: "2025-07-20",
       });
       const req: any = { body: {}, ...mockUser(USER_ROLE.ADMIN) };
       const res = mockResponse();
@@ -54,9 +60,15 @@ describe("Notice Controller", () => {
       await createNotice(req, res);
 
       expect(noticeService.createNotice).toHaveBeenCalledWith(
-        { title: "test", content: "test" },
-        1,
-        2
+        {
+          title: "test",
+          content: "test",
+          startDate: "2025-07-10",
+          endDate: "2025-07-20",
+        },
+        "user-uuid",
+        "apt-uuid",
+        true // isEvent based on startDate & endDate
       );
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.send).toHaveBeenCalledWith(expect.any(registerSuccessMessage));
@@ -72,45 +84,30 @@ describe("Notice Controller", () => {
 
   describe("getNoticeList", () => {
     it("should return notice list if not SUPER_ADMIN", async () => {
-      (struct.create as jest.Mock).mockReturnValue({ page: 1 });
+      (struct.create as jest.Mock).mockReturnValue({ page: 1, limit: 10 });
+
       const mockNoticeList = [
         {
-          id: "e1b0f1fa-c8f3-4b17-8d2d-f0e5678a1234",
-          isPinned: false,
+          id: "notice-1",
+          title: "Notice 1",
           category: "MAINTENANCE",
-          viewCount: 123,
-          userId: "a3d1234b-5678-4c9f-a123-b4567d89ef01",
-          title: "승강기 정기점검 안내",
-          content: "매월 실시하는 승강기 정기점검으로 인해 ...",
-          startDate: new Date("2025-06-01T00:00:00Z"),
-          endDate: new Date("2025-06-10T00:00:00Z"),
-          createdAt: new Date("2025-05-25T09:00:00Z"),
-          updatedAt: new Date("2025-05-25T09:00:00Z"),
-          user: {
-            username: "adminuser",
-          },
-          _count: {
-            NoticeComments: 5,
-          },
+          isPinned: false,
+          viewCount: 10,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          user: { username: "admin1" },
+          _count: { NoticeComments: 2 },
         },
         {
-          id: "f2d1e2fb-d9f4-5c28-9e3d-a1b2c3d4e5f6",
-          isPinned: true,
+          id: "notice-2",
+          title: "Notice 2",
           category: "EVENT",
-          viewCount: 45,
-          userId: "b4c5678d-1234-5e6f-8g9h-i0jklmn12345",
-          title: "입주민 대상 문화 행사 안내",
-          content: "이번 주말에 아파트 단지 내에서 문화 행사가 있습니다.",
-          startDate: new Date("2025-07-15T00:00:00Z"),
-          endDate: new Date("2025-07-16T00:00:00Z"),
-          createdAt: new Date("2025-07-01T12:00:00Z"),
-          updatedAt: new Date("2025-07-01T12:00:00Z"),
-          user: {
-            username: "eventmanager",
-          },
-          _count: {
-            NoticeComments: 12,
-          },
+          isPinned: true,
+          viewCount: 5,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          user: { username: "admin2" },
+          _count: { NoticeComments: 0 },
         },
       ];
 
@@ -124,6 +121,10 @@ describe("Notice Controller", () => {
 
       await getNoticeList(req, res);
 
+      expect(noticeService.getNoticeList).toHaveBeenCalledWith("apt-uuid", {
+        page: 1,
+        limit: 10,
+      });
       expect(res.send).toHaveBeenCalledWith(expect.any(ResponseNoticeListDTO));
     });
 
@@ -137,7 +138,10 @@ describe("Notice Controller", () => {
 
   describe("getNotice", () => {
     it("should return notice if not SUPER_ADMIN", async () => {
-      (struct.create as jest.Mock).mockReturnValue({ noticeId: 123 });
+      (struct.create as jest.Mock).mockReturnValue({
+        noticeId: "notice-uuid-1234",
+      });
+
       const mockNotice = {
         id: "notice-uuid-1234",
         isPinned: true,
@@ -152,7 +156,7 @@ describe("Notice Controller", () => {
         updatedAt: new Date("2025-05-20T10:00:00Z"),
 
         user: {
-          username: "adminuser",
+          username: "adminuser", // ✅ 추가
           apartmentInfo: {
             id: "apt-uuid-001",
           },
@@ -206,16 +210,18 @@ describe("Notice Controller", () => {
 
   describe("editNotice", () => {
     it("should edit notice if admin", async () => {
-      (struct.create as jest.Mock).mockImplementationOnce(() => ({
-        title: "updated",
-      }));
-      (struct.create as jest.Mock).mockImplementationOnce(() => ({
-        noticeId: 5,
-      }));
+      (struct.create as jest.Mock)
+        .mockImplementationOnce(() => ({
+          title: "updated",
+          startDate: "2025-07-15",
+          endDate: "2025-07-20",
+        })) // body
+        .mockImplementationOnce(() => ({ noticeId: "notice-uuid" })); // params
+
       const updatedNotice = {
         id: "notice-uuid-1234",
         isPinned: false,
-        category: "EVENT", // NOTICE_CATEGORY enum 값 중 하나
+        category: "EVENT",
         viewCount: 105,
         userId: "user-uuid-1111",
         title: "단지 문화행사 변경 안내",
@@ -223,17 +229,14 @@ describe("Notice Controller", () => {
         startDate: new Date("2025-06-20T00:00:00Z"),
         endDate: new Date("2025-06-21T00:00:00Z"),
         createdAt: new Date("2025-05-10T09:00:00Z"),
-        updatedAt: new Date("2025-06-18T15:30:00Z"), // 업데이트 시점
-
+        updatedAt: new Date("2025-06-18T15:30:00Z"),
         user: {
-          username: "adminuser",
+          username: "adminuser", // ✅ 추가
         },
-
         _count: {
           NoticeComments: 3,
         },
       };
-
       (noticeService.updateNotice as jest.Mock).mockResolvedValue(
         updatedNotice
       );
@@ -243,9 +246,11 @@ describe("Notice Controller", () => {
 
       await editNotice(req, res);
 
-      expect(noticeService.updateNotice).toHaveBeenCalledWith(5, {
-        title: "updated",
-      });
+      expect(noticeService.updateNotice).toHaveBeenCalledWith(
+        "notice-uuid",
+        { title: "updated", startDate: "2025-07-15", endDate: "2025-07-20" },
+        true // isEvent
+      );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.send).toHaveBeenCalledWith(expect.any(ResponseNoticeDTO));
     });
@@ -260,14 +265,14 @@ describe("Notice Controller", () => {
 
   describe("removeNotice", () => {
     it("should remove notice if admin", async () => {
-      (struct.create as jest.Mock).mockReturnValue({ noticeId: 7 });
+      (struct.create as jest.Mock).mockReturnValue({ noticeId: "notice-uuid" });
 
       const req: any = { params: {}, ...mockUser(USER_ROLE.ADMIN) };
       const res = mockResponse();
 
       await removeNotice(req, res);
 
-      expect(noticeService.removeNotice).toHaveBeenCalledWith(7);
+      expect(noticeService.removeNotice).toHaveBeenCalledWith("notice-uuid");
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.send).toHaveBeenCalledWith(expect.any(removeSuccessMessage));
     });

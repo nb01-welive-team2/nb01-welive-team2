@@ -29,6 +29,11 @@ module.exports = {
       testMatch: ["**/unitTest/**/residents*.unit.test.ts"],
     },
     {
+      displayName: "notice-integration",
+      ...commonConfig,
+      testMatch: ["**/integrationTest/notice*.test.ts"],
+    },
+    {
       displayName: "complaint-unit",
       ...commonConfig,
       testMatch: ["**/unitTest/complaintTest/complaint*.test.ts"],
@@ -37,6 +42,16 @@ module.exports = {
       displayName: "complaint-integration",
       ...commonConfig,
       testMatch: ["**/integrationTest/complaint*.test.ts"],
+    },
+    {
+      displayName: "event-unit",
+      ...commonConfig,
+      testMatch: ["**/unitTest/eventTest/event*.test.ts"],
+    },
+    {
+      displayName: "event-integration",
+      ...commonConfig,
+      testMatch: ["**/integrationTest/event*.test.ts"],
     },
     {
       displayName: "auth-unit",
@@ -72,6 +87,20 @@ module.exports = {
       displayName: "apartmentInfo-unit",
       ...commonConfig,
       testMatch: ["**/unitTest/**/apartmentInfo*.unit.test.ts"],
+    },
+    {
+      displayName: "notice-unit",
+      ...commonConfig,
+      testMatch: ["**/unitTest/noticeTest/notice*.test.ts"],
+
+      displayName: "notification-unit",
+      ...commonConfig,
+      testMatch: ["**/unitTest/notificationTest/notification*.test.ts"],
+    },
+    {
+      displayName: "notification-integration",
+      ...commonConfig,
+      testMatch: ["**/integrationTest/notification*.test.ts"],
     },
   ],
 };
