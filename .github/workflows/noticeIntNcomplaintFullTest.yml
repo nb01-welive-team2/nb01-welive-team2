@@ -98,3 +98,6 @@ jobs:
 
       - name: Run event integration tests
         run: npm run test-event-int
+
+      - name: Run event integration tests
+        run: npm run test-event-int
