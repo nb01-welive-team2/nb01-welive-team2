@@ -1,7 +1,8 @@
 import { Admin, ResidentUser, SuperAdmin, UserType } from "@/types/User";
-import { JOIN_STATUS, USER_ROLE } from "@prisma/client";
+import { JOIN_STATUS, USER_ROLE, Users } from "@prisma/client";
 
 export interface userRequestDTO {
+  id?: string;
   username: string;
   password: string;
   contact: string;
@@ -82,4 +83,65 @@ export interface UpdateAdminDTO {
   apartmentAddress: string;
   apartmentManagementNumber: string;
   id: string;
+}
+
+export class SignupResponseDTO {
+  id: string;
+  name: string;
+  role: USER_ROLE;
+  email: string;
+  joinStatus: JOIN_STATUS;
+  isActive: boolean;
+
+  constructor(
+    user: Pick<Users, "id" | "name" | "role" | "email" | "joinStatus">
+  ) {
+    this.id = user.id;
+    this.name = user.name;
+    this.role = user.role;
+    this.email = user.email;
+    this.joinStatus = user.joinStatus;
+    this.isActive = true;
+  }
+}
+
+export class loginResponseDTO {
+  id: string;
+  name: string;
+  email: string;
+  role: USER_ROLE;
+  username: string;
+  contact: string;
+  avatar: string;
+  joinStatus: JOIN_STATUS;
+  isActive: boolean;
+  apartmentId?: string;
+  apartmentName?: string;
+  residentDong?: number;
+
+  constructor(
+    user: Users & {
+      apartmentInfo?: { id: string; apartmentName: string } | null;
+    } & {
+      userInfo?: {
+        apartmentId: string;
+        apartmentName: string;
+        apartmentDong: number;
+      } | null;
+    }
+  ) {
+    this.id = user.id;
+    this.name = user.name;
+    this.email = user.email;
+    this.role = user.role;
+    this.username = user.username;
+    this.contact = user.contact;
+    this.avatar = user.profileImage ?? "";
+    this.joinStatus = user.joinStatus;
+    this.isActive = true;
+    this.apartmentId = user.apartmentInfo?.id ?? user.userInfo?.apartmentId;
+    this.apartmentName =
+      user.apartmentInfo?.apartmentName ?? user.userInfo?.apartmentName;
+    this.residentDong = user.userInfo?.apartmentDong;
+  }
 }

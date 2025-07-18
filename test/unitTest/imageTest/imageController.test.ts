@@ -46,6 +46,7 @@ describe("imageController", () => {
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         url: "http://localhost:3000/uploads/test-image.png",
+        message: "아바타가 성공적으로 업데이트되었습니다.",
       });
     });
 
@@ -94,6 +95,7 @@ describe("imageController", () => {
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         url: "https://bucket.s3.region.amazonaws.com/uploads/uuid.png",
+        message: "아바타가 성공적으로 업데이트되었습니다.",
       });
     });
 

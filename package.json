@@ -38,6 +38,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.828.0",
     "@prisma/client": "^6.9.0",
+    "@upstash/redis": "^1.35.1",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
