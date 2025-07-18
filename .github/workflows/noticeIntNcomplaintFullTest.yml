@@ -16,6 +16,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    if: >
+      !(github.event_name == 'push' && github.event.pull_request)
+
     services:
       postgres:
         image: postgres:15
