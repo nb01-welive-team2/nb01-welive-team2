@@ -26,14 +26,6 @@ export const updateNotificationById = async (
   });
 };
 
-export const findNotificationById = async (
-  id: string
-): Promise<Notifications | null> => {
-  return prisma.notifications.findUnique({
-    where: { id },
-  });
-};
-
 export const createNotificationInDb = async (data: {
   userId: string;
   type: NOTIFICATION_TYPE;

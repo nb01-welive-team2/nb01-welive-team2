@@ -1,96 +1,49 @@
 import { Request, Response } from "express";
-import { NOTIFICATION_TYPE } from "@prisma/client";
 import {
   getNotifications,
   updateNotification,
-  getNotificationById,
-  createNotification,
   countUnreadNotifications,
   markAllNotificationsAsRead,
 } from "../services/notificationService";
-import {
-  CreateNotificationStruct,
-  PatchNotificationStruct,
-  GetNotificationListStruct,
-} from "../structs/notificationStructs";
+import { PatchNotificationStruct } from "../structs/notificationStructs";
 import { validate } from "superstruct";
 
-// 알림 목록 조회
-export const getNotificationsHandler = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
-  const query = {
-    userId: req.query.userId as string,
-    isRead: req.query.isRead ? req.query.isRead === "true" : undefined,
+// SSE 알림 수신
+export const sseNotificationHandler = async (req: Request, res: Response) => {
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+
+  const userId = (req as any).user.id;
+
+  const sendUnreadNotifications = async () => {
+    try {
+      const unread = await getNotifications(userId, false);
+      const payload = {
+        type: "alarm",
+        data: unread.map((n) => ({
+          notificationId: n.id,
+          content: n.content,
+          notificationType: n.notificationType,
+          notifiedAt: n.notifiedAt,
+          isChecked: n.isChecked,
+          complaintId: n.complaintId,
+          noticeId: n.noticeId,
+          pollId: n.pollId,
+        })),
+      };
+      res.write(`data: ${JSON.stringify(payload)}\n\n`);
+    } catch (error) {
+      console.error("[SSE] Error:", error);
+    }
   };
 
-  const [error] = validate(query, GetNotificationListStruct);
-  if (error) {
-    res.status(400).json({
-      code: 400,
-      message: "요청 형식이 올바르지 않습니다.",
-      data: null,
-    });
-    return;
-  }
+  await sendUnreadNotifications();
+  const intervalId = setInterval(sendUnreadNotifications, 30000);
 
-  const notifications = await getNotifications(query.userId, query.isRead);
-
-  const formatted = notifications.map((n) => ({
-    id: n.id,
-    userId: n.userId,
-    type: n.notificationType,
-    content: n.content,
-    isRead: n.isChecked,
-    referenceId: n.complaintId || n.noticeId || n.pollId || null,
-    createdAt: n.notifiedAt,
-    updatedAt: null,
-  }));
-
-  res.status(200).json({
-    code: 200,
-    message: "알림 목록 조회에 성공했습니다.",
-    data: formatted,
-  });
-};
-
-// 단건 조회
-export const getNotificationByIdHandler = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
-  const id = req.params.id;
-  const notification = await getNotificationById(id);
-
-  if (!notification) {
-    res.status(404).json({
-      code: 404,
-      message: "알림을 찾을 수 없습니다.",
-      data: null,
-    });
-    return;
-  }
-
-  const referenceId =
-    notification.complaintId ||
-    notification.noticeId ||
-    notification.pollId ||
-    null;
-
-  res.status(200).json({
-    code: 200,
-    message: "알림 조회에 성공했습니다.",
-    data: {
-      id: notification.id,
-      userId: notification.userId,
-      type: notification.notificationType,
-      content: notification.content,
-      isRead: notification.isChecked,
-      referenceId,
-      createdAt: notification.notifiedAt,
-      updatedAt: null,
-    },
+  req.on("close", () => {
+    clearInterval(intervalId);
+    res.end();
   });
 };
 
@@ -126,58 +79,6 @@ export const patchNotificationHandler = async (
       isRead: updated.isChecked,
       referenceId,
       createdAt: updated.notifiedAt,
-      updatedAt: null,
-    },
-  });
-};
-
-// 알림 생성
-export const createNotificationHandler = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
-  const [error] = validate(req.body, CreateNotificationStruct);
-  if (error) {
-    res.status(400).json({
-      code: 400,
-      message: "요청 형식이 올바르지 않습니다.",
-      data: null,
-    });
-    return;
-  }
-
-  const { userId, type, content, referenceId } = req.body;
-
-  if (!Object.values(NOTIFICATION_TYPE).includes(type)) {
-    res.status(400).json({
-      code: 400,
-      message: `type 값은 다음 중 하나여야 합니다: ${Object.values(NOTIFICATION_TYPE).join(", ")}`,
-      data: null,
-    });
-    return;
-  }
-
-  const created = await createNotification({
-    userId,
-    type: type as NOTIFICATION_TYPE,
-    content,
-    referenceId,
-  });
-
-  const reference =
-    created.complaintId || created.noticeId || created.pollId || null;
-
-  res.status(201).json({
-    code: 201,
-    message: "알림이 생성되었습니다.",
-    data: {
-      id: created.id,
-      userId: created.userId,
-      type: created.notificationType,
-      content: created.content,
-      isRead: created.isChecked,
-      referenceId: reference,
-      createdAt: created.notifiedAt,
       updatedAt: null,
     },
   });
