@@ -1,6 +1,5 @@
 import {
   findNotifications,
-  findNotificationById,
   updateNotificationById,
   createNotificationInDb,
   countUnreadNotificationsInDb,
@@ -62,22 +61,6 @@ describe("notificationRepository", () => {
         where: { userId: "u-1", isChecked: false },
         orderBy: { notifiedAt: "desc" },
       });
-    });
-  });
-
-  describe("findNotificationById", () => {
-    it("ID로 단건 조회", async () => {
-      (prisma.notifications.findUnique as jest.Mock).mockResolvedValue(
-        mockNotification
-      );
-
-      const result = await findNotificationById("n-1");
-
-      expect(prisma.notifications.findUnique).toHaveBeenCalledWith({
-        where: { id: "n-1" },
-      });
-
-      expect(result).toEqual(mockNotification);
     });
   });
 
