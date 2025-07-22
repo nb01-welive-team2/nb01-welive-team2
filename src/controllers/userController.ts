@@ -10,6 +10,7 @@ import {
   UpdateUserBodyStruct,
 } from "@/structs/userStruct";
 import { AuthenticatedRequest } from "@/types/express";
+import { reqFile } from "./imageController";
 
 /**
  * @openapi
@@ -337,13 +338,13 @@ export const signupUser = async (
  * @openapi
  * /api/users/me:
  *   patch:
- *     summary: 내 계정 정보 수정 (프로필 / 비밀번호)
+ *     summary: "내 계정 정보 수정 (프로필 / 비밀번호)"
  *     description: |
  *       로그인한 사용자가 자신의 계정 정보를 수정합니다.<br>
  *       비밀번호 변경시에만 현재 비밀번호와 새 비밀번호를 입력하세요.<br>
  *       비밀번호 없이 프로필 이미지 변경이 가능합니다.<br>
  *       지원 항목:
- *       - **프로필 이미지 변경** (`profileImage`)
+ *       - **프로필 이미지 변경** (`image`)
  *       - **비밀번호 변경**: `currentPassword` + `newPassword` 동시 전달 시 적용
  *
  *       비밀번호가 변경되면 기존 인증 access/refresh 토큰이 무효화되므로 **다시 로그인**해야 합니다.
@@ -352,15 +353,38 @@ export const signupUser = async (
  *     security:
  *       - bearerAuth: []
  *     requestBody:
- *       required: true
+ *       required: false   # 전체 바디 자체도 선택
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
- *             $ref: '#/components/schemas/UpdateUserDTO'
- *           example:
+ *             type: object
+ *             properties:
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 nullable: true
+ *                 description: 업로드할 이미지 파일
+ *               currentPassword:
+ *                 type: string
+ *                 nullable: true
+ *                 description: 기존 비밀번호
+ *               newPassword:
+ *                 type: string
+ *                 nullable: true
+ *                 description: 새 비밀번호
+ *           examples:
+ *             withImage:
+ *               summary: 이미지와 함께 정보 수정
+ *               value:
+ *                 image: "(binary)"
+ *             withPasswordChange:
+ *               summary: 비밀번호 변경만
+ *               value:
  *                 currentPassword: "password1234!"
  *                 newPassword: "newpassword1234!"
- *                 profileImage: "https://cdn.example.com/avatar/me2.png"
+ *             empty:
+ *               summary: "아무 필드도 없이 호출"
+ *               value: {}
  *     responses:
  *       200:
  *         description: 내 정보가 수정되었습니다. 변경 내용에 따라 재로그인이 필요할 수 있습니다.
@@ -409,10 +433,19 @@ export const updateUser = async (
   req: Request,
   res: Response
 ): Promise<void> => {
+  const imageUrl = await reqFile(req, res);
+  delete req.body.image;
+
   const data = create(req.body, UpdateUserBodyStruct);
   const request = req as AuthenticatedRequest;
   const userId = request.user.userId;
-  await userService.updateUser(userId, data);
+
+  const dataToUpdate = {
+    ...data,
+    ...(imageUrl && { profileImage: imageUrl }),
+  };
+
+  await userService.updateUser(userId, dataToUpdate);
 
   res.status(200).json({
     message: "정보가 성공적으로 업데이트되었습니다. 다시 로그인해주세요.",

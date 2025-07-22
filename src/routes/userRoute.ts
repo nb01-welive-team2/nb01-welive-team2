@@ -2,6 +2,7 @@ import { updatePassword } from "@/controllers/authController";
 import { updateUser } from "@/controllers/userController";
 import { withAsync } from "@/lib/withAsync";
 import authenticate from "@/middlewares/authenticate";
+import { uploader } from "@/middlewares/uploader";
 import express from "express";
 
 const userRouter = express.Router();
@@ -14,6 +15,7 @@ userRouter.patch(
 userRouter.patch(
   "/me",
   authenticate({ optional: false }),
+  uploader.single("image"),
   withAsync(updateUser)
 );
 
