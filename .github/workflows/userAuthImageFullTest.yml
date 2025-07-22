@@ -1,9 +1,9 @@
-name: noticeIntNcomplaintFullTest
+name: userAuthImageFullTest
 
 on:
   push:
     branches:
-      - feat/게시글 # feat/게시글에 push될때 실행
+      - develop # dev에 push될때 실행
   pull_request:
     branches:
       - develop # dev에 pull request가 생성될때 실행
@@ -28,11 +28,11 @@ jobs:
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
-          --health-timeout 5s
+          --health-timeout 5s 
           --health-retries 5
 
     env:
-      DATABASE_URL: postgres://postgres:postgres@localhost:5432/testdb
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
       NODE_ENV: test
       BASE_URL: http://localhost:3000
       PORT: 3000
@@ -78,26 +78,17 @@ jobs:
       - name: Type Check
         run: npm run typecheck
 
-      - name: Run notice unit tests
-        run: npm run test-notice-unit
+      - name: Run auth unit tests
+        run: npm run test-auth-unit
 
-      - name: Run notice integration tests
-        run: npm run test-notice-int
+      - name: Run user unit tests
+        run: npm run test-user-unit
 
-      - name: Run complaint unit tests
-        run: npm run test-complaint-unit
+      - name: Run userAuth integration tests
+        run: npm run test-userAuth-int
 
-      - name: Run complaint integration tests
-        run: npm run test-complaint-int
+      - name: Run image unit tests
+        run: npm run test-image-unit
 
-      - name: Run poll unit tests
-        run: npm run test-poll-unit
-
-      - name: Run poll integration tests
-        run: npm run test-poll-int
-
-      - name: Run event unit tests
-        run: npm run test-event-unit
-
-      - name: Run event integration tests
-        run: npm run test-event-int
+      - name: Run image integration tests
+        run: npm run test-image-int

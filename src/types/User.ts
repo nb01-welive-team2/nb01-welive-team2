@@ -56,3 +56,9 @@ export interface ResidentUser extends BaseUser {
 }
 
 export type UserType = SuperAdmin | Admin | ResidentUser;
+
+export interface AuthenticatedUser {
+  userId: string;
+  role: USER_ROLE;
+  apartmentId: string;
+}
