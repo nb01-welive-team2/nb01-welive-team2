@@ -2,10 +2,11 @@ import complaintService from "@/services/complaintService";
 import complaintRepository from "@/repositories/complaintRepository";
 import userInfoRepository from "@/repositories/userInfoRepository";
 import { getUserId } from "@/repositories/userRepository";
-import { USER_ROLE } from "@prisma/client";
+import { COMPLAINT_STATUS, USER_ROLE } from "@prisma/client";
 import NotFoundError from "@/errors/NotFoundError";
 import ForbiddenError from "@/errors/ForbiddenError";
 import { buildSearchCondition } from "@/lib/searchCondition";
+import CommonError from "@/errors/CommonError";
 
 jest.mock("@/repositories/complaintRepository");
 jest.mock("@/repositories/userInfoRepository");
@@ -43,6 +44,8 @@ describe("complaintService", () => {
     it("should return complaints and totalCount with valid userInfo", async () => {
       const params = { page: 1, limit: 10 };
       const apartmentId = "apt-1";
+      const userId = "user-1";
+      const role = USER_ROLE.USER;
 
       const mockSearchCondition = {
         whereCondition: {},
@@ -57,7 +60,7 @@ describe("complaintService", () => {
       const mockComplaints = [
         {
           id: "c1",
-          userId: "user-1",
+          userId: userId,
           user: {
             userInfo: {
               apartmentId: "apt1",
@@ -72,6 +75,8 @@ describe("complaintService", () => {
       );
 
       const result = await complaintService.getComplaintList(
+        userId,
+        role,
         apartmentId,
         params
       );
@@ -80,7 +85,10 @@ describe("complaintService", () => {
         params.page,
         params.limit,
         "",
-        { apartmentId }
+        {
+          OR: [{ isSecret: false }, { userId: userId, isSecret: true }],
+          apartmentId,
+        }
       );
       expect(complaintRepository.getCount).toHaveBeenCalledWith({
         where: mockSearchCondition.whereCondition,
@@ -97,6 +105,8 @@ describe("complaintService", () => {
     it("should throw NotFoundError if complaint userInfo is missing", async () => {
       const params = { page: 1, limit: 10 };
       const apartmentId = "apt-1";
+      const userId = "user-1";
+      const role = USER_ROLE.USER;
 
       (buildSearchCondition as jest.Mock).mockResolvedValue({
         whereCondition: {},
@@ -108,7 +118,7 @@ describe("complaintService", () => {
       ]);
 
       await expect(
-        complaintService.getComplaintList(apartmentId, params)
+        complaintService.getComplaintList(userId, role, apartmentId, params)
       ).rejects.toThrow(NotFoundError);
     });
   });
@@ -227,36 +237,92 @@ describe("complaintService", () => {
       });
     });
   });
-
   describe("updateComplaint", () => {
-    it("should call complaintRepository.update", async () => {
+    it("should call complaintRepository.update when status is PENDING", async () => {
       const complaintId = "comp-1";
       const body = { title: "new title" };
-      (complaintRepository.update as jest.Mock).mockResolvedValue(body);
+      const existingComplaint = {
+        id: complaintId,
+        complaintStatus: COMPLAINT_STATUS.PENDING,
+      };
+
+      (complaintRepository.findById as jest.Mock).mockResolvedValue(
+        existingComplaint
+      );
+      (complaintRepository.update as jest.Mock).mockResolvedValue({
+        ...existingComplaint,
+        ...body,
+      });
 
       const result = await complaintService.updateComplaint(complaintId, body);
 
+      expect(complaintRepository.findById).toHaveBeenCalledWith(complaintId);
       expect(complaintRepository.update).toHaveBeenCalledWith(
         complaintId,
         body
       );
-      expect(result).toBe(body);
+      expect(result).toEqual({ ...existingComplaint, ...body });
+    });
+
+    it("should throw CommonError if status is not PENDING", async () => {
+      const complaintId = "comp-1";
+      const body = { title: "new title" };
+      const existingComplaint = {
+        id: complaintId,
+        complaintStatus: COMPLAINT_STATUS.RESOLVED,
+      };
+
+      (complaintRepository.findById as jest.Mock).mockResolvedValue(
+        existingComplaint
+      );
+
+      await expect(
+        complaintService.updateComplaint(complaintId, body)
+      ).rejects.toThrow(CommonError);
+      expect(complaintRepository.update).not.toHaveBeenCalled();
     });
   });
 
   describe("removeComplaint", () => {
-    it("should call complaintRepository.deleteById", async () => {
+    it("should call complaintRepository.deleteById when status is PENDING", async () => {
       const complaintId = "comp-1";
+      const existingComplaint = {
+        id: complaintId,
+        complaintStatus: COMPLAINT_STATUS.PENDING,
+      };
+
+      (complaintRepository.findById as jest.Mock).mockResolvedValue(
+        existingComplaint
+      );
       (complaintRepository.deleteById as jest.Mock).mockResolvedValue({
         id: complaintId,
       });
 
       const result = await complaintService.removeComplaint(complaintId);
 
+      expect(complaintRepository.findById).toHaveBeenCalledWith(complaintId);
       expect(complaintRepository.deleteById).toHaveBeenCalledWith(complaintId);
       expect(result).toEqual({ id: complaintId });
     });
+
+    it("should throw CommonError if status is not PENDING", async () => {
+      const complaintId = "comp-1";
+      const existingComplaint = {
+        id: complaintId,
+        complaintStatus: COMPLAINT_STATUS.IN_PROGRESS,
+      };
+
+      (complaintRepository.findById as jest.Mock).mockResolvedValue(
+        existingComplaint
+      );
+
+      await expect(
+        complaintService.removeComplaint(complaintId)
+      ).rejects.toThrow(CommonError);
+      expect(complaintRepository.deleteById).not.toHaveBeenCalled();
+    });
   });
+
   describe("changeStatus", () => {
     it("should call complaintRepository.update with complaintId and status", async () => {
       const complaintId = "comp-1";

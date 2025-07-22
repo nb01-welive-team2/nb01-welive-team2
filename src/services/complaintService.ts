@@ -11,6 +11,7 @@ import userInfoRepository from "@/repositories/userInfoRepository";
 import NotFoundError from "@/errors/NotFoundError";
 import ForbiddenError from "@/errors/ForbiddenError";
 import { getUserId } from "@/repositories/userRepository";
+import CommonError from "@/errors/CommonError";
 
 async function createComplaint(
   complaint: CreateComplaintBodyType,
@@ -26,12 +27,23 @@ async function createComplaint(
   });
 }
 
-async function getComplaintList(apartmentId: string, params: PageParamsType) {
+async function getComplaintList(
+  userId: string,
+  role: USER_ROLE,
+  apartmentId: string,
+  params: PageParamsType
+) {
+  let addtionalCondition = {};
+  if (role === USER_ROLE.USER) {
+    addtionalCondition = {
+      OR: [{ isSecret: false }, { userId: userId, isSecret: true }],
+    };
+  }
   const searchCondition = await buildSearchCondition(
     params.page,
     params.limit,
     "",
-    { apartmentId }
+    { ...addtionalCondition, apartmentId }
   );
   const totalCount = await complaintRepository.getCount({
     where: searchCondition.whereCondition,
@@ -80,9 +92,17 @@ async function getComplaint(
   if (!complaint) {
     throw new NotFoundError("Complaint", complaintId);
   }
-
   if (apartmentId !== complaint.apartmentId) {
     throw new ForbiddenError();
+  }
+  if (
+    complaint.isSecret &&
+    role === USER_ROLE.USER &&
+    complaint.userId !== userId
+  ) {
+    throw new ForbiddenError(
+      "You do not have permission to view this complaint."
+    );
   }
   return complaint;
 }
@@ -91,6 +111,13 @@ async function updateComplaint(
   complaintId: string,
   body: PatchComplaintBodyType
 ) {
+  const complaint = await complaintRepository.findById(complaintId);
+  if (complaint?.complaintStatus !== COMPLAINT_STATUS.PENDING) {
+    throw new CommonError(
+      "Complaint can only be updated when it is in PENDING status.",
+      403
+    );
+  }
   return await complaintRepository.update(complaintId, body);
 }
 
@@ -102,6 +129,13 @@ async function changeStatus(
 }
 
 async function removeComplaint(complaintId: string) {
+  const complaint = await complaintRepository.findById(complaintId);
+  if (complaint?.complaintStatus !== COMPLAINT_STATUS.PENDING) {
+    throw new CommonError(
+      "Complaint can only be removed when it is in PENDING status.",
+      403
+    );
+  }
   return await complaintRepository.deleteById(complaintId);
 }
 

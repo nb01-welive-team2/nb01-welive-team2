@@ -257,7 +257,7 @@ const mockPolls: Polls[] = [
     title: "Vote on new playground",
     content: "Please vote for the playground location.",
     startDate: new Date("2025-05-01T00:00:00Z"),
-    endDate: new Date("2025-12-10T00:00:00Z"),
+    endDate: new Date("2025-06-10T00:00:00Z"),
     status: POLL_STATUS.IN_PROGRESS,
     buildingPermission: 1,
     eventId: "3f8d3f9e-5b6a-4c4e-8a3b-1c7a7e5e7c2f", // Poll event

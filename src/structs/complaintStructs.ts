@@ -16,6 +16,7 @@ export const CreateComplaintBodyStruct = object({
   title: nonempty(string()),
   content: string(),
   isPublic: boolean(),
+  isSecret: optional(boolean()),
 });
 export type CreateComplaintBodyType = Infer<typeof CreateComplaintBodyStruct>;
 

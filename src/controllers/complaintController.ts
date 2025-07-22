@@ -129,6 +129,8 @@ export async function getComplaintList(req: Request, res: Response) {
   }
   const data = create(req.query, PageParamsStruct);
   const result = await complaintService.getComplaintList(
+    reqWithPayload.user.userId,
+    reqWithPayload.user.role as USER_ROLE,
     reqWithPayload.user.apartmentId,
     data
   );

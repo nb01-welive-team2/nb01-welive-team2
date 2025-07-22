@@ -1,10 +1,7 @@
 import request from "supertest";
 import app from "@/app";
-import path from "path";
-const seedPath = path.resolve(__dirname, "../../prisma/seed");
-const { seedDatabase } = require(seedPath);
-const mockPath = path.resolve(__dirname, "../../prisma/mock");
-const { mockUsers, mockComplaints } = require(mockPath);
+import { seedDatabase } from "../../prisma/seed";
+import { mockUsers, mockComplaints } from "../../prisma/mock";
 
 beforeEach(async () => {
   await seedDatabase();

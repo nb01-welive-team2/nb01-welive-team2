@@ -11,7 +11,7 @@ import registerSuccessMessage from "@/lib/responseJson/registerSuccess";
 
 /**
  * @openapi
- * /polls:
+ * /api/polls:
  *   post:
  *     summary: 투표 생성
  *     description: 관리자가 투표 제목, 설명, 기간, 옵션 등을 입력하여 새로운 투표를 생성합니다.
@@ -83,7 +83,7 @@ export const createPoll = async (req: Request, res: Response) => {
 
 /**
  * @openapi
- * /polls:
+ * /api/polls:
  *   get:
  *     summary: 투표 목록 조회
  *     description: 전체 투표 목록을 조회합니다. 권한에 따라 필터링됩니다.
@@ -109,7 +109,6 @@ export const createPoll = async (req: Request, res: Response) => {
  *         required: false
  *         schema:
  *           type: string
- *         example: 놀이터
  *       - in: query
  *         name: status
  *         required: false
@@ -147,7 +146,7 @@ export const getPollList = async (req: Request, res: Response) => {
 
 /**
  * @openapi
- * /polls/{pollId}:
+ * /api/polls/{pollId}:
  *   get:
  *     summary: 투표 상세 조회
  *     description: 투표 ID를 통해 상세 내용을 조회합니다.
@@ -161,6 +160,7 @@ export const getPollList = async (req: Request, res: Response) => {
  *         required: true
  *         schema:
  *           type: string
+ *           example: 8b83f903-5ede-476d-86a4-a4e20f9c99ac
  *         description: 조회할 투표 ID
  *     responses:
  *       200:
@@ -179,7 +179,7 @@ export const getPoll = async (req: Request, res: Response) => {
 
 /**
  * @openapi
- * /polls/{pollId}:
+ * /api/polls/{pollId}:
  *   patch:
  *     summary: 투표 수정
  *     description: 관리자가 투표 정보를 수정합니다. 이미 시작된 투표는 수정할 수 없습니다.
@@ -193,6 +193,7 @@ export const getPoll = async (req: Request, res: Response) => {
  *         required: true
  *         schema:
  *           type: string
+ *           example: 8b83f903-5ede-476d-86a4-a4e20f9c99ac
  *         description: 수정할 투표 ID
  *     requestBody:
  *       required: true
@@ -248,7 +249,7 @@ export const editPoll = async (req: Request, res: Response) => {
 
 /**
  * @openapi
- * /polls/{pollId}:
+ * /api/polls/{pollId}:
  *   delete:
  *     summary: 투표 삭제
  *     description: 투표 작성자가 투표를 삭제합니다. 시작된 투표는 삭제할 수 없습니다.
@@ -262,6 +263,7 @@ export const editPoll = async (req: Request, res: Response) => {
  *         required: true
  *         schema:
  *           type: string
+ *           example: 8b83f903-5ede-476d-86a4-a4e20f9c99ac
  *         description: 삭제할 투표 ID
  *     responses:
  *       204:
