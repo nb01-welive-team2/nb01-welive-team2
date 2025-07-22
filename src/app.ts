@@ -19,6 +19,7 @@ import { PUBLIC_PATH } from "./lib/constance";
 import eventsRouter from "./routes/eventRouter";
 import { seedDatabase } from "../prisma/seed";
 import { renderHtmlWithUrl } from "./lib/htmlRenderer";
+import optionsRouter from "./routes/optionRouter";
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.use("/api/complaints", complaintsRouter);
 app.use("/api/users", imagesRouter);
 // app.use('/notifications', notificationsRouter);
 app.use("/api/events", eventsRouter);
+app.use("/api/options", optionsRouter);
 
 app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.get("/seed", async (req, res) => {
