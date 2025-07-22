@@ -1,13 +1,13 @@
 import {
   findNotifications,
   updateNotificationById,
-  findNotificationById,
   createNotificationInDb,
+  countUnreadNotificationsInDb,
+  markAllNotificationsAsReadInDb,
 } from "../repositories/notificationRepository";
 import { NOTIFICATION_TYPE, USER_ROLE, Notifications } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 import { getIO } from "../sockets/registerSocketServer";
-import { CreateNotificationRequestDto } from "../dto/notificationDto";
 
 export const getNotifications = async (
   userId: string,
@@ -23,32 +23,18 @@ export const updateNotification = async (
   return updateNotificationById(id, isRead);
 };
 
-export const getNotificationById = async (
-  id: string
-): Promise<Notifications | null> => {
-  return findNotificationById(id);
+// 사용자가 읽지 않은 알림 총 개수 반환
+export const countUnreadNotifications = async (
+  userId: string
+): Promise<number> => {
+  return countUnreadNotificationsInDb(userId);
 };
 
-export const createNotification = async (
-  data: CreateNotificationRequestDto
-): Promise<Notifications> => {
-  const notification = await createNotificationInDb(data);
-  const io = getIO();
-  io.to(notification.userId).emit("notification", {
-    id: notification.id,
-    userId: notification.userId,
-    type: notification.notificationType,
-    content: notification.content,
-    isRead: notification.isChecked,
-    referenceId:
-      notification.complaintId ||
-      notification.noticeId ||
-      notification.pollId ||
-      null,
-    createdAt: notification.notifiedAt,
-    updatedAt: null,
-  });
-  return notification;
+// 모든 알림을 읽음 상태로 변경
+export const markAllNotificationsAsRead = async (
+  userId: string
+): Promise<void> => {
+  await markAllNotificationsAsReadInDb(userId);
 };
 
 // 관리자 회원가입 시, 슈퍼 어드민에게 알림 전송

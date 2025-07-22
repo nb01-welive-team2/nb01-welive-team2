@@ -1,98 +1,157 @@
 import { Request, Response } from "express";
-import { NOTIFICATION_TYPE } from "@prisma/client";
 import {
   getNotifications,
   updateNotification,
-  getNotificationById,
-  createNotification,
+  countUnreadNotifications,
+  markAllNotificationsAsRead,
 } from "../services/notificationService";
-import {
-  CreateNotificationStruct,
-  PatchNotificationStruct,
-  GetNotificationListStruct,
-} from "../structs/notificationStructs";
+import { PatchNotificationStruct } from "../structs/notificationStructs";
 import { validate } from "superstruct";
 
-// 알림 목록 조회
-export const getNotificationsHandler = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
-  const query = {
-    userId: req.query.userId as string,
-    isRead: req.query.isRead ? req.query.isRead === "true" : undefined,
+/**
+ * @openapi
+ * /notifications/sse:
+ *   get:
+ *     summary: 실시간 알림 수신
+ *     description: Server-Sent Events (SSE)를 통해 실시간 알림을 스트리밍합니다.
+ *     tags:
+ *       - Notifications
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: 실시간 알림 스트림 시작
+ *         content:
+ *           text/event-stream:
+ *             schema:
+ *               type: string
+ *               example: |
+ *                 data: {
+ *                   "type": "alarm",
+ *                   "data": [
+ *                     {
+ *                       "notificationId": "noti-123",
+ *                       "content": "새로운 공지사항이 등록되었습니다.",
+ *                       "notificationType": "공지_등록",
+ *                       "notifiedAt": "2025-07-18T10:00:00Z",
+ *                       "isChecked": false,
+ *                       "complaintId": null,
+ *                       "noticeId": "notice-456",
+ *                       "pollId": null
+ *                     }
+ *                   ]
+ *                 }
+ */
+export const sseNotificationHandler = async (req: Request, res: Response) => {
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+
+  const userId = (req as any).user.id;
+
+  const sendUnreadNotifications = async () => {
+    try {
+      const unread = await getNotifications(userId, false);
+      const payload = {
+        type: "alarm",
+        data: unread.map((n) => ({
+          notificationId: n.id,
+          content: n.content,
+          notificationType: n.notificationType,
+          notifiedAt: n.notifiedAt,
+          isChecked: n.isChecked,
+          complaintId: n.complaintId,
+          noticeId: n.noticeId,
+          pollId: n.pollId,
+        })),
+      };
+      res.write(`data: ${JSON.stringify(payload)}\n\n`);
+    } catch (error) {
+      console.error("[SSE] Error:", error);
+    }
   };
 
-  const [error] = validate(query, GetNotificationListStruct);
-  if (error) {
-    res.status(400).json({
-      code: 400,
-      message: "요청 형식이 올바르지 않습니다.",
-      data: null,
-    });
-    return;
-  }
+  await sendUnreadNotifications();
+  const intervalId = setInterval(sendUnreadNotifications, 30000);
 
-  const notifications = await getNotifications(query.userId, query.isRead);
-
-  const formatted = notifications.map((n) => ({
-    id: n.id,
-    userId: n.userId,
-    type: n.notificationType,
-    content: n.content,
-    isRead: n.isChecked,
-    referenceId: n.complaintId || n.noticeId || n.pollId || null,
-    createdAt: n.notifiedAt,
-    updatedAt: null,
-  }));
-
-  res.status(200).json({
-    code: 200,
-    message: "알림 목록 조회에 성공했습니다.",
-    data: formatted,
+  req.on("close", () => {
+    clearInterval(intervalId);
+    res.end();
   });
 };
 
-// 단건 조회
-export const getNotificationByIdHandler = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
-  const id = req.params.id;
-  const notification = await getNotificationById(id);
-
-  if (!notification) {
-    res.status(404).json({
-      code: 404,
-      message: "알림을 찾을 수 없습니다.",
-      data: null,
-    });
-    return;
-  }
-
-  const referenceId =
-    notification.complaintId ||
-    notification.noticeId ||
-    notification.pollId ||
-    null;
-
-  res.status(200).json({
-    code: 200,
-    message: "알림 조회에 성공했습니다.",
-    data: {
-      id: notification.id,
-      userId: notification.userId,
-      type: notification.notificationType,
-      content: notification.content,
-      isRead: notification.isChecked,
-      referenceId,
-      createdAt: notification.notifiedAt,
-      updatedAt: null,
-    },
-  });
-};
-
-// 알림 읽음 처리
+/**
+ * @openapi
+ * /notifications/{id}/read:
+ *   patch:
+ *     summary: 개별 알림 읽음 처리
+ *     description: 지정된 알림을 읽음 처리합니다.
+ *     tags:
+ *       - Notifications
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 알림 ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               isRead:
+ *                 type: boolean
+ *                 example: true
+ *     responses:
+ *       200:
+ *         description: 알림 상태가 업데이트되었습니다.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: number
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: 알림 상태가 업데이트되었습니다.
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: noti-123
+ *                     userId:
+ *                       type: string
+ *                       example: user-1
+ *                     type:
+ *                       type: string
+ *                       example: 공지_등록
+ *                     content:
+ *                       type: string
+ *                       example: 새로운 공지사항이 등록되었습니다.
+ *                     isRead:
+ *                       type: boolean
+ *                       example: true
+ *                     referenceId:
+ *                       type: string
+ *                       nullable: true
+ *                       example: notice-456
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: 2025-07-18T10:00:00Z
+ *                     updatedAt:
+ *                       type: string
+ *                       nullable: true
+ *                       example: null
+ */
 export const patchNotificationHandler = async (
   req: Request,
   res: Response
@@ -129,54 +188,94 @@ export const patchNotificationHandler = async (
   });
 };
 
-// 알림 생성
-export const createNotificationHandler = async (
+/**
+ * @openapi
+ * /notifications/me/unread-count:
+ *   get:
+ *     summary: 읽지 않은 알림 개수 조회
+ *     description: 현재 로그인된 사용자의 읽지 않은 알림 개수를 반환합니다.
+ *     tags:
+ *       - Notifications
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: 성공적으로 읽지 않은 알림 개수를 반환
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: number
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: 읽지 않은 알림 개수 조회에 성공했습니다.
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     count:
+ *                       type: number
+ *                       example: 3
+ */
+export const getUnreadNotificationCountHandler = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const [error] = validate(req.body, CreateNotificationStruct);
-  if (error) {
-    res.status(400).json({
-      code: 400,
-      message: "요청 형식이 올바르지 않습니다.",
-      data: null,
-    });
-    return;
-  }
+  const userId = (req as any).user.id;
 
-  const { userId, type, content, referenceId } = req.body;
+  const count = await countUnreadNotifications(userId);
 
-  if (!Object.values(NOTIFICATION_TYPE).includes(type)) {
-    res.status(400).json({
-      code: 400,
-      message: `type 값은 다음 중 하나여야 합니다: ${Object.values(NOTIFICATION_TYPE).join(", ")}`,
-      data: null,
-    });
-    return;
-  }
-
-  const created = await createNotification({
-    userId,
-    type: type as NOTIFICATION_TYPE,
-    content,
-    referenceId,
-  });
-
-  const reference =
-    created.complaintId || created.noticeId || created.pollId || null;
-
-  res.status(201).json({
-    code: 201,
-    message: "알림이 생성되었습니다.",
+  res.status(200).json({
+    code: 200,
+    message: "읽지 않은 알림 개수 조회에 성공했습니다.",
     data: {
-      id: created.id,
-      userId: created.userId,
-      type: created.notificationType,
-      content: created.content,
-      isRead: created.isChecked,
-      referenceId: reference,
-      createdAt: created.notifiedAt,
-      updatedAt: null,
+      count,
     },
+  });
+};
+
+/**
+ * @openapi
+ * /notifications/mark-all-read:
+ *   post:
+ *     summary: 모든 알림 읽음 처리
+ *     description: 현재 로그인된 사용자의 모든 알림을 읽음 처리합니다.
+ *     tags:
+ *       - Notifications
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: 모든 알림이 읽음 처리되었습니다.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: number
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: 모든 알림이 읽음 처리되었습니다.
+ *                 data:
+ *                   type: string
+ *                   nullable: true
+ *                   example: null
+ */
+export const markAllNotificationsAsReadHandler = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const userId = (req as any).user.id;
+
+  await markAllNotificationsAsRead(userId);
+
+  res.status(200).json({
+    code: 200,
+    message: "모든 알림이 읽음 처리되었습니다.",
+    data: null,
   });
 };
