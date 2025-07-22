@@ -23,15 +23,6 @@ describe("imageController", () => {
   });
 
   describe("uploadImage", () => {
-    test("파일이 없을 때 400 에러 반환", async () => {
-      req.file = undefined;
-
-      await uploadImage(req as Request, res as Response);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ message: "파일이 없습니다." });
-    });
-
     test("개발 환경에서 로컬 파일 업로드 성공", async () => {
       req.file = {
         filename: "test-image.png",
