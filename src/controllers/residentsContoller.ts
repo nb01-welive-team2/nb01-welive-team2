@@ -444,7 +444,7 @@ export async function getResidentsListFilteredController(
  *         description: 조회할 입주민의 고유 ID
  *         schema:
  *           type: string
- *           example: "uuid-1234"
+ *           example: "69f298ce-5775-4206-b377-d083313e4946"
  *     responses:
  *       200:
  *         description: 입주민 상세 정보 조회 성공
@@ -519,7 +519,7 @@ export async function getResidentByIdController(req: Request, res: Response) {
  *         description: 수정할 입주민의 고유 ID
  *         schema:
  *           type: string
- *           example: "uuid-1234"
+ *           example: "69f298ce-5775-4206-b377-d083313e4946"
  *     requestBody:
  *       description: 수정할 입주민 정보
  *       required: true
@@ -530,7 +530,7 @@ export async function getResidentByIdController(req: Request, res: Response) {
  *             properties:
  *               name:
  *                 type: string
- *                 example: "홍길동"
+ *                 example: "테스트 입주민"
  *               contact:
  *                 type: string
  *                 example: "010-1234-5678"
@@ -624,7 +624,7 @@ export async function updateResidentInfoController(
  *         description: 삭제할 입주민의 고유 ID
  *         schema:
  *           type: string
- *           example: "uuid-1234"
+ *           example: "2ed98767-e501-446b-bafc-db6b299602d4"
  *     responses:
  *       200:
  *         description: 입주민 정보 삭제 성공
