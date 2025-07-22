@@ -11,9 +11,9 @@ import { GetEventStruct } from "@/structs/eventStructs";
 
 /**
  * @openapi
- * /events:
+ * /api/events:
  *   get:
- *     summary: 이벤트 목록 조회
+ *     summary: 이벤트 목록 조회 [관리자/입주민]
  *     description: 아파트 단지별로 특정 연도와 월에 해당하는 이벤트 목록을 조회합니다. SUPER_ADMIN 권한 사용자는 접근할 수 없습니다
  *     tags:
  *       - Events
@@ -26,6 +26,7 @@ import { GetEventStruct } from "@/structs/eventStructs";
  *         schema:
  *           type: string
  *           format: uuid
+ *           example: 2149430f-2892-463f-b3e7-4e893548c6d6
  *         description: 조회할 아파트 단지 ID
  *       - in: query
  *         name: year
@@ -41,7 +42,7 @@ import { GetEventStruct } from "@/structs/eventStructs";
  *           type: integer
  *           minimum: 1
  *           maximum: 12
- *           example: 7
+ *           example: 5
  *         description: 조회할 월 1에서 12 사이 값
  *     responses:
  *       200:
@@ -98,39 +99,49 @@ export async function getEventList(req: Request, res: Response) {
 
 /**
  * @openapi
- * /events:
+ * /api/events:
  *   put:
- *     summary: 이벤트 정보 수정
- *     description: 관리자가 특정 게시물의 이벤트 기간을 수정합니다 없으면 등록합니다
+ *     summary: 이벤트 정보 수정 [관리자]
+ *     description: 관리자가 특정 게시물의 이벤트 기간을 수정합니다. 이벤트가 없으면 새로 등록합니다
  *     tags:
  *       - Events
  *     security:
  *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               boardType:
- *                 type: string
- *                 description: 이벤트와 연결된 게시판 타입 NOTICE 또는 POLL
- *                 example: NOTICE
- *               boardId:
- *                 type: string
- *                 format: uuid
- *                 description: 연결된 게시물 ID
- *               startDate:
- *                 type: string
- *                 format: date-time
- *                 description: 이벤트 시작일
- *                 example: 2025-07-22T09:00:00Z
- *               endDate:
- *                 type: string
- *                 format: date-time
- *                 description: 이벤트 종료일
- *                 example: 2025-07-25T18:00:00Z
+ *     parameters:
+ *       - in: query
+ *         name: boardType
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum:
+ *             - NOTICE
+ *             - POLL
+ *           example: NOTICE
+ *         description: 이벤트와 연결된 게시판 타입 NOTICE 또는 POLL
+ *       - in: query
+ *         name: boardId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *           example: f1c531ea-8f03-4f12-a8bb-7899148354df
+ *         description: 연결된 게시물 ID
+ *       - in: query
+ *         name: startDate
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *           example: 2025-07-22T09:00:00Z
+ *         description: 이벤트 시작일
+ *       - in: query
+ *         name: endDate
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *           example: 2025-07-25T18:00:00Z
+ *         description: 이벤트 종료일
  *     responses:
  *       200:
  *         description: 이벤트 정보가 성공적으로 수정되었습니다
@@ -157,9 +168,9 @@ export async function editEvent(req: Request, res: Response) {
 
 /**
  * @openapi
- * /events/{eventId}:
+ * /api/events/{eventId}:
  *   delete:
- *     summary: 이벤트 삭제
+ *     summary: 이벤트 삭제 [관리자]
  *     description: 관리자가 특정 이벤트를 삭제합니다
  *     tags:
  *       - Events
@@ -172,6 +183,7 @@ export async function editEvent(req: Request, res: Response) {
  *         schema:
  *           type: string
  *           format: uuid
+ *           example: 3f8d3f9e-5b6a-4c4e-8a3b-1c7a7e5e7c2f
  *         description: 삭제할 이벤트의 ID
  *     responses:
  *       200:

@@ -23,7 +23,7 @@ import ForbiddenError from "@/errors/ForbiddenError";
  * @openapi
  * /api/complaints:
  *   post:
- *     summary: 민원 등록
+ *     summary: 민원 등록 [입주민]
  *     description: 사용자 권한 USER가 민원을 등록합니다. 제목, 내용, 공개 여부를 입력해야 합니다.
  *     tags:
  *       - Complaints
@@ -87,7 +87,7 @@ export async function createComplaint(req: Request, res: Response) {
  * @openapi
  * /api/complaints:
  *   get:
- *     summary: 민원 목록 조회
+ *     summary: 민원 목록 조회 [관리자/입주민]
  *     description: 사용자 권한에 따라 민원 목록을 페이지 단위로 조회합니다. SUPER_ADMIN 권한은 접근할 수 없습니다.
  *     tags:
  *       - Complaints
@@ -139,7 +139,7 @@ export async function getComplaintList(req: Request, res: Response) {
  * @openapi
  * /api/complaints/{complaintId}:
  *   get:
- *     summary: 민원 상세 조회
+ *     summary: 민원 상세 조회 [관리자/입주민]
  *     description: 특정 민원의 상세 내용을 조회합니다 SUPER_ADMIN 권한은 접근할 수 없습니다
  *     tags:
  *       - Complaints
@@ -152,6 +152,7 @@ export async function getComplaintList(req: Request, res: Response) {
  *         schema:
  *           type: string
  *           format: uuid
+ *           example: 693cd12f-d156-4e07-9934-ad02a4fce664
  *         description: 조회할 민원 ID
  *     responses:
  *       200:
@@ -185,7 +186,7 @@ export async function getComplaint(req: Request, res: Response) {
  * @openapi
  * /api/complaints/{complaintId}:
  *   put:
- *     summary: 민원 수정
+ *     summary: 민원 수정 [입주민]
  *     description: USER 권한 사용자가 자신의 민원 내용을 수정합니다
  *     tags:
  *       - Complaints
@@ -198,6 +199,7 @@ export async function getComplaint(req: Request, res: Response) {
  *         schema:
  *           type: string
  *           format: uuid
+ *           example: 693cd12f-d156-4e07-9934-ad02a4fce664
  *         description: 수정할 민원 ID
  *     requestBody:
  *       required: true
@@ -245,9 +247,9 @@ export async function editComplaint(req: Request, res: Response) {
 
 /**
  * @openapi
- * /complaints/{complaintId}:
+ * /api/complaints/{complaintId}:
  *   delete:
- *     summary: 민원 삭제
+ *     summary: 민원 삭제 [관리자]
  *     description: ADMIN 권한 사용자가 특정 민원을 삭제합니다
  *     tags:
  *       - Complaints
@@ -260,6 +262,7 @@ export async function editComplaint(req: Request, res: Response) {
  *         schema:
  *           type: string
  *           format: uuid
+ *           example: 693cd12f-d156-4e07-9934-ad02a4fce664
  *         description: 삭제할 민원 ID
  *     responses:
  *       200:
@@ -291,9 +294,9 @@ export async function removeComplaint(req: Request, res: Response) {
 
 /**
  * @openapi
- * /complaints/{complaintId}/status:
+ * /api/complaints/{complaintId}/status:
  *   patch:
- *     summary: 민원 상태 변경
+ *     summary: 민원 상태 변경 [관리자]
  *     description: ADMIN 권한 사용자가 민원의 상태를 변경합니다
  *     tags:
  *       - Complaints
@@ -306,6 +309,7 @@ export async function removeComplaint(req: Request, res: Response) {
  *         schema:
  *           type: string
  *           format: uuid
+ *           example: 693cd12f-d156-4e07-9934-ad02a4fce664
  *         description: 상태를 변경할 민원 ID
  *     requestBody:
  *       required: true

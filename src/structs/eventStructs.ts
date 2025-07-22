@@ -4,7 +4,7 @@ import { DateTimeStringStruct, integerString, UUID } from "./commonStructs";
 const EventCategoryEnum = union([literal("NOTICE"), literal("POLL")]);
 
 export const UpdateEventStruct = object({
-  boardType: nonempty(EventCategoryEnum),
+  boardType: EventCategoryEnum,
   boardId: UUID,
   startDate: DateTimeStringStruct,
   endDate: DateTimeStringStruct,

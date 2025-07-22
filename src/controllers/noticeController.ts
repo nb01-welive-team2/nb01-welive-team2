@@ -20,9 +20,9 @@ import ForbiddenError from "@/errors/ForbiddenError";
 
 /**
  * @openapi
- * /notices:
+ * /api/notices:
  *   post:
- *     summary: 공지사항 생성
+ *     summary: 공지사항 생성 [관리자]
  *     description: 관리자가 공지 카테고리, 제목, 내용, 상단 고정 여부 및 선택적으로 이벤트 기간을 입력하여 새로운 공지사항을 생성합니다.
  *     tags:
  *       - Notices
@@ -103,9 +103,9 @@ export async function createNotice(req: Request, res: Response) {
 
 /**
  * @openapi
- * /notices:
+ * /api/notices:
  *   get:
- *     summary: 공지사항 목록 조회
+ *     summary: 공지사항 목록 조회 [관리자/입주민]
  *     description: 사용자 권한에 따라 공지사항 목록을 페이지 단위로 조회합니다. SUPER_ADMIN 권한 사용자는 접근이 제한됩니다.
  *     tags:
  *       - Notices
@@ -128,7 +128,7 @@ export async function createNotice(req: Request, res: Response) {
  *         name: category
  *         schema:
  *           type: string
- *           enum: [MAINTENANCE, EVENT]  # 실제 NoticeCategoryEnum에 맞게 나열
+ *           enum: [MAINTENANCE, EMERGENCY, COMMUNITY, RESIDENT_VOTE, RESIDENT_COUNCIL, ETC]  # 실제 NoticeCategoryEnum에 맞게 나열
  *         description: 공지 카테고리 필터링 선택 사항
  *       - in: query
  *         name: keyword
@@ -166,9 +166,9 @@ export async function getNoticeList(req: Request, res: Response) {
 
 /**
  * @openapi
- * /notices/{noticeId}:
+ * /api/notices/{noticeId}:
  *   get:
- *     summary: 공지사항 상세 조회
+ *     summary: 공지사항 상세 조회 [관리자/입주민]
  *     description: SUPER_ADMIN 권한 사용자는 접근이 제한됩니다. 특정 공지사항 ID에 해당하는 상세 정보를 반환합니다.
  *     tags:
  *       - Notices
@@ -179,6 +179,7 @@ export async function getNoticeList(req: Request, res: Response) {
  *         schema:
  *           type: string
  *           format: uuid
+ *           example: f1c531ea-8f03-4f12-a8bb-7899148354df
  *         description: 조회할 공지사항 ID
  *     security:
  *       - bearerAuth: []
@@ -212,9 +213,9 @@ export async function getNotice(req: Request, res: Response) {
 
 /**
  * @openapi
- * /notices/{noticeId}:
+ * /api/notices/{noticeId}:
  *   put:
- *     summary: 공지사항 정보 수정
+ *     summary: 공지사항 정보 수정 [관리자]
  *     description: 지정된 공지사항 정보를 수정합니다. ADMIN 권한을 가진 사용자만 접근할 수 있습니다.
  *     tags:
  *       - Notices
@@ -225,6 +226,7 @@ export async function getNotice(req: Request, res: Response) {
  *         schema:
  *           type: string
  *           format: uuid
+ *           example: f1c531ea-8f03-4f12-a8bb-7899148354df
  *         description: 수정할 공지사항 ID
  *     requestBody:
  *       required: true
@@ -240,11 +242,11 @@ export async function getNotice(req: Request, res: Response) {
  *               title:
  *                 type: string
  *                 description: 공지사항 제목
- *                 example: 서비스 점검 안내
+ *                 example: 서비스 점검 안내 수정
  *               content:
  *                 type: string
  *                 description: 공지사항 내용
- *                 example: 2025년 6월 20일 02:00 ~ 04:00 시스템 점검이 예정되어 있습니다.
+ *                 example: 2025년 6월 20일 02:00 ~ 07:00 시스템 점검이 예정되어 있습니다.
  *               isPinned:
  *                 type: boolean
  *                 description: 상단 고정 여부
@@ -258,7 +260,7 @@ export async function getNotice(req: Request, res: Response) {
  *                 type: string
  *                 format: date-time
  *                 description: 이벤트 종료일 선택사항
- *                 example: 2025-06-20T04:00:00Z
+ *                 example: 2025-06-20T07:00:00Z
  *     responses:
  *       200:
  *         description: 공지사항 정보가 성공적으로 수정되었습니다.
@@ -289,9 +291,9 @@ export async function editNotice(req: Request, res: Response) {
 
 /**
  * @openapi
- * /notices/{noticeId}:
+ * /api/notices/{noticeId}:
  *   delete:
- *     summary: 공지사항 삭제
+ *     summary: 공지사항 삭제 [관리자]
  *     description: 지정된 공지사항을 삭제합니다. ADMIN 권한을 가진 사용자만 접근할 수 있습니다.
  *     tags:
  *       - Notices
@@ -302,6 +304,7 @@ export async function editNotice(req: Request, res: Response) {
  *         schema:
  *           type: string
  *           format: uuid
+ *           example: f1c531ea-8f03-4f12-a8bb-7899148354df
  *         description: 삭제할 공지사항 ID
  *     responses:
  *       200:
