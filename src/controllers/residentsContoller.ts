@@ -606,7 +606,7 @@ export async function updateResidentInfoController(
  *         description: 삭제할 입주민의 고유 ID
  *         schema:
  *           type: string
- *           example: "0980d601-282d-4170-95b0-444403a6694f"
+ *           example: "69f298ce-5775-4206-b377-d083313e4946"
  *     responses:
  *       200:
  *         description: 입주민 정보 삭제 성공
