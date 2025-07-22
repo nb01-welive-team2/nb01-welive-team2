@@ -916,6 +916,510 @@ const swaggerDefinition = {
           },
         },
       },
+
+      //Notice
+      ResponseNoticeDTO: {
+        type: "object",
+        description: "공지사항 응답 DTO",
+        properties: {
+          noticeId: {
+            type: "string",
+            description: "공지사항 ID",
+            example: "a1b2c3d4",
+          },
+          userId: {
+            type: "string",
+            description: "작성자 사용자 ID",
+            example: "user123",
+          },
+          category: {
+            type: "string",
+            description: "공지사항 카테고리",
+            example: "GENERAL",
+          },
+          title: {
+            type: "string",
+            description: "공지사항 제목",
+            example: "서버 점검 안내",
+          },
+          writerName: {
+            type: "string",
+            description: "작성자 이름",
+            example: "홍길동",
+          },
+          createdAt: {
+            type: "string",
+            format: "date-time",
+            description: "공지 작성일",
+            example: "2025-07-22T09:30:00Z",
+          },
+          updatedAt: {
+            type: "string",
+            format: "date-time",
+            description: "공지 수정일",
+            example: "2025-07-22T10:00:00Z",
+          },
+          viewCount: {
+            type: "integer",
+            description: "조회수",
+            example: 1024,
+          },
+          commentCount: {
+            type: "integer",
+            description: "댓글 수",
+            example: 12,
+          },
+          isPinned: {
+            type: "boolean",
+            description: "공지 고정 여부",
+            example: true,
+          },
+        },
+        required: [
+          "noticeId",
+          "userId",
+          "category",
+          "title",
+          "writerName",
+          "createdAt",
+          "updatedAt",
+          "viewCount",
+          "commentCount",
+          "isPinned",
+        ],
+      },
+      ResponseNoticeCommentDTO: {
+        type: "object",
+        description: "공지사항 + 댓글 응답 DTO",
+        properties: {
+          noticeId: {
+            type: "string",
+            description: "공지사항 ID",
+            example: "a1b2c3d4",
+          },
+          userId: {
+            type: "string",
+            description: "작성자 사용자 ID",
+            example: "user123",
+          },
+          category: {
+            type: "string",
+            description: "공지사항 카테고리",
+            example: "GENERAL",
+          },
+          title: {
+            type: "string",
+            description: "공지사항 제목",
+            example: "서버 점검 안내",
+          },
+          writerName: {
+            type: "string",
+            description: "작성자 이름",
+            example: "홍길동",
+          },
+          createdAt: {
+            type: "string",
+            format: "date-time",
+            description: "공지 작성일",
+            example: "2025-07-22T09:30:00Z",
+          },
+          updatedAt: {
+            type: "string",
+            format: "date-time",
+            description: "공지 수정일",
+            example: "2025-07-22T10:00:00Z",
+          },
+          viewsCount: {
+            type: "integer",
+            description: "조회수",
+            example: 1024,
+          },
+          commentsCount: {
+            type: "integer",
+            description: "댓글 수",
+            example: 12,
+          },
+          isPinned: {
+            type: "boolean",
+            description: "공지 고정 여부",
+            example: true,
+          },
+          content: {
+            type: "string",
+            description: "공지 내용",
+            example: "서버 점검으로 인한 서비스 중단 안내입니다.",
+          },
+          boardName: {
+            type: "string",
+            description: "게시판 이름",
+            example: "공지사항",
+          },
+          comments: {
+            type: "array",
+            description: "댓글 목록",
+            items: {
+              type: "object",
+              properties: {
+                id: {
+                  type: "string",
+                  description: "댓글 ID",
+                  example: "cmt123",
+                },
+                userId: {
+                  type: "string",
+                  description: "댓글 작성자 ID",
+                  example: "user456",
+                },
+                content: {
+                  type: "string",
+                  description: "댓글 내용",
+                  example: "좋은 정보 감사합니다.",
+                },
+                createdAt: {
+                  type: "string",
+                  format: "date-time",
+                  description: "댓글 작성일",
+                  example: "2025-07-22T10:15:00Z",
+                },
+                updatedAt: {
+                  type: "string",
+                  format: "date-time",
+                  description: "댓글 수정일",
+                  example: "2025-07-22T10:20:00Z",
+                },
+                writerName: {
+                  type: "string",
+                  description: "댓글 작성자 이름",
+                  example: "김철수",
+                },
+              },
+              required: [
+                "id",
+                "userId",
+                "content",
+                "createdAt",
+                "updatedAt",
+                "writerName",
+              ],
+            },
+          },
+        },
+        required: [
+          "noticeId",
+          "userId",
+          "category",
+          "title",
+          "writerName",
+          "createdAt",
+          "updatedAt",
+          "viewsCount",
+          "commentsCount",
+          "isPinned",
+          "content",
+          "boardName",
+          "comments",
+        ],
+      },
+      ResponseNoticeListDTO: {
+        type: "object",
+        description: "공지사항 리스트 응답 DTO",
+        properties: {
+          totalCount: {
+            type: "integer",
+            description: "전체 공지사항 개수",
+            example: 123,
+          },
+          notices: {
+            type: "array",
+            description: "공지사항 목록",
+            items: {
+              $ref: "#/components/schemas/ResponseNoticeDTO",
+            },
+          },
+        },
+        required: ["totalCount", "notices"],
+      },
+      //complaint
+      ResponseComplaintDTO: {
+        type: "object",
+        description: "민원 응답 DTO",
+        properties: {
+          complaintId: {
+            type: "string",
+            description: "민원 ID",
+            example: "cmp123",
+          },
+          userId: {
+            type: "string",
+            description: "작성자 사용자 ID",
+            example: "user456",
+          },
+          title: {
+            type: "string",
+            description: "민원 제목",
+            example: "주차장 불편 신고",
+          },
+          content: {
+            type: "string",
+            description: "민원 내용",
+            example: "주차 공간이 너무 좁습니다.",
+          },
+          writerName: {
+            type: "string",
+            description: "작성자 이름",
+            example: "김철수",
+          },
+          createdAt: {
+            type: "string",
+            format: "date-time",
+            description: "민원 작성일",
+            example: "2025-07-22T09:45:00Z",
+          },
+          updatedAt: {
+            type: "string",
+            format: "date-time",
+            description: "민원 수정일",
+            example: "2025-07-22T10:10:00Z",
+          },
+          isPublic: {
+            type: "boolean",
+            description: "공개 여부",
+            example: true,
+          },
+          viewCount: {
+            type: "integer",
+            description: "조회수",
+            example: 56,
+          },
+          commentCount: {
+            type: "integer",
+            description: "댓글 수",
+            example: 5,
+          },
+          status: {
+            type: "string",
+            description: "민원 상태",
+            example: "PENDING",
+          },
+          dong: {
+            type: "string",
+            description: "아파트 동",
+            example: "101",
+          },
+          ho: {
+            type: "string",
+            description: "아파트 호",
+            example: "202",
+          },
+        },
+        required: [
+          "complaintId",
+          "userId",
+          "title",
+          "content",
+          "writerName",
+          "createdAt",
+          "updatedAt",
+          "isPublic",
+          "viewCount",
+          "commentCount",
+          "status",
+          "dong",
+          "ho",
+        ],
+      },
+      ResponseComplaintListDTO: {
+        type: "object",
+        description: "민원 리스트 응답 DTO",
+        properties: {
+          totalCount: {
+            type: "integer",
+            description: "전체 민원 개수",
+            example: 50,
+          },
+          complaints: {
+            type: "array",
+            description: "민원 목록",
+            items: {
+              $ref: "#/components/schemas/ResponseComplaintDTO",
+            },
+          },
+        },
+        required: ["totalCount", "complaints"],
+      },
+      ResponseComplaintCommentDTO: {
+        type: "object",
+        description: "민원 + 댓글 응답 DTO",
+        properties: {
+          complaintId: {
+            type: "string",
+            description: "민원 ID",
+            example: "cmp123",
+          },
+          userId: {
+            type: "string",
+            description: "작성자 사용자 ID",
+            example: "user456",
+          },
+          title: {
+            type: "string",
+            description: "민원 제목",
+            example: "주차장 불편 신고",
+          },
+          content: {
+            type: "string",
+            description: "민원 내용",
+            example: "주차 공간이 너무 좁습니다.",
+          },
+          writerName: {
+            type: "string",
+            description: "작성자 이름",
+            example: "김철수",
+          },
+          createdAt: {
+            type: "string",
+            format: "date-time",
+            description: "민원 작성일",
+            example: "2025-07-22T09:45:00Z",
+          },
+          updatedAt: {
+            type: "string",
+            format: "date-time",
+            description: "민원 수정일",
+            example: "2025-07-22T10:10:00Z",
+          },
+          isPublic: {
+            type: "boolean",
+            description: "공개 여부",
+            example: true,
+          },
+          viewsCount: {
+            type: "integer",
+            description: "조회수",
+            example: 56,
+          },
+          commentsCount: {
+            type: "integer",
+            description: "댓글 수",
+            example: 5,
+          },
+          status: {
+            type: "string",
+            description: "민원 상태",
+            example: "PENDING",
+          },
+          boardName: {
+            type: "string",
+            description: "게시판 이름",
+            example: "민원",
+          },
+          comments: {
+            type: "array",
+            description: "댓글 목록",
+            items: {
+              type: "object",
+              properties: {
+                id: {
+                  type: "string",
+                  description: "댓글 ID",
+                  example: "cmt789",
+                },
+                userId: {
+                  type: "string",
+                  description: "댓글 작성자 ID",
+                  example: "user789",
+                },
+                content: {
+                  type: "string",
+                  description: "댓글 내용",
+                  example: "빠른 처리 부탁드립니다.",
+                },
+                createdAt: {
+                  type: "string",
+                  format: "date-time",
+                  description: "댓글 작성일",
+                  example: "2025-07-22T11:00:00Z",
+                },
+                updatedAt: {
+                  type: "string",
+                  format: "date-time",
+                  description: "댓글 수정일",
+                  example: "2025-07-22T11:15:00Z",
+                },
+                writerName: {
+                  type: "string",
+                  description: "댓글 작성자 이름",
+                  example: "이영희",
+                },
+              },
+              required: [
+                "id",
+                "userId",
+                "content",
+                "createdAt",
+                "updatedAt",
+                "writerName",
+              ],
+            },
+          },
+        },
+        required: [
+          "complaintId",
+          "userId",
+          "title",
+          "content",
+          "writerName",
+          "createdAt",
+          "updatedAt",
+          "isPublic",
+          "viewsCount",
+          "commentsCount",
+          "status",
+          "boardName",
+          "comments",
+        ],
+      },
+      //event
+      ResponseEventDTO: {
+        type: "object",
+        description: "이벤트 응답 DTO (공지사항 또는 투표)",
+        properties: {
+          id: {
+            type: "string",
+            description: "이벤트 ID",
+            example: "evt123",
+          },
+          start: {
+            type: "string",
+            format: "date-time",
+            description: "이벤트 시작일시",
+            example: "2025-07-22T09:00:00Z",
+          },
+          end: {
+            type: "string",
+            format: "date-time",
+            description: "이벤트 종료일시",
+            example: "2025-07-25T18:00:00Z",
+          },
+          title: {
+            type: "string",
+            description: "이벤트 제목",
+            example: "여름 휴가 공지",
+          },
+          category: {
+            type: "string",
+            description: "공지 카테고리",
+            example: "GENERAL",
+          },
+          type: {
+            type: "string",
+            description: "이벤트 유형",
+            example: "NOTICE",
+            enum: ["NOTICE", "POLL"],
+          },
+        },
+        required: ["id", "start", "end", "title", "category", "type"],
+      },
     },
   },
 };

@@ -4,9 +4,6 @@ import {
   ComplaintComments,
   Complaints,
 } from "@prisma/client";
-
-import { NOTICE_CATEGORY } from "@prisma/client";
-
 export class ResponseComplaintDTO {
   complaintId: string;
   userId: string;
@@ -88,9 +85,7 @@ export class ResponseComplaintCommentDTO {
   viewsCount: number;
   commentsCount: number;
   status: COMPLAINT_STATUS;
-  // dong: string;
-  // ho: string;
-  boardName: string; //"민원"
+  boardName: string;
   comments: {
     id: string;
     userId: string;
@@ -103,7 +98,6 @@ export class ResponseComplaintCommentDTO {
     complaint: Complaints & {
       user: {
         username: string;
-        // userInfo: { apartmentDong: number; apartmentHo: number };
       };
     } & {
       ComplaintComments: (ComplaintComments & { user: { username: string } })[];
@@ -120,8 +114,6 @@ export class ResponseComplaintCommentDTO {
     this.viewsCount = complaint.viewCount;
     this.commentsCount = complaint.ComplaintComments.length;
     this.status = complaint.complaintStatus;
-    // this.dong = complaint.user.userInfo.apartmentDong.toString();
-    // this.ho = complaint.user.userInfo.apartmentHo.toString();
     this.boardName = "민원";
     this.comments = complaint.ComplaintComments.map((comment) => ({
       id: comment.id,
@@ -133,22 +125,3 @@ export class ResponseComplaintCommentDTO {
     }));
   }
 }
-
-// export class ResponseComplaintUserListDTO {
-//   currentPage: number;
-//   totalPages: number;
-//   totalItemCount: number;
-//   data: ResponseComplaintUserDTO[];
-
-//   constructor(
-//     page: number,
-//     pageSize: number,
-//     users: (Users & { complaint: { complaintName: string } })[],
-//     totalItemCount: number,
-//   ) {
-//     this.currentPage = page;
-//     this.totalPages = Math.ceil(totalItemCount / pageSize);
-//     this.totalItemCount = totalItemCount;
-//     this.data = users.map((user) => new ResponseComplaintUserDTO(user));
-//   }
-// }

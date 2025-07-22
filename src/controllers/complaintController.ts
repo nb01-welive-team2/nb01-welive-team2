@@ -21,10 +21,10 @@ import ForbiddenError from "@/errors/ForbiddenError";
 
 /**
  * @openapi
- * /complaints:
+ * /api/complaints:
  *   post:
- *     summary: 불편사항 등록
- *     description: 사용자 권한 USER가 불편사항을 등록합니다. 제목, 내용, 공개 여부를 입력해야 합니다.
+ *     summary: 민원 등록
+ *     description: 사용자 권한 USER가 민원을 등록합니다. 제목, 내용, 공개 여부를 입력해야 합니다.
  *     tags:
  *       - Complaints
  *     security:
@@ -38,19 +38,19 @@ import ForbiddenError from "@/errors/ForbiddenError";
  *             properties:
  *               title:
  *                 type: string
- *                 description: 불편사항 제목
+ *                 description: 민원 제목
  *                 example: 엘리베이터 고장 신고
  *               content:
  *                 type: string
- *                 description: 불편사항 상세 내용
+ *                 description: 민원 상세 내용
  *                 example: 101동 엘리베이터가 고장 났습니다. 점검이 필요합니다.
  *               isPublic:
  *                 type: boolean
- *                 description: 불편사항 공개 여부
+ *                 description: 민원 공개 여부
  *                 example: true
  *     responses:
  *       201:
- *         description: 불편사항 등록 성공
+ *         description: 민원 등록 성공
  *         content:
  *           application/json:
  *             schema:
@@ -85,10 +85,10 @@ export async function createComplaint(req: Request, res: Response) {
 
 /**
  * @openapi
- * /complaints:
+ * /api/complaints:
  *   get:
- *     summary: 불편사항 목록 조회
- *     description: 사용자 권한에 따라 불편사항 목록을 페이지 단위로 조회합니다. SUPER_ADMIN 권한은 접근할 수 없습니다.
+ *     summary: 민원 목록 조회
+ *     description: 사용자 권한에 따라 민원 목록을 페이지 단위로 조회합니다. SUPER_ADMIN 권한은 접근할 수 없습니다.
  *     tags:
  *       - Complaints
  *     security:
@@ -110,7 +110,7 @@ export async function createComplaint(req: Request, res: Response) {
  *         description: 페이지 크기 기본값 11
  *     responses:
  *       200:
- *         description: 불편사항 목록이 성공적으로 반환되었습니다
+ *         description: 민원 목록이 성공적으로 반환되었습니다
  *         content:
  *           application/json:
  *             schema:
@@ -137,10 +137,10 @@ export async function getComplaintList(req: Request, res: Response) {
 
 /**
  * @openapi
- * /complaints/{complaintId}:
+ * /api/complaints/{complaintId}:
  *   get:
- *     summary: 불편사항 상세 조회
- *     description: 특정 불편사항의 상세 내용을 조회합니다 SUPER_ADMIN 권한은 접근할 수 없습니다
+ *     summary: 민원 상세 조회
+ *     description: 특정 민원의 상세 내용을 조회합니다 SUPER_ADMIN 권한은 접근할 수 없습니다
  *     tags:
  *       - Complaints
  *     security:
@@ -152,10 +152,10 @@ export async function getComplaintList(req: Request, res: Response) {
  *         schema:
  *           type: string
  *           format: uuid
- *         description: 조회할 불편사항 ID
+ *         description: 조회할 민원 ID
  *     responses:
  *       200:
- *         description: 불편사항 상세가 성공적으로 반환되었습니다
+ *         description: 민원 상세가 성공적으로 반환되었습니다
  *         content:
  *           application/json:
  *             schema:
@@ -163,7 +163,7 @@ export async function getComplaintList(req: Request, res: Response) {
  *       403:
  *         description: 권한이 없는 사용자입니다 SUPER_ADMIN은 접근할 수 없습니다
  *       404:
- *         description: 불편사항을 찾을 수 없습니다
+ *         description: 민원을 찾을 수 없습니다
  *       500:
  *         description: 서버 오류가 발생했습니다
  */
@@ -183,10 +183,10 @@ export async function getComplaint(req: Request, res: Response) {
 
 /**
  * @openapi
- * /complaints/{complaintId}:
+ * /api/complaints/{complaintId}:
  *   put:
- *     summary: 불편사항 수정
- *     description: USER 권한 사용자가 자신의 불편사항 내용을 수정합니다
+ *     summary: 민원 수정
+ *     description: USER 권한 사용자가 자신의 민원 내용을 수정합니다
  *     tags:
  *       - Complaints
  *     security:
@@ -198,7 +198,7 @@ export async function getComplaint(req: Request, res: Response) {
  *         schema:
  *           type: string
  *           format: uuid
- *         description: 수정할 불편사항 ID
+ *         description: 수정할 민원 ID
  *     requestBody:
  *       required: true
  *       content:
@@ -220,7 +220,7 @@ export async function getComplaint(req: Request, res: Response) {
  *                 example: true
  *     responses:
  *       200:
- *         description: 불편사항이 성공적으로 수정되었습니다
+ *         description: 민원이 성공적으로 수정되었습니다
  *         content:
  *           application/json:
  *             schema:
@@ -228,7 +228,7 @@ export async function getComplaint(req: Request, res: Response) {
  *       403:
  *         description: USER 권한이 아닌 경우 접근할 수 없습니다
  *       404:
- *         description: 불편사항을 찾을 수 없습니다
+ *         description: 민원을 찾을 수 없습니다
  *       500:
  *         description: 서버 오류가 발생했습니다
  */
@@ -247,8 +247,8 @@ export async function editComplaint(req: Request, res: Response) {
  * @openapi
  * /complaints/{complaintId}:
  *   delete:
- *     summary: 불편사항 삭제
- *     description: ADMIN 권한 사용자가 특정 불편사항을 삭제합니다
+ *     summary: 민원 삭제
+ *     description: ADMIN 권한 사용자가 특정 민원을 삭제합니다
  *     tags:
  *       - Complaints
  *     security:
@@ -260,10 +260,10 @@ export async function editComplaint(req: Request, res: Response) {
  *         schema:
  *           type: string
  *           format: uuid
- *         description: 삭제할 불편사항 ID
+ *         description: 삭제할 민원 ID
  *     responses:
  *       200:
- *         description: 불편사항이 성공적으로 삭제되었습니다
+ *         description: 민원이 성공적으로 삭제되었습니다
  *         content:
  *           application/json:
  *             schema:
@@ -275,7 +275,7 @@ export async function editComplaint(req: Request, res: Response) {
  *       403:
  *         description: ADMIN 권한이 아닌 경우 접근할 수 없습니다
  *       404:
- *         description: 불편사항을 찾을 수 없습니다
+ *         description: 민원을 찾을 수 없습니다
  *       500:
  *         description: 서버 오류가 발생했습니다
  */
@@ -293,8 +293,8 @@ export async function removeComplaint(req: Request, res: Response) {
  * @openapi
  * /complaints/{complaintId}/status:
  *   patch:
- *     summary: 불편사항 상태 변경
- *     description: ADMIN 권한 사용자가 불편사항의 상태를 변경합니다
+ *     summary: 민원 상태 변경
+ *     description: ADMIN 권한 사용자가 민원의 상태를 변경합니다
  *     tags:
  *       - Complaints
  *     security:
@@ -306,7 +306,7 @@ export async function removeComplaint(req: Request, res: Response) {
  *         schema:
  *           type: string
  *           format: uuid
- *         description: 상태를 변경할 불편사항 ID
+ *         description: 상태를 변경할 민원 ID
  *     requestBody:
  *       required: true
  *       content:
@@ -316,7 +316,7 @@ export async function removeComplaint(req: Request, res: Response) {
  *             properties:
  *               status:
  *                 type: string
- *                 description: 변경할 불편사항 상태
+ *                 description: 변경할 민원 상태
  *                 enum:
  *                   - PENDING
  *                   - IN_PROGRESS
@@ -324,7 +324,7 @@ export async function removeComplaint(req: Request, res: Response) {
  *                 example: IN_PROGRESS
  *     responses:
  *       200:
- *         description: 불편사항 상태가 성공적으로 변경되었습니다
+ *         description: 민원 상태가 성공적으로 변경되었습니다
  *         content:
  *           application/json:
  *             schema:
@@ -336,7 +336,7 @@ export async function removeComplaint(req: Request, res: Response) {
  *       403:
  *         description: ADMIN 권한이 아닌 경우 접근할 수 없습니다
  *       404:
- *         description: 불편사항을 찾을 수 없습니다
+ *         description: 민원을 찾을 수 없습니다
  *       500:
  *         description: 서버 오류가 발생했습니다
  */

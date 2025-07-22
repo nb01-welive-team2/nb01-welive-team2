@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>사이트 안내</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background-color: #f9f9f9;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .button-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+    .site-button {
+      padding: 1rem 2rem;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background-color 0.2s ease;
+    }
+    .site-button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>사이트 바로가기</h1>
+  <div class="button-container">
+    <a class="site-button" data-path="/swagger" target="_blank">Swagger 페이지</a>
+    <a class="site-button" data-path="/socket" target="_blank">소켓 테스트 페이지</a>
+  </div>
+  <div class="button-container">
+    <button id="command-button">seed 실행</button>
+  </div>
+
+  <p>
+    1번 사용자 : alice@example.com, hashedpassword1<br>
+    - 1번 게시글과 1번 상품 작성, 2번 게시글에 좋아요<br>
+  2번 사용자 : bob@example.com, hashedpassword2<br>
+  - 2번 게시글 작성, 1번 게시글에 좋아요<br>
+</p>
+
+  <script>
+    const origin = "__SERVER_URL__"
+
+    document.querySelectorAll('.site-button').forEach((btn) => {
+      const path = btn.getAttribute('data-path');
+      btn.setAttribute('href', origin + path);
+    });
+
+    const commandBtn = document.getElementById('command-button');
+    commandBtn.addEventListener('click', async () => {
+      try {
+        const res = await fetch(origin + '/seed', {
+          method: 'GET'
+        });
+
+        if (!res.ok) {
+          throw new Error(`서버 오류: ${res.status}`);
+        }
+
+        const result = await res.json();
+        alert(`서버 응답: ${result.message}`);
+      } catch (err) {
+        alert(`에러 발생: ${err.message}`);
+      }
+    });
+  </script>
+</body>
+</html>
