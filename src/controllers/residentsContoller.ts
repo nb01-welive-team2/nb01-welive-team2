@@ -528,27 +528,9 @@ export async function getResidentByIdController(req: Request, res: Response) {
  *           schema:
  *             type: object
  *             properties:
- *               name:
- *                 type: string
- *                 example: "테스트 입주민"
- *               contact:
- *                 type: string
- *                 example: "010-1234-5678"
  *               email:
  *                 type: string
- *                 example: "hong@example.com"
- *               isHouseholder:
- *                 type: string
- *                 enum: [HOUSEHOLDER, NON_HOUSEHOLDER]
- *                 example: "HOUSEHOLDER"
- *               residenceStatus:
- *                 type: string
- *                 enum: [RESIDENCE, MOVE_OUT]
- *                 example: "RESIDENCE"
- *               approvalStatus:
- *                 type: string
- *                 enum: [PENDING, APPROVED, REJECTED]
- *                 example: "PENDING"
+ *                 example: "updated@example.com"
  *     responses:
  *       200:
  *         description: 입주민 정보 수정 성공
@@ -624,7 +606,7 @@ export async function updateResidentInfoController(
  *         description: 삭제할 입주민의 고유 ID
  *         schema:
  *           type: string
- *           example: "2ed98767-e501-446b-bafc-db6b299602d4"
+ *           example: "0980d601-282d-4170-95b0-444403a6694f"
  *     responses:
  *       200:
  *         description: 입주민 정보 삭제 성공
