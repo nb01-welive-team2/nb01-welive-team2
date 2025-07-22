@@ -7,7 +7,7 @@ import { NODE_ENV, STATIC_PATH } from "@/lib/constance";
 /**
  * @openapi
  * /api/users/avatar:
- *   patch:
+ *   post:
  *     summary: 프로필 아바타 변경
  *     description: |
  *       인증된 사용자의 **프로필 아바타 이미지를 업로드**합니다.
@@ -34,7 +34,7 @@ import { NODE_ENV, STATIC_PATH } from "@/lib/constance";
  *             type: object
  *             required: [image]
  *             properties:
- *               file:
+ *               image:
  *                 type: string
  *                 format: binary
  *                 description: 아바타 이미지 파일.

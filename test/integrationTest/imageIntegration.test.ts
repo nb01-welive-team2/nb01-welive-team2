@@ -81,7 +81,7 @@ describe("Image Integration Tests", () => {
       fs.writeFileSync(testImagePath, testImageBuffer);
 
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .set("Cookie", cookies)
         .attach("image", testImagePath);
 
@@ -100,7 +100,7 @@ describe("Image Integration Tests", () => {
       fs.writeFileSync(testImagePath, testImageBuffer);
 
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .attach("image", testImagePath);
 
       expect(uploadResponse.status).toBe(401);
@@ -168,7 +168,7 @@ describe("Image Integration Tests", () => {
       const cookies = loginResponse.headers["set-cookie"];
 
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .set("Cookie", cookies);
 
       expect(uploadResponse.status).toBe(400);
@@ -246,7 +246,7 @@ describe("Image Integration Tests", () => {
         fs.writeFileSync(testImagePath, testImageBuffer);
 
         const uploadResponse = await request(app)
-          .patch("/api/users/avatar")
+          .post("/api/users/avatar")
           .set("Cookie", cookies)
           .attach("image", testImagePath);
 
@@ -323,7 +323,7 @@ describe("Image Integration Tests", () => {
       fs.writeFileSync(testImagePath, testImageBuffer);
 
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .set("Cookie", cookies)
         .attach("image", testImagePath);
 
@@ -424,7 +424,7 @@ describe("Image Integration Tests", () => {
       fs.writeFileSync(testImagePath, testImageBuffer);
 
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .set("Cookie", cookies)
         .attach("image", testImagePath);
 
@@ -497,7 +497,7 @@ describe("Image Integration Tests", () => {
       fs.writeFileSync(testImagePath, testImageBuffer);
 
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .set("Cookie", cookies)
         .attach("image", testImagePath);
 
@@ -572,7 +572,7 @@ describe("Image Integration Tests", () => {
 
       // Host 헤더 제거
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .set("Cookie", cookies)
         .unset("Host")
         .attach("image", testImagePath);
@@ -648,7 +648,7 @@ describe("Image Integration Tests", () => {
       fs.writeFileSync(testImagePath, testImageBuffer);
 
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .set("Cookie", cookies)
         .attach("image", testImagePath);
 
@@ -723,7 +723,7 @@ describe("Image Integration Tests", () => {
       fs.writeFileSync(testImagePath, testImageBuffer);
 
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .set("Cookie", cookies)
         .attach("image", testImagePath);
 
@@ -798,7 +798,7 @@ describe("Image Integration Tests", () => {
       fs.writeFileSync(testFilePath, testFileBuffer);
 
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .set("Cookie", cookies)
         .attach("image", testFilePath);
 
@@ -871,7 +871,7 @@ describe("Image Integration Tests", () => {
       fs.writeFileSync(testImagePath, largeBuffer);
 
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .set("Cookie", cookies)
         .attach("image", testImagePath);
 
@@ -953,7 +953,7 @@ describe("Image Integration Tests", () => {
       fs.writeFileSync(testImagePath, testImageBuffer);
 
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .set("Cookie", cookies)
         .attach("image", testImagePath);
 
@@ -975,7 +975,7 @@ describe("Image Integration Tests", () => {
       fs.writeFileSync(testImagePath, testImageBuffer);
 
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .attach("image", testImagePath);
 
       expect(uploadResponse.status).toBe(401);
@@ -1046,7 +1046,7 @@ describe("Image Integration Tests", () => {
 
       // 파일 없이 요청 - imageController.ts
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .set("Cookie", cookies);
 
       expect(uploadResponse.status).toBe(400);
@@ -1119,7 +1119,7 @@ describe("Image Integration Tests", () => {
 
       // Host 헤더를 제거하여 에러 발생 시키기
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .set("Cookie", cookies)
         .set("Host", "") // 빈 Host 헤더
         .attach("image", testImagePath);
@@ -1195,7 +1195,7 @@ describe("Image Integration Tests", () => {
 
       // 파일 없이 요청 - imageController.ts
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .set("Cookie", cookies);
 
       expect(uploadResponse.status).toBe(400);
@@ -1269,7 +1269,7 @@ describe("Image Integration Tests", () => {
 
       // production 환경에서 S3 업로드
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .set("Cookie", cookies)
         .attach("image", testImagePath);
 
