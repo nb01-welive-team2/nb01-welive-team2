@@ -1,9 +1,10 @@
 import complaintRepository from "../repositories/complaintRepository";
 import {
+  ComplaintStatusType,
   CreateComplaintBodyType,
   PatchComplaintBodyType,
 } from "../structs/complaintStructs";
-import { USER_ROLE } from "@prisma/client";
+import { COMPLAINT_STATUS, USER_ROLE } from "@prisma/client";
 import { PageParamsType } from "../structs/commonStructs";
 import { buildSearchCondition } from "../lib/searchCondition";
 import userInfoRepository from "@/repositories/userInfoRepository";
@@ -93,6 +94,13 @@ async function updateComplaint(
   return await complaintRepository.update(complaintId, body);
 }
 
+async function changeStatus(
+  complaintId: string,
+  body: { complaintStatus: COMPLAINT_STATUS }
+) {
+  return await complaintRepository.update(complaintId, body);
+}
+
 async function removeComplaint(complaintId: string) {
   return await complaintRepository.deleteById(complaintId);
 }
@@ -103,4 +111,5 @@ export default {
   getComplaint,
   getComplaintList,
   removeComplaint,
+  changeStatus,
 };

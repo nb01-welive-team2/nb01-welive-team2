@@ -5,6 +5,7 @@ import {
   CreateComplaintBodyStruct,
   ComplaintIdParamStruct,
   PatchComplaintBodyStruct,
+  ComplaintStatusStruct,
 } from "../structs/complaintStructs";
 import complaintService from "../services/complaintService";
 import registerSuccessMessage from "../lib/responseJson/registerSuccess";
@@ -243,4 +244,17 @@ export async function removeComplaint(req: Request, res: Response) {
   const { complaintId } = create(req.params, ComplaintIdParamStruct);
   await complaintService.removeComplaint(complaintId);
   res.status(200).send(new removeSuccessMessage());
+}
+
+export async function changeStatus(req: Request, res: Response) {
+  const reqWithPayload = req as AuthenticatedRequest;
+  if (reqWithPayload.user.role !== USER_ROLE.ADMIN) {
+    throw new ForbiddenError();
+  }
+  const data = create(req.body, ComplaintStatusStruct);
+  const { complaintId } = create(req.params, ComplaintIdParamStruct);
+  const complaint = await complaintService.changeStatus(complaintId, {
+    complaintStatus: data.status,
+  });
+  res.status(200).send({ message: "상태 변경 성공" });
 }

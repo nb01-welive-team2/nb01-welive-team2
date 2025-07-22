@@ -4,6 +4,7 @@ import {
   getComplaint,
   editComplaint,
   removeComplaint,
+  changeStatus,
 } from "@/controllers/complaintController";
 import complaintService from "@/services/complaintService";
 import { USER_ROLE } from "@prisma/client";
@@ -219,6 +220,46 @@ describe("Complaint Controller", () => {
       await expect(removeComplaint(req, mockResponse())).rejects.toThrow(
         ForbiddenError
       );
+    });
+  });
+
+  describe("changeStatus", () => {
+    it("should throw ForbiddenError if user is not ADMIN", async () => {
+      const req: any = {
+        body: {},
+        params: {},
+        ...mockUser(USER_ROLE.USER),
+      };
+      await expect(changeStatus(req, mockResponse())).rejects.toThrow(
+        ForbiddenError
+      );
+    });
+
+    it("should call complaintService.changeStatus and send ResponseComplaintDTO if user is ADMIN", async () => {
+      const req: any = {
+        body: { status: "RESOLVED" },
+        params: { complaintId: "comp-1" },
+        ...mockUser(USER_ROLE.ADMIN),
+      };
+      const res = mockResponse();
+
+      // superstruct.create mock: 1) body validation, 2) params validation
+      (struct.create as jest.Mock)
+        .mockImplementationOnce(() => ({ status: "RESOLVED" }))
+        .mockImplementationOnce(() => ({ complaintId: "comp-1" }));
+
+      const mockComplaint = { id: "comp-1", complaintStatus: "RESOLVED" };
+      (complaintService.changeStatus as jest.Mock).mockResolvedValue(
+        mockComplaint
+      );
+
+      await changeStatus(req, res);
+
+      expect(struct.create).toHaveBeenCalledTimes(2);
+      expect(complaintService.changeStatus).toHaveBeenCalledWith("comp-1", {
+        complaintStatus: "RESOLVED",
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
     });
   });
 });

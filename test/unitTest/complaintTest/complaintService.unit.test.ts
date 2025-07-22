@@ -257,4 +257,20 @@ describe("complaintService", () => {
       expect(result).toEqual({ id: complaintId });
     });
   });
+  describe("changeStatus", () => {
+    it("should call complaintRepository.update with complaintId and status", async () => {
+      const complaintId = "comp-1";
+      const body = { complaintStatus: "RESOLVED" as const };
+
+      (complaintRepository.update as jest.Mock).mockResolvedValue(body);
+
+      const result = await complaintService.changeStatus(complaintId, body);
+
+      expect(complaintRepository.update).toHaveBeenCalledWith(
+        complaintId,
+        body
+      );
+      expect(result).toBe(body);
+    });
+  });
 });

@@ -156,4 +156,38 @@ describe("ComplaintController Integration Tests", () => {
       expect(res.status).toBe(404);
     });
   });
+
+  describe("PATCH /api/complaints/:complaintId/status", () => {
+    const complaintId = mockComplaints[0].id;
+    const invalidComplaintId = "2c6a4baf-9efd-4187-be34-624b2b35f195";
+
+    const validBody = {
+      status: "RESOLVED",
+    };
+
+    it("should update complaint status for ADMIN role", async () => {
+      const res = await adminAgent
+        .patch(`/api/complaints/${complaintId}/status`)
+        .send(validBody);
+
+      expect(res.status).toBe(200);
+    });
+
+    it("should return 403 if role is not ADMIN", async () => {
+      const res = await userAgent
+        .patch(`/api/complaints/${complaintId}/status`)
+        .send(validBody);
+
+      expect(res.status).toBe(403);
+      expect(res.body).toHaveProperty("message");
+    });
+
+    it("should return 404 if complaint not found", async () => {
+      const res = await adminAgent
+        .patch(`/api/complaints/${invalidComplaintId}/status`)
+        .send(validBody);
+
+      expect(res.status).toBe(404);
+    });
+  });
 });
