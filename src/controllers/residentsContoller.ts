@@ -13,7 +13,7 @@ import { RESIDENCE_STATUS } from "@prisma/client";
 // 입주민 명부 개별 등록
 /**
  * @swagger
- * /api/residents/upload:
+ * /api/residents/register:
  *   post:
  *     summary: "[관리자] 입주민 등록(개별 등록)"
  *     description: 관리자가 개별 입주민 정보를 등록합니다. 이메일은 선택 사항이며, 명부에 등록되지 않은 사용자도 추가할 수 있습니다.
@@ -37,15 +37,15 @@ import { RESIDENCE_STATUS } from "@prisma/client";
  *               building:
  *                 type: number
  *                 description: 동 번호
- *                 example: 101
+ *                 example: 909
  *               unitNumber:
  *                 type: number
  *                 description: 호수
- *                 example: 1002
+ *                 example: 9001
  *               contact:
  *                 type: string
  *                 description: 연락처
- *                 example: "010-1234-5678"
+ *                 example: "010-9999-9999"
  *               name:
  *                 type: string
  *                 description: 입주민 이름
@@ -123,6 +123,194 @@ export async function uploadResidentController(req: Request, res: Response) {
   });
 
   res.status(201).json(residents);
+}
+
+// 입주민 명부 CSV파일 업로드
+/**
+ * @swagger
+ * /api/residents/upload:
+ *   post:
+ *     summary: "[관리자] 입주민 명부 CSV 파일 업로드"
+ *     description: 관리자가 CSV 파일을 업로드하여 아파트 입주민 명부를 일괄 등록합니다.
+ *     tags:
+ *       - Residents
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: 업로드할 CSV 파일
+ *     responses:
+ *       201:
+ *         description: 입주민 명부 업로드 성공
+ *       400:
+ *         description: 잘못된 요청 (아파트 정보 없거나 CSV 파일 누락)
+ *       401:
+ *         description: 인증되지 않은 사용자
+ */
+export async function uploadResidentsCsvController(
+  req: Request,
+  res: Response
+) {
+  const user = (req as AuthenticatedRequest).user;
+  if (!user) throw new CommonError("인증되지 않은 사용자입니다.", 401);
+
+  const apartmentId = user.apartmentId;
+  if (!apartmentId) throw new CommonError("아파트 정보가 없습니다.", 400);
+  if (!req.file) throw new CommonError("CSV 파일이 없습니다.", 400);
+
+  const csvText = req.file.buffer.toString("utf-8");
+  const createdResidents = await residentsService.uploadResidentsFromCsv(
+    csvText,
+    apartmentId
+  );
+
+  res.status(201).json();
+}
+
+// 입주민 명부 CSV 파일 다운로드
+/**
+ * @swagger
+ * /api/residents/download:
+ *   get:
+ *     summary: "[관리자] 입주민 명부 CSV 파일 다운로드"
+ *     description: 관리자 권한으로 필터 조건에 따라 아파트 입주민 명부를 CSV 파일로 다운로드합니다.
+ *     tags:
+ *       - Residents
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: building
+ *         schema:
+ *           type: integer
+ *         description: 동 (동 번호)
+ *       - in: query
+ *         name: unitNumber
+ *         schema:
+ *           type: integer
+ *         description: 호수 (호 번호)
+ *       - in: query
+ *         name: residenceStatus
+ *         schema:
+ *           type: string
+ *           enum: [RESIDENCE, NO_RESIDENCE]
+ *         description: 거주 여부 필터
+ *       - in: query
+ *         name: isRegistered
+ *         schema:
+ *           type: boolean
+ *         description: 위리브 가입 여부 필터
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *         description: 이름 검색
+ *       - in: query
+ *         name: contact
+ *         schema:
+ *           type: string
+ *         description: 연락처 검색
+ *     responses:
+ *       200:
+ *         description: CSV 파일 다운로드 성공
+ *       400:
+ *         description: 잘못된 요청 (아파트 정보 누락 등)
+ *       401:
+ *         description: 인증되지 않은 사용자
+ *       403:
+ *         description: 권한이 없는 사용자 (관리자 전용)
+ */
+export async function downloadResidentsCsvController(
+  req: Request,
+  res: Response
+) {
+  const user = (req as AuthenticatedRequest).user;
+  if (!user) throw new CommonError("인증되지 않은 사용자입니다.", 401);
+
+  if (user.role !== "ADMIN") {
+    throw new CommonError("해당 기능은 관리자 전용입니다.", 403);
+  }
+
+  const apartmentId = user.apartmentId;
+  if (!apartmentId) throw new CommonError("아파트 정보가 없습니다.", 400);
+
+  const { building, unitNumber, residenceStatus, isRegistered, name, contact } =
+    req.query;
+
+  const query = {
+    apartmentId: user.apartmentId,
+    building: Number(building),
+    unitNumber: Number(unitNumber),
+    residenceStatus:
+      residenceStatus === "RESIDENCE" || residenceStatus === "NO_RESIDENCE"
+        ? (residenceStatus as RESIDENCE_STATUS)
+        : undefined,
+    isRegistered:
+      isRegistered === "true"
+        ? true
+        : isRegistered === "false"
+          ? false
+          : undefined,
+    name: typeof name === "string" ? name : undefined,
+    contact: typeof contact === "string" ? contact : undefined,
+  };
+
+  const csv = await residentsService.getResidentsCsv(query);
+  const filename = "residents.csv";
+
+  res.setHeader("Content-Type", "text/csv");
+  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+  res.status(200).send(csv);
+}
+
+// 입주민 명부 CSV 템플릿 다운로드
+/**
+ * @swagger
+ * /api/residents/template:
+ *   get:
+ *     summary: "[관리자] 입주민 명부 CSV 템플릿 다운로드"
+ *     description: 관리자 권한으로 입주민 명부 작성용 CSV 템플릿 파일을 다운로드합니다.
+ *     tags:
+ *       - Residents
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: CSV 템플릿 다운로드 성공
+ *       400:
+ *         description: 잘못된 요청 (아파트 정보 누락)
+ *       401:
+ *         description: 인증되지 않은 사용자
+ *       403:
+ *         description: 권한이 없는 사용자 (관리자 전용)
+ */
+export async function downloadResidentsCsvTemplateController(
+  req: Request,
+  res: Response
+) {
+  const user = (req as AuthenticatedRequest).user;
+  if (!user) throw new CommonError("인증되지 않은 사용자입니다.", 401);
+
+  if (user.role !== "ADMIN") {
+    new CommonError("해당 기능은 관리자 전용입니다.", 403);
+  }
+
+  const apartmentId = user.apartmentId;
+  if (!apartmentId) throw new CommonError("아파트 정보가 없습니다.", 400);
+  const csv = await residentsService.getResidentsCsvTemplate();
+  const filename = "resident-form.csv";
+
+  res.header("Content-Type", "text/csv; charset=utf-8");
+  res.header("Content-Disposition", `attachment; filename="${filename}"`);
+  res.status(200).send(csv);
 }
 
 // 입주민 목록 조회
@@ -459,192 +647,4 @@ export async function deleteResidentController(req: Request, res: Response) {
   await residentsService.removeResident(id);
 
   res.status(200).json();
-}
-
-// 입주민 명부 CSV파일 업로드
-/**
- * @swagger
- * /api/residents/upload:
- *   post:
- *     summary: "[관리자] 입주민 명부 CSV 파일 업로드"
- *     description: 관리자가 CSV 파일을 업로드하여 아파트 입주민 명부를 일괄 등록합니다.
- *     tags:
- *       - Residents
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             properties:
- *               file:
- *                 type: string
- *                 format: binary
- *                 description: 업로드할 CSV 파일
- *     responses:
- *       201:
- *         description: 입주민 명부 업로드 성공
- *       400:
- *         description: 잘못된 요청 (아파트 정보 없거나 CSV 파일 누락)
- *       401:
- *         description: 인증되지 않은 사용자
- */
-export async function uploadResidentsCsvController(
-  req: Request,
-  res: Response
-) {
-  const user = (req as AuthenticatedRequest).user;
-  if (!user) throw new CommonError("인증되지 않은 사용자입니다.", 401);
-
-  const apartmentId = user.apartmentId;
-  if (!apartmentId) throw new CommonError("아파트 정보가 없습니다.", 400);
-  if (!req.file) throw new CommonError("CSV 파일이 없습니다.", 400);
-
-  const csvText = req.file.buffer.toString("utf-8");
-  const createdResidents = await residentsService.uploadResidentsFromCsv(
-    csvText,
-    apartmentId
-  );
-
-  res.status(201).json();
-}
-
-// 입주민 명부 CSV 파일 다운로드
-/**
- * @swagger
- * /api/residents/download:
- *   get:
- *     summary: "[관리자] 입주민 명부 CSV 파일 다운로드"
- *     description: 관리자 권한으로 필터 조건에 따라 아파트 입주민 명부를 CSV 파일로 다운로드합니다.
- *     tags:
- *       - Residents
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: building
- *         schema:
- *           type: integer
- *         description: 동 (동 번호)
- *       - in: query
- *         name: unitNumber
- *         schema:
- *           type: integer
- *         description: 호수 (호 번호)
- *       - in: query
- *         name: residenceStatus
- *         schema:
- *           type: string
- *           enum: [RESIDENCE, NO_RESIDENCE]
- *         description: 거주 여부 필터
- *       - in: query
- *         name: isRegistered
- *         schema:
- *           type: boolean
- *         description: 위리브 가입 여부 필터
- *       - in: query
- *         name: name
- *         schema:
- *           type: string
- *         description: 이름 검색
- *       - in: query
- *         name: contact
- *         schema:
- *           type: string
- *         description: 연락처 검색
- *     responses:
- *       200:
- *         description: CSV 파일 다운로드 성공
- *       400:
- *         description: 잘못된 요청 (아파트 정보 누락 등)
- *       401:
- *         description: 인증되지 않은 사용자
- *       403:
- *         description: 권한이 없는 사용자 (관리자 전용)
- */
-export async function downloadResidentsCsvController(
-  req: Request,
-  res: Response
-) {
-  const user = (req as AuthenticatedRequest).user;
-  if (!user) throw new CommonError("인증되지 않은 사용자입니다.", 401);
-
-  if (user.role !== "ADMIN") {
-    throw new CommonError("해당 기능은 관리자 전용입니다.", 403);
-  }
-
-  const apartmentId = user.apartmentId;
-  if (!apartmentId) throw new CommonError("아파트 정보가 없습니다.", 400);
-
-  const { building, unitNumber, residenceStatus, isRegistered, name, contact } =
-    req.query;
-
-  const query = {
-    apartmentId: user.apartmentId,
-    building: Number(building),
-    unitNumber: Number(unitNumber),
-    residenceStatus:
-      residenceStatus === "RESIDENCE" || residenceStatus === "NO_RESIDENCE"
-        ? (residenceStatus as RESIDENCE_STATUS)
-        : undefined,
-    isRegistered:
-      isRegistered === "true"
-        ? true
-        : isRegistered === "false"
-          ? false
-          : undefined,
-    name: typeof name === "string" ? name : undefined,
-    contact: typeof contact === "string" ? contact : undefined,
-  };
-
-  const csv = await residentsService.getResidentsCsv(query);
-  const filename = "residents.csv";
-
-  res.setHeader("Content-Type", "text/csv");
-  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
-  res.status(200).send(csv);
-}
-
-// 입주민 명부 CSV 템플릿 다운로드
-/**
- * @swagger
- * /api/residents/template:
- *   get:
- *     summary: "[관리자] 입주민 명부 CSV 템플릿 다운로드"
- *     description: 관리자 권한으로 입주민 명부 작성용 CSV 템플릿 파일을 다운로드합니다.
- *     tags:
- *       - Residents
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: CSV 템플릿 다운로드 성공
- *       400:
- *         description: 잘못된 요청 (아파트 정보 누락)
- *       401:
- *         description: 인증되지 않은 사용자
- *       403:
- *         description: 권한이 없는 사용자 (관리자 전용)
- */
-export async function downloadResidentsCsvTemplateController(
-  req: Request,
-  res: Response
-) {
-  const user = (req as AuthenticatedRequest).user;
-  if (!user) throw new CommonError("인증되지 않은 사용자입니다.", 401);
-
-  if (user.role !== "ADMIN") {
-    new CommonError("해당 기능은 관리자 전용입니다.", 403);
-  }
-
-  const apartmentId = user.apartmentId;
-  if (!apartmentId) throw new CommonError("아파트 정보가 없습니다.", 400);
-  const csv = await residentsService.getResidentsCsvTemplate();
-  const filename = "resident-form.csv";
-
-  res.header("Content-Type", "text/csv; charset=utf-8");
-  res.header("Content-Disposition", `attachment; filename="${filename}"`);
-  res.status(200).send(csv);
 }
