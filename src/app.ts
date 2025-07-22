@@ -17,7 +17,7 @@ import pollsRouter from "./routes/pollRouter";
 import imagesRouter from "./routes/imageRouter";
 import { PUBLIC_PATH } from "./lib/constance";
 import eventsRouter from "./routes/eventRouter";
-import { seedDatabase } from "prisma/seed";
+import { seedDatabase } from "../prisma/seed";
 import { renderHtmlWithUrl } from "./lib/htmlRenderer";
 
 const app = express();

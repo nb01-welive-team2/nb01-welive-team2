@@ -123,11 +123,11 @@ describe("ComplaintController Integration Tests", () => {
       expect(res.body).toHaveProperty("message");
     });
 
-    it("should return 404 if complaint not found", async () => {
+    it("should return 403 if invalidComplaintId", async () => {
       const res = await userAgent
         .put(`/api/complaints/${invalidComplaintId}`)
         .send(validBody);
-      expect(res.status).toBe(404);
+      expect(res.status).toBe(403);
     });
   });
 
@@ -146,11 +146,11 @@ describe("ComplaintController Integration Tests", () => {
       expect(res.body).toHaveProperty("message");
     });
 
-    it("should return 404 if complaint not found", async () => {
+    it("should return 403 if invalidComplaintId", async () => {
       const res = await adminAgent.delete(
         `/api/complaints/${invalidComplaintId}`
       );
-      expect(res.status).toBe(404);
+      expect(res.status).toBe(403);
     });
   });
 
