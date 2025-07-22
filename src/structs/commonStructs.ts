@@ -66,8 +66,6 @@ export const DateTimeStringStruct = define<string>(
 export const PageParamsStruct = object({
   page: defaulted(integerString, 1),
   limit: defaulted(integerString, 11),
-  // searchBy: optional(string()),
-  // keyword: optional(string()),
 });
 export type PageParamsType = Infer<typeof PageParamsStruct>;
 
