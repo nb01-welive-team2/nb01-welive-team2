@@ -1,42 +1,43 @@
 import { Request, Response } from "express";
-import * as optionService from "../services/optionService";
-import UnauthError from "../errors/UnauthError";
 import ForbiddenError from "../errors/ForbiddenError";
-import {
-  createOptionSchema,
-  optionIdParamSchema,
-} from "../structs/optionStructs";
-import { validate } from "superstruct";
+import { create, validate } from "superstruct";
 import { USER_ROLE } from "@prisma/client";
 import { AuthenticatedRequest } from "@/types/express";
 import registerSuccessMessage from "@/lib/responseJson/registerSuccess";
+import { VoteBodyStruct } from "@/structs/optionStructs";
+import optionService from "@/services/optionService";
+import removeSuccessMessage from "@/lib/responseJson/removeSuccess";
+import { ResponseOptionDTO, ResponseWinnerOptionDTO } from "@/dto/optionDTO";
 
 export async function createOption(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
-  const data = create(req.body, CreateOptionBodyStruct);
+  const { optionId } = create(req.body, VoteBodyStruct);
 
-  if (reqWithPayload.user.role !== USER_ROLE.ADMIN) {
+  if (reqWithPayload.user.role === USER_ROLE.SUPER_ADMIN) {
     throw new ForbiddenError();
   }
-
-  const isEvent = Boolean(data.startDate && data.endDate);
-
-  await optionService.createOption(
-    data,
+  const option = await optionService.createVote(
+    optionId,
     reqWithPayload.user.userId,
-    reqWithPayload.user.apartmentId,
-    isEvent
+    reqWithPayload.user.apartmentId
   );
 
-  res.status(201).send(new registerSuccessMessage());
+  res
+    .status(201)
+    .send(new ResponseWinnerOptionDTO(option!, "Vote created successfully"));
 }
 
 export async function removeOption(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
-  if (reqWithPayload.user.role !== USER_ROLE.ADMIN) {
+  if (reqWithPayload.user.role === USER_ROLE.SUPER_ADMIN) {
     throw new ForbiddenError();
   }
-  const { optionId } = create(req.params, OptionIdParamStruct);
-  await optionService.removeOption(optionId);
-  res.status(200).send(new removeSuccessMessage());
+  const { optionId } = create(req.params, VoteBodyStruct);
+  const option = await optionService.removeVote(
+    optionId,
+    reqWithPayload.user.userId
+  );
+  res
+    .status(200)
+    .send(new ResponseOptionDTO(option!, "Vote removed successfully"));
 }
