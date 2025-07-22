@@ -13,6 +13,8 @@ import ForbiddenError from "../errors/ForbiddenError";
 import { createPollSchema } from "../structs/pollStructs";
 import { assert } from "superstruct";
 import { createEvent, deleteEventById } from "../repositories/pollRepository";
+import { POLL_STATUS } from "@prisma/client";
+import { cancelPollJobs, schedulePollStatus } from "@/lib/pollScheduler";
 
 const toISO = (d: Date) => d.toISOString();
 
@@ -52,6 +54,13 @@ export const createPoll = async (
   });
 
   await pollRepo.createPollOptions(poll.id, dto.options);
+
+  // 스케줄러에 투표 상태 변경 등록
+  await schedulePollStatus(
+    poll.id,
+    new Date(dto.startDate),
+    new Date(dto.endDate)
+  );
 };
 
 // 투표 전체 조회
@@ -138,7 +147,7 @@ export const editPoll = async (
   if (poll.userId !== userId && role !== "ADMIN") {
     throw new ForbiddenError();
   }
-  if (poll.startDate <= new Date()) {
+  if (poll.status !== POLL_STATUS.PENDING) {
     throw new ForbiddenError("이미 시작된 투표는 수정할 수 없습니다.");
   }
 
@@ -152,6 +161,13 @@ export const editPoll = async (
   });
 
   await pollRepo.replacePollOptions(pollId, dto.options);
+
+  // 스케줄러에 투표 상태 변경 등록
+  await schedulePollStatus(
+    poll.id,
+    new Date(dto.startDate),
+    new Date(dto.endDate)
+  );
 
   return {
     id: updated.id,
@@ -176,7 +192,7 @@ export const removePoll = async (
   if (poll.userId !== userId) {
     throw new ForbiddenError();
   }
-  if (poll.startDate <= new Date()) {
+  if (poll.status !== POLL_STATUS.PENDING) {
     throw new ForbiddenError("이미 시작된 투표는 삭제할 수 없습니다.");
   }
 
@@ -185,4 +201,7 @@ export const removePoll = async (
   if (poll.eventId) {
     await deleteEventById(poll.eventId);
   }
+
+  // 스케줄러 작업 취소
+  cancelPollJobs(pollId);
 };
