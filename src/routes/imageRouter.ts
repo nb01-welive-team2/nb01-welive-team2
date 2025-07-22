@@ -6,9 +6,9 @@ import express from "express";
 
 const imagesRouter = express.Router();
 
-imagesRouter.post(
+imagesRouter.patch(
   "/avatar",
-  authenticate(),
+  authenticate({ optional: false }),
   uploader.single("image"),
   withAsync(uploadImage)
 );

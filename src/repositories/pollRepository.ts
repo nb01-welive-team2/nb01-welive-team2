@@ -1,5 +1,5 @@
-import { prisma } from "../lib/prisma";
-import { $Enums } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
+import { $Enums, Prisma } from "@prisma/client";
 
 export const findPolls = async (where: any, skip: number, take: number) => {
   return await prisma.polls.findMany({
@@ -16,9 +16,19 @@ export const findPolls = async (where: any, skip: number, take: number) => {
   });
 };
 
+export const findPollsForEvent = async (params: Prisma.PollsFindManyArgs) => {
+  return await prisma.polls.findMany({
+    ...params,
+    include: {
+      event: true,
+    },
+  });
+};
+
 export const createPollEntry = async (data: {
   title: string;
   content: string;
+  eventId: string;
   startDate: Date;
   endDate: Date;
   buildingPermission: number;
@@ -29,6 +39,7 @@ export const createPollEntry = async (data: {
     data: {
       title: data.title,
       content: data.content || "",
+      event: { connect: { id: data.eventId } },
       startDate: data.startDate,
       endDate: data.endDate,
       buildingPermission: data.buildingPermission,
@@ -157,6 +168,16 @@ export const updatePoll = async (
   });
 };
 
+export const updatePollForEvent = async (
+  pollId: string,
+  data: Prisma.PollsUpdateInput
+) => {
+  return await prisma.polls.update({
+    where: { id: pollId },
+    data,
+  });
+};
+
 export const replacePollOptions = async (
   pollId: string,
   options: { title: string }[]
@@ -178,4 +199,16 @@ export const deletePollById = async (pollId: string) => {
   return await prisma.polls.delete({
     where: { id: pollId },
   });
+};
+
+// 일정 관련
+export const createEvent = async (data: {
+  eventType: $Enums.EVENT_TYPE;
+  isActive: boolean;
+}) => {
+  return await prisma.events.create({ data });
+};
+
+export const deleteEventById = async (eventId: string) => {
+  return await prisma.events.delete({ where: { id: eventId } });
 };

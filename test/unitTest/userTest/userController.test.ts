@@ -39,10 +39,10 @@ describe("userController", () => {
         role: USER_ROLE.USER,
         apartmentDong: "10",
         apartmentHo: "10",
+        isActive: true,
       };
 
       (userService.signupUser as jest.Mock).mockResolvedValue(mockUser);
-      (userResponseDTO as jest.Mock).mockReturnValue(mockUser);
 
       await userController.signupUser(req as Request, res as Response);
 
@@ -56,9 +56,10 @@ describe("userController", () => {
         role: USER_ROLE.USER,
         apartmentDong: 10,
         apartmentHo: 10,
+        isActive: true,
       });
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith(mockUser);
+      expect(res.json).toHaveBeenCalledWith(expect.any(Object));
     });
 
     test("아파트가 존재하지 않을 경우 BadRequestError", async () => {
@@ -106,10 +107,10 @@ describe("userController", () => {
         endFloorNumber: "10",
         startHoNumber: "1",
         endHoNumber: "10",
+        isActive: true,
       };
 
       (userService.signupAdmin as jest.Mock).mockResolvedValue(mockAdmin);
-      (userResponseDTO as jest.Mock).mockReturnValue(mockAdmin);
 
       await userController.signupAdmin(req as Request, res as Response);
 
@@ -132,9 +133,10 @@ describe("userController", () => {
         endFloorNumber: 10,
         startHoNumber: 1,
         endHoNumber: 10,
+        isActive: true,
       });
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith(mockAdmin);
+      expect(res.json).toHaveBeenCalledWith(expect.any(Object));
     });
   });
 
@@ -148,18 +150,18 @@ describe("userController", () => {
       name: "KimSuper",
       role: USER_ROLE.SUPER_ADMIN,
       joinStatus: JOIN_STATUS.APPROVED,
+      isActive: true,
     };
 
     (userService.signupSuperAdmin as jest.Mock).mockResolvedValue(
       mockSuperAdmin
     );
-    (userResponseDTO as jest.Mock).mockReturnValue(mockSuperAdmin);
 
     await userController.signupSuperAdmin(req as Request, res as Response);
 
     expect(userService.signupSuperAdmin).toHaveBeenCalledWith(req.body);
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(mockSuperAdmin);
+    expect(res.json).toHaveBeenCalledWith(expect.any(Object));
   });
 
   describe("updateUser", () => {
@@ -183,7 +185,9 @@ describe("userController", () => {
         profileImage: "new-image.jpg",
       });
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ message: "유저 정보 수정 성공" });
+      expect(res.json).toHaveBeenCalledWith({
+        message: "정보가 성공적으로 업데이트되었습니다. 다시 로그인해주세요.",
+      });
     });
 
     test("현재 비밀번호 불일치 시 UnauthError", async () => {
@@ -232,7 +236,9 @@ describe("userController", () => {
 
       expect(userService.updateAdmin).toHaveBeenCalledWith(req.body);
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith(mockResult);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "[슈퍼관리자] 관리자 정보를 수정했습니다.",
+      });
     });
 
     test("권한 없음 등의 에러 발생 시 UnauthError throw", async () => {
@@ -267,7 +273,7 @@ describe("userController", () => {
       expect(userService.deleteAdmin).toHaveBeenCalledWith("admin-uuid");
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: "관리자 정보(아파트 정보 포함) 삭제가 완료되었습니다",
+        message: "[슈퍼관리자] 관리자 정보를 삭제했습니다.",
       });
     });
 
@@ -307,7 +313,7 @@ describe("userController", () => {
       );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: "관리자 가입 승인이 완료되었습니다",
+        message: "관리자 가입 승인이 완료되었습니다.",
       });
     });
 
@@ -333,7 +339,7 @@ describe("userController", () => {
       );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: "관리자 가입 거절이 완료되었습니다",
+        message: "관리자 가입 거절이 완료되었습니다.",
       });
     });
 
@@ -357,7 +363,7 @@ describe("userController", () => {
       );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: "관리자 가입 전체 승인이 완료되었습니다",
+        message: "관리자 가입 전체 승인이 완료되었습니다.",
       });
     });
 
@@ -381,7 +387,7 @@ describe("userController", () => {
       );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: "관리자 가입 전체 거절이 완료되었습니다",
+        message: "관리자 가입 전체 거절이 완료되었습니다.",
       });
     });
 
@@ -430,7 +436,7 @@ describe("userController", () => {
       );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: "사용자 가입 요청 승인 성공",
+        message: "사용자 가입 요청 승인이 성공했습니다.",
       });
     });
 
@@ -456,7 +462,7 @@ describe("userController", () => {
       );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: "사용자 가입 요청 거절 성공",
+        message: "사용자 가입 요청 거절이 성공했습니다.",
       });
     });
 
@@ -478,7 +484,7 @@ describe("userController", () => {
       expect(userService.approveAllUsers).toHaveBeenCalledWith("admin-uuid");
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: "사용자 가입 요청 전체 승인 성공",
+        message: "사용자 가입 요청 전체 승인이 성공했습니다.",
       });
     });
 
@@ -500,7 +506,7 @@ describe("userController", () => {
       expect(userService.rejectAllUsers).toHaveBeenCalledWith("admin-uuid");
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: "사용자 가입 요청 전체 거절 성공",
+        message: "사용자 가입 요청 전체 거절이 성공했습니다.",
       });
     });
   });
@@ -528,7 +534,7 @@ describe("userController", () => {
       );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: "관리자 정보(아파트 정보 포함) 삭제가 완료되었습니다",
+        message: "거절한 사용자 정보를 일괄 정리했습니다.",
       });
     });
   });

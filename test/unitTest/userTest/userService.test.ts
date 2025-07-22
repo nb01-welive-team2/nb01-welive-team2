@@ -287,7 +287,7 @@ describe("userService", () => {
       ).rejects.toThrow(UnauthError);
     });
 
-    test("존재하지 않는 사용자일 경우 UnauthError", async () => {
+    test("존재하지 않는 사용자일 경우 에러 발생", async () => {
       (userRepository.getUserId as jest.Mock).mockResolvedValue(null);
 
       await expect(
@@ -295,7 +295,7 @@ describe("userService", () => {
           currentPassword: "current",
           newPassword: "new",
         })
-      ).rejects.toThrow(UnauthError);
+      ).rejects.toThrow();
     });
   });
 

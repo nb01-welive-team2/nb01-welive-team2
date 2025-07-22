@@ -17,13 +17,17 @@ export const JWT_ACCESS_TOKEN_SECRET =
 export const JWT_REFRESH_TOKEN_SECRET =
   process.env.JWT_REFRESH_TOKEN_SECRET || "";
 
-export const SERVER_URL = process.env.SERVER_URL || `http://localhost:${PORT}`;
+export const SERVER_URL = process.env.SERVER_URL || "localhost";
 
 export const NODE_ENV = process.env.NODE_ENV || "development";
 export const AWS_REGION = process.env.AWS_REGION || "";
 export const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID || "";
 export const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY || "";
 export const AWS_S3_BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME || "";
+
+export const UPSTASH_REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL || "";
+export const UPSTASH_REDIS_REST_TOKEN =
+  process.env.UPSTASH_REDIS_REST_TOKEN || "";
 
 if (NODE_ENV === "production") {
   if (

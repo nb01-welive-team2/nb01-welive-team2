@@ -20,7 +20,7 @@ model Users {
   contact           String      @unique @db.VarChar(20)
   name              String      @db.VarChar(50)
   email             String      @unique @db.VarChar(320)
-  residentId        String?
+  residentId        String?     @unique
   role              USER_ROLE
   joinStatus        JOIN_STATUS
   profileImage      String?     @db.VarChar(255)
@@ -91,12 +91,13 @@ model Residents {
   approvalStatus  APPROVAL_STATUS
 
   apartmentInfo ApartmentInfo @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
-  Users         Users[]
+  Users         Users?
 }
 
 model Complaints {
   id              String           @id @default(uuid())
   userId          String
+  apartmentId     String
   title           String           @db.VarChar(100)
   content         String
   createdAt       DateTime         @default(now())
@@ -105,12 +106,10 @@ model Complaints {
   complaintStatus COMPLAINT_STATUS @default(PENDING)
   viewCount       Int              @default(0)
 
-  user          Users           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  notifications Notifications[]
-
+  user              Users               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notifications     Notifications[]
   ComplaintComments ComplaintComments[]
   ApartmentInfo     ApartmentInfo       @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
-  apartmentId       String
 }
 
 model ComplaintComments {
@@ -126,21 +125,24 @@ model ComplaintComments {
 }
 
 model Polls {
-  id                 String          @id @default(uuid())
+  id                 String      @id @default(uuid())
+  userId             String
+  apartmentId        String
+  eventId            String
+  title              String      @db.VarChar(100)
+  content            String
+  startDate          DateTime    @default(now())
+  endDate            DateTime    @default(now())
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @default(now()) @updatedAt
   status             POLL_STATUS
   buildingPermission Int
-  userId             String
-  title              String          @db.VarChar(100)
-  content            String
-  startDate          DateTime        @default(now())
-  endDate            DateTime        @default(now())
-  createdAt          DateTime        @default(now())
-  updatedAt          DateTime        @default(now()) @updatedAt
-  user               Users           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  pollOptions        PollOptions[]
-  notifications      Notifications[]
-  ApartmentInfo      ApartmentInfo   @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
-  apartmentId        String
+
+  user          Users           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pollOptions   PollOptions[]
+  notifications Notifications[]
+  ApartmentInfo ApartmentInfo   @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  event         Events          @relation(fields: [eventId], references: [id], onDelete: Cascade)
 }
 
 model PollOptions {
@@ -163,24 +165,25 @@ model Votes {
 }
 
 model Notices {
-  id        String          @id @default(uuid())
-  isPinned  Boolean
-  category  NOTICE_CATEGORY
-  viewCount Int             @default(0)
-  userId    String
-  title     String          @db.VarChar(100)
-  content   String
-  startDate DateTime        @default(now())
-  endDate   DateTime        @default(now())
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @default(now()) @updatedAt
+  id          String          @id @default(uuid())
+  userId      String
+  apartmentId String
+  eventId     String
+  title       String          @db.VarChar(100)
+  content     String
+  startDate   DateTime        @default(now())
+  endDate     DateTime        @default(now())
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @default(now()) @updatedAt
+  isPinned    Boolean
+  category    NOTICE_CATEGORY
+  viewCount   Int             @default(0)
 
-  user          Users           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  notifications Notifications[]
-
+  user           Users            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notifications  Notifications[]
   NoticeComments NoticeComments[]
   ApartmentInfo  ApartmentInfo    @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
-  apartmentId    String
+  event          Events           @relation(fields: [eventId], references: [id], onDelete: Cascade)
 }
 
 model NoticeComments {
@@ -210,6 +213,19 @@ model Notifications {
   complaint Complaints? @relation(fields: [complaintId], references: [id], onDelete: Cascade)
   notice    Notices?    @relation(fields: [noticeId], references: [id], onDelete: Cascade)
   poll      Polls?      @relation(fields: [pollId], references: [id], onDelete: Cascade)
+}
+
+model Events {
+  id        String     @id @default(uuid())
+  isActive  Boolean    @default(false)
+  eventType EVENT_TYPE
+  Notices   Notices[]
+  Polls     Polls[]
+}
+
+enum EVENT_TYPE {
+  NOTICE
+  POLL
 }
 
 enum USER_ROLE {
@@ -262,6 +278,7 @@ enum NOTICE_CATEGORY {
   EMERGENCY
   COMMUNITY
   RESIDENT_VOTE
+  RESIDENT_COUNCIL
   ETC
 }
 

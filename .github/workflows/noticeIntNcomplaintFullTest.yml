@@ -54,6 +54,9 @@ jobs:
       JWT_ACCESS_TOKEN_SECRET: your-access-token-secret
       JWT_REFRESH_TOKEN_SECRET: your-refresh-token-secret
 
+      UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+      UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -78,6 +81,9 @@ jobs:
       - name: Run notice unit tests
         run: npm run test-notice-unit
 
+      - name: Run notice integration tests
+        run: npm run test-notice-int
+
       - name: Run complaint unit tests
         run: npm run test-complaint-unit
 
@@ -90,17 +96,8 @@ jobs:
       - name: Run poll integration tests
         run: npm run test-poll-int
 
-      - name: Run auth unit tests
-        run: npm run test-auth-unit
+      - name: Run event unit tests
+        run: npm run test-event-unit
 
-      - name: Run user unit tests
-        run: npm run test-user-unit
-
-      - name: Run userAuth integration tests
-        run: npm run test-userAuth-int
-
-      - name: Run image unit tests
-        run: npm run test-image-unit
-
-      - name: Run image integration tests
-        run: npm run test-image-int
+      - name: Run event integration tests
+        run: npm run test-event-int

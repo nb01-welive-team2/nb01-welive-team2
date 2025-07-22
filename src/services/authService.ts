@@ -7,10 +7,14 @@ import { JOIN_STATUS, USER_ROLE } from "@prisma/client";
 import UnauthError from "@/errors/UnauthError";
 import * as userRepository from "@/repositories/userRepository";
 import { hashPassword } from "@/lib/utils/hash";
+import { redis } from "@/lib/redis";
+import jwt from "jsonwebtoken";
 
 export const login = async (data: LoginRequestDTO) => {
   const { username, password } = data;
+
   const user = await getUserByUsername(username);
+
   if (!user) {
     throw new UnauthError();
   }
@@ -23,7 +27,6 @@ export const login = async (data: LoginRequestDTO) => {
     throw new UnauthError();
   }
 
-  // TODO: "JOIN_STATUS가 APPROVED일 때만 로그인 가능. 편의를 위해 다른 기능 완성 후 적용"
   if (user.joinStatus !== JOIN_STATUS.APPROVED) {
     throw new UnauthError();
   }
@@ -38,20 +41,25 @@ export const login = async (data: LoginRequestDTO) => {
   } else if (role === USER_ROLE.USER && user.userInfo) {
     apartmentId = user.userInfo.apartmentId;
   } else if (role === USER_ROLE.SUPER_ADMIN) {
-    apartmentId = undefined;
+    apartmentId = null;
   } else {
     throw new UnauthError();
   }
 
-  const { accessToken, refreshToken } = generateTokens(
+  const { accessToken, refreshToken, jti } = generateTokens(
     userId,
     role,
     apartmentId!
   );
 
+  await redis.set(`refresh_token:${userId}:${jti}`, refreshToken, {
+    ex: 60 * 60 * 24 * 7,
+  });
+
   return {
     accessToken,
     refreshToken,
+    user,
   };
 };
 
@@ -60,19 +68,38 @@ export const refreshToken = async (refreshToken?: string) => {
     throw new BadRequestError("Invalid refresh token");
   }
 
-  const { userId } = verifyRefreshToken(refreshToken);
+  const { userId, jti } = verifyRefreshToken(refreshToken);
+  const key = `refresh_token:${userId}:${jti}`;
+  const storedToken = await redis.get(key);
+
+  // 토큰 탈취 의심되면 redis 토큰 전체 삭제
+  if (!storedToken || storedToken !== refreshToken) {
+    await deleteAllUserRefreshTokens(userId); // 사용자 단위로 관련 토큰 모두 삭제
+
+    throw new UnauthError();
+  }
+
   const user = await getUserId(userId);
   if (!user) {
     throw new BadRequestError("Invalid refresh token");
   }
   const role = user.role;
-  const apartmentId = user.apartmentInfo?.id;
+  const apartmentId = user.apartmentId;
 
-  const { accessToken, refreshToken: newRefreshToken } = generateTokens(
-    userId,
-    role,
-    apartmentId!
-  );
+  await redis.del(key);
+
+  const {
+    accessToken,
+    refreshToken: newRefreshToken,
+    jti: newJti,
+  } = generateTokens(userId, role, apartmentId!);
+
+  const newKey = `refresh_token:${userId}:${newJti}`;
+
+  // 토큰 로테이션
+  await redis.set(newKey, newRefreshToken, {
+    ex: 60 * 60 * 24 * 7,
+  });
 
   return {
     accessToken,
@@ -100,4 +127,33 @@ export const updatePassword = async (
 
   const hashedPassword = await hashPassword(newPassword);
   await userRepository.updateUser(id, { encryptedPassword: hashedPassword });
+  await deleteAllUserRefreshTokens(id); // 비밀번호 변경 시 사용자의 모든 쿠키 무효화하여 재로그인하도록 구현
+};
+
+export const logout = async (refreshToken: string, accessToken?: string) => {
+  try {
+    if (refreshToken) {
+      const { userId, jti } = verifyRefreshToken(refreshToken);
+      await redis.del(`refresh_token:${userId}:${jti}`);
+    }
+
+    if (accessToken) {
+      const decoded = jwt.decode(accessToken) as any;
+      if (decoded?.exp && decoded?.jti) {
+        const ttl = decoded.exp - Math.floor(Date.now() / 1000);
+        await redis.set(`blacklist:access_token:${decoded.jti}`, true, {
+          // 로그아웃 후 토큰을 블랙리스트로 분류
+          ex: ttl,
+        });
+      }
+    }
+  } catch (err) {
+    console.error("Logout failed:", err);
+  }
+};
+
+export const deleteAllUserRefreshTokens = async (userId: string) => {
+  const pattern = `refresh_token:${userId}:*`;
+  const keys = await redis.keys(pattern);
+  await Promise.all(keys.map((k) => redis.del(k)));
 };

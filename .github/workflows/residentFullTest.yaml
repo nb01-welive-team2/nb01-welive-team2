@@ -1,0 +1,91 @@
+name: residentFulltest
+
+on:
+  push:
+    branches:
+      - feat/residents-민호
+  pull_request:
+    branches:
+      - develop # dev에 pull request가 생성될때 실행
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: test_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/testdb
+      NODE_ENV: test
+      BASE_URL: http://localhost:3000
+      PORT: 3000
+
+      # JWT 서명을 위한 시크릿 키 (테스트용 더미 값)
+      JWT_SECRET: your-secret-key
+
+      # AWS 관련 설정 - 실제 AWSㄴst-2
+      AWS_REGION: ap-northeast-2
+      AWS_ACCESS_KEY_ID: aws-access-key # 실제 키를 넣으면 안 됨 (테스트용 더미 값)
+      AWS_SECRET_ACCESS_KEY: aws-secret-access-key # 실제 키를 넣으면 안 됨
+      AWS_S3_BUCKET_NAME: panda-market
+
+      S3_ENDPOINT: dummy-s3-endpoint
+      IAM_ACCESS_KEY: dummy-access-key
+      IAM_SECRET_ACCESS_KEY: dummy-secret-key
+      SERVER_URL: dummy-server-url
+      SALT: $2b$10$abcdefghij1234567890ABCD # 테스트용 더미 값
+      JWT_ACCESS_TOKEN_SECRET: your-access-token-secret
+      JWT_REFRESH_TOKEN_SECRET: your-refresh-token-secret
+
+      UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+      UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "lts/*" # LTS 버전의 Node.js 사용
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Migrate database
+        run: npm run prisma:migrate
+
+      - name: DB Seed
+        run: npm run prisma:seed
+
+      - name: Type Check
+        run: npm run typecheck
+
+      - name: Run residents unit test
+        run: npm run test-residents-unit
+
+      - name: Run apartmentInfo unit tests
+        run: npm run test-apartmentInfo-unit
+
+      - name: Run residents integration tests
+        run: npm run test-residents-api
+
+      - name: Run apartmentInfo integration tests
+        run: npm run test-apartmentInfo-api
