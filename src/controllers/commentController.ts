@@ -78,10 +78,6 @@ import ForbiddenError from "@/errors/ForbiddenError";
 export async function createComment(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
   const data = create(req.body, CreateCommentBodyStruct);
-
-  if (reqWithPayload.user.role === USER_ROLE.SUPER_ADMIN) {
-    throw new ForbiddenError();
-  }
   await commentService.createComment(data, reqWithPayload.user.userId);
 
   res.status(201).send(new registerSuccessMessage());
@@ -155,9 +151,6 @@ export async function createComment(req: Request, res: Response) {
  */
 export async function editComment(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
-  if (reqWithPayload.user.role === USER_ROLE.SUPER_ADMIN) {
-    throw new ForbiddenError();
-  }
   const data = create(req.body, PatchCommentBodyStruct);
   const { commentId } = create(req.params, CommentIdParamStruct);
   await commentService.updateComment(
@@ -205,9 +198,6 @@ export async function editComment(req: Request, res: Response) {
  */
 export async function removeComment(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
-  if (reqWithPayload.user.role === USER_ROLE.SUPER_ADMIN) {
-    throw new ForbiddenError();
-  }
   const { commentId } = create(req.params, CommentIdParamStruct);
   await commentService.removeComment(commentId, reqWithPayload.user.userId);
   res.status(200).send(new removeSuccessMessage());

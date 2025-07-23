@@ -84,11 +84,6 @@ import ForbiddenError from "@/errors/ForbiddenError";
 export async function createNotice(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
   const data = create(req.body, CreateNoticeBodyStruct);
-
-  if (reqWithPayload.user.role !== USER_ROLE.ADMIN) {
-    throw new ForbiddenError();
-  }
-
   const isEvent = Boolean(data.startDate && data.endDate);
 
   await noticeService.createNotice(
@@ -153,9 +148,6 @@ export async function createNotice(req: Request, res: Response) {
  */
 export async function getNoticeList(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
-  if ((reqWithPayload.user.role as string) === USER_ROLE.SUPER_ADMIN) {
-    throw new ForbiddenError();
-  }
   const data = create(req.query, NoticePageParamsStruct);
   const result = await noticeService.getNoticeList(
     reqWithPayload.user.apartmentId,
@@ -199,9 +191,6 @@ export async function getNoticeList(req: Request, res: Response) {
  */
 export async function getNotice(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
-  if ((reqWithPayload.user.role as string) === USER_ROLE.SUPER_ADMIN) {
-    throw new ForbiddenError();
-  }
   const { noticeId } = create(req.params, NoticeIdParamStruct);
   const result = await noticeService.getNotice(
     noticeId,
@@ -279,9 +268,6 @@ export async function getNotice(req: Request, res: Response) {
  */
 export async function editNotice(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
-  if (reqWithPayload.user.role !== USER_ROLE.ADMIN) {
-    throw new ForbiddenError();
-  }
   const data = create(req.body, PatchNoticeBodyStruct);
   const { noticeId } = create(req.params, NoticeIdParamStruct);
   const isEvent = Boolean(data.startDate && data.endDate);
@@ -326,9 +312,6 @@ export async function editNotice(req: Request, res: Response) {
  */
 export async function removeNotice(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
-  if (reqWithPayload.user.role !== USER_ROLE.ADMIN) {
-    throw new ForbiddenError();
-  }
   const { noticeId } = create(req.params, NoticeIdParamStruct);
   await noticeService.removeNotice(noticeId);
   res.status(200).send(new removeSuccessMessage());

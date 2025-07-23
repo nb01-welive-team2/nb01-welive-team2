@@ -69,11 +69,6 @@ import ForbiddenError from "@/errors/ForbiddenError";
 export async function createComplaint(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
   const data = create(req.body, CreateComplaintBodyStruct);
-
-  if (reqWithPayload.user.role !== USER_ROLE.USER) {
-    throw new ForbiddenError();
-  }
-
   await complaintService.createComplaint(
     data,
     reqWithPayload.user.userId,
@@ -124,9 +119,6 @@ export async function createComplaint(req: Request, res: Response) {
  */
 export async function getComplaintList(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
-  if ((reqWithPayload.user.role as string) === USER_ROLE.SUPER_ADMIN) {
-    throw new ForbiddenError();
-  }
   const data = create(req.query, PageParamsStruct);
   const result = await complaintService.getComplaintList(
     reqWithPayload.user.userId,
@@ -172,9 +164,6 @@ export async function getComplaintList(req: Request, res: Response) {
  */
 export async function getComplaint(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
-  if ((reqWithPayload.user.role as string) === USER_ROLE.SUPER_ADMIN) {
-    throw new ForbiddenError();
-  }
   const { complaintId } = create(req.params, ComplaintIdParamStruct);
   const result = await complaintService.getComplaint(
     complaintId,
@@ -238,9 +227,6 @@ export async function getComplaint(req: Request, res: Response) {
  */
 export async function editComplaint(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
-  if (reqWithPayload.user.role !== USER_ROLE.USER) {
-    throw new ForbiddenError();
-  }
   const data = create(req.body, PatchComplaintBodyStruct);
   const { complaintId } = create(req.params, ComplaintIdParamStruct);
   const complaint = await complaintService.updateComplaint(complaintId, data);
@@ -286,9 +272,6 @@ export async function editComplaint(req: Request, res: Response) {
  */
 export async function removeComplaint(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
-  if (reqWithPayload.user.role !== USER_ROLE.ADMIN) {
-    throw new ForbiddenError();
-  }
   const { complaintId } = create(req.params, ComplaintIdParamStruct);
   await complaintService.removeComplaint(complaintId);
   res.status(200).send(new removeSuccessMessage());
@@ -348,9 +331,6 @@ export async function removeComplaint(req: Request, res: Response) {
  */
 export async function changeStatus(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
-  if (reqWithPayload.user.role !== USER_ROLE.ADMIN) {
-    throw new ForbiddenError();
-  }
   const data = create(req.body, ComplaintStatusStruct);
   const { complaintId } = create(req.params, ComplaintIdParamStruct);
   const complaint = await complaintService.changeStatus(complaintId, {

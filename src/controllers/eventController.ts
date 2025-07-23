@@ -86,9 +86,6 @@ import { GetEventStruct } from "@/structs/eventStructs";
  */
 export async function getEventList(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
-  if ((reqWithPayload.user.role as string) === USER_ROLE.SUPER_ADMIN) {
-    throw new ForbiddenError();
-  }
   const data = create(req.query, GetEventStruct);
   if (data.apartmentId !== reqWithPayload.user.apartmentId) {
     throw new ForbiddenError();
@@ -158,11 +155,8 @@ export async function getEventList(req: Request, res: Response) {
  */
 export async function editEvent(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
-  if (reqWithPayload.user.role !== USER_ROLE.ADMIN) {
-    throw new ForbiddenError();
-  }
   const data = create(req.query, UpdateEventStruct);
-  const event = await eventService.editEvent(data);
+  const event = await eventService.editEvent(data, reqWithPayload.user.userId);
   res.status(200).send(new ResponseEventDTO(event));
 }
 
@@ -205,10 +199,7 @@ export async function editEvent(req: Request, res: Response) {
  */
 export async function removeEvent(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
-  if (reqWithPayload.user.role !== USER_ROLE.ADMIN) {
-    throw new ForbiddenError();
-  }
   const { eventId } = create(req.params, EventIdParamStruct);
-  await eventService.removeEvent(eventId);
+  await eventService.removeEvent(eventId, reqWithPayload.user.userId);
   res.status(200).send(new removeSuccessMessage());
 }

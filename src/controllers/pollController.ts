@@ -74,8 +74,6 @@ export const createPoll = async (req: Request, res: Response) => {
   if (!user) throw new UnauthError();
   const { userId, role, apartmentId } = user;
 
-  if (role !== USER_ROLE.ADMIN) throw new ForbiddenError();
-
   validate(req.body, createPollSchema);
   await pollService.createPoll(req.body, userId, apartmentId);
   res.status(201).send(new registerSuccessMessage());
@@ -121,7 +119,6 @@ export const createPoll = async (req: Request, res: Response) => {
  */
 export const getPollList = async (req: Request, res: Response) => {
   const { user } = req as AuthenticatedRequest;
-  if (!user) throw new UnauthError();
   const { userId, role } = user;
 
   const { page, limit } = getPagination({
@@ -170,7 +167,6 @@ export const getPollList = async (req: Request, res: Response) => {
  */
 export const getPoll = async (req: Request, res: Response) => {
   const { user } = req as AuthenticatedRequest;
-  if (!user) throw new UnauthError();
   const { userId } = user;
   const pollId = req.params.pollId;
 
@@ -236,7 +232,6 @@ export const getPoll = async (req: Request, res: Response) => {
  */
 export const editPoll = async (req: Request, res: Response) => {
   const { user } = req as AuthenticatedRequest;
-  if (!user) throw new UnauthError();
   const { userId, role } = user;
 
   validate(req.body, createPollSchema);

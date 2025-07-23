@@ -111,11 +111,6 @@ import { RESIDENCE_STATUS } from "@prisma/client";
 export async function uploadResidentController(req: Request, res: Response) {
   const { role, apartmentId } = (req as AuthenticatedRequest).user;
   const data = create(req.body, createResidentBodyStruct);
-
-  if (role !== "ADMIN") {
-    throw new CommonError("권한이 없습니다.", 403);
-  }
-
   const residents = await residentsService.uploadResident({
     ...data,
     email: data.email ?? "",
@@ -221,11 +216,6 @@ export async function getResidentsListFilteredController(
   res: Response
 ) {
   const { role, apartmentId } = (req as AuthenticatedRequest).user;
-
-  if (role !== "ADMIN") {
-    throw new CommonError("권한이 없습니다.", 403);
-  }
-
   const { residents, count } = await residentsService.getResidentsList({
     ...req.query,
     apartmentId,
@@ -299,11 +289,6 @@ export async function getResidentsListFilteredController(
 export async function getResidentByIdController(req: Request, res: Response) {
   const { id } = req.params;
   const { apartmentId, role } = (req as AuthenticatedRequest).user;
-
-  if (role !== "ADMIN") {
-    throw new CommonError("권한이 없습니다.", 403);
-  }
-
   await residentsService.residentAccessCheck(id, apartmentId);
   const resident = await residentsService.getResident(id);
   if (!resident) {
@@ -406,11 +391,6 @@ export async function updateResidentInfoController(
 ) {
   const { id } = req.params;
   const { apartmentId, role } = (req as AuthenticatedRequest).user;
-
-  if (role !== "ADMIN") {
-    throw new CommonError("권한이 없습니다.", 403);
-  }
-
   const data = create(req.body, UpdateResidentBodyStruct);
   await residentsService.residentAccessCheck(id, apartmentId);
   const resident = await residentsService.patchResident(id, data);
@@ -450,11 +430,6 @@ export async function updateResidentInfoController(
 export async function deleteResidentController(req: Request, res: Response) {
   const { id } = req.params;
   const { apartmentId, role } = (req as AuthenticatedRequest).user;
-
-  if (role !== "ADMIN") {
-    throw new CommonError("권한이 없습니다.", 403);
-  }
-
   await residentsService.residentAccessCheck(id, apartmentId);
   await residentsService.removeResident(id);
 
@@ -496,10 +471,7 @@ export async function uploadResidentsCsvController(
   res: Response
 ) {
   const user = (req as AuthenticatedRequest).user;
-  if (!user) throw new CommonError("인증되지 않은 사용자입니다.", 401);
-
   const apartmentId = user.apartmentId;
-  if (!apartmentId) throw new CommonError("아파트 정보가 없습니다.", 400);
   if (!req.file) throw new CommonError("CSV 파일이 없습니다.", 400);
 
   const csvText = req.file.buffer.toString("utf-8");
@@ -569,15 +541,6 @@ export async function downloadResidentsCsvController(
   res: Response
 ) {
   const user = (req as AuthenticatedRequest).user;
-  if (!user) throw new CommonError("인증되지 않은 사용자입니다.", 401);
-
-  if (user.role !== "ADMIN") {
-    throw new CommonError("해당 기능은 관리자 전용입니다.", 403);
-  }
-
-  const apartmentId = user.apartmentId;
-  if (!apartmentId) throw new CommonError("아파트 정보가 없습니다.", 400);
-
   const { building, unitNumber, residenceStatus, isRegistered, name, contact } =
     req.query;
 
@@ -633,12 +596,6 @@ export async function downloadResidentsCsvTemplateController(
   res: Response
 ) {
   const user = (req as AuthenticatedRequest).user;
-  if (!user) throw new CommonError("인증되지 않은 사용자입니다.", 401);
-
-  if (user.role !== "ADMIN") {
-    new CommonError("해당 기능은 관리자 전용입니다.", 403);
-  }
-
   const apartmentId = user.apartmentId;
   if (!apartmentId) throw new CommonError("아파트 정보가 없습니다.", 400);
   const csv = await residentsService.getResidentsCsvTemplate();

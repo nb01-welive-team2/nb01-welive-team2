@@ -6,10 +6,27 @@ import {
   removeComment,
 } from "../controllers/commentController";
 import authenticate from "@/middlewares/authenticate";
+import { requireRole } from "@/middlewares/requireRole";
+import { USER_ROLE } from "@prisma/client";
 
 const commentsRouter = express.Router();
-commentsRouter.put("/:commentId", authenticate(), withAsync(editComment));
-commentsRouter.delete("/:commentId", authenticate(), withAsync(removeComment));
-commentsRouter.post("/", authenticate(), withAsync(createComment));
+commentsRouter.put(
+  "/:commentId",
+  authenticate(),
+  requireRole([USER_ROLE.ADMIN, USER_ROLE.USER]),
+  withAsync(editComment)
+);
+commentsRouter.delete(
+  "/:commentId",
+  authenticate(),
+  requireRole([USER_ROLE.ADMIN, USER_ROLE.USER]),
+  withAsync(removeComment)
+);
+commentsRouter.post(
+  "/",
+  authenticate(),
+  requireRole([USER_ROLE.ADMIN, USER_ROLE.USER]),
+  withAsync(createComment)
+);
 
 export default commentsRouter;

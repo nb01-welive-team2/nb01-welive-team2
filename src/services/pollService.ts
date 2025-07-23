@@ -77,13 +77,9 @@ export const getPollList = async (
         contains: keyword,
         mode: "insensitive",
       },
-      // content: {
-      //   contains: keyword,
-      //   mode: "insensitive",
-      // }, < content 추가되면 주석 해제 >
     }),
     ...(role === "ADMIN" && userId && { userId }),
-  }; // 관리자인 경우에만 userId 필터 적용
+  };
 
   const isUserRole = role === "USER";
   if (isUserRole && userId) {
