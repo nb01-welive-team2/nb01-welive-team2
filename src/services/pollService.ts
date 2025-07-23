@@ -10,7 +10,7 @@ import * as pollRepo from "../repositories/pollRepository";
 import { getPagination } from "../utils/pagination";
 import NotFoundError from "../errors/NotFoundError";
 import ForbiddenError from "../errors/ForbiddenError";
-import { createPollSchema } from "../structs/pollStructs";
+import { createPollSchema, CreatePollSchemaType } from "../structs/pollStructs";
 import { assert } from "superstruct";
 import { createEvent, deleteEventById } from "../repositories/pollRepository";
 import { POLL_STATUS } from "@prisma/client";
@@ -32,7 +32,7 @@ const mapToPollResponse = (poll: any): PollResponseDto => ({
 
 // 투표 등록
 export const createPoll = async (
-  dto: CreatePollRequestDto,
+  dto: CreatePollSchemaType,
   userId: string,
   apartmentId: string
 ): Promise<void> => {
@@ -133,7 +133,7 @@ export const getPoll = async (
 // 투표 수정
 export const editPoll = async (
   pollId: string,
-  dto: UpdatePollRequestDto,
+  dto: CreatePollSchemaType,
   userId: string,
   role: string
 ): Promise<PollUpdateResponseDto> => {
@@ -149,11 +149,11 @@ export const editPoll = async (
 
   const updated = await pollRepo.updatePoll(pollId, {
     title: dto.title,
-    content: dto.content,
+    content: dto.content!,
     startDate: new Date(dto.startDate),
     endDate: new Date(dto.endDate),
     buildingPermission: dto.buildingPermission,
-    status: dto.status,
+    status: dto.status as POLL_STATUS,
   });
 
   await pollRepo.replacePollOptions(pollId, dto.options);

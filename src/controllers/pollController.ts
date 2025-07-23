@@ -4,7 +4,7 @@ import { getPagination } from "../utils/pagination";
 import UnauthError from "../errors/UnauthError";
 import ForbiddenError from "../errors/ForbiddenError";
 import { createPollSchema, pollIdParamSchema } from "../structs/pollStructs";
-import { validate } from "superstruct";
+import { create, validate } from "superstruct";
 import { USER_ROLE } from "@prisma/client";
 import { AuthenticatedRequest } from "@/types/express";
 import registerSuccessMessage from "@/lib/responseJson/registerSuccess";
@@ -74,8 +74,8 @@ export const createPoll = async (req: Request, res: Response) => {
   if (!user) throw new UnauthError();
   const { userId, role, apartmentId } = user;
 
-  validate(req.body, createPollSchema);
-  await pollService.createPoll(req.body, userId, apartmentId);
+  const body = create(req.body, createPollSchema);
+  await pollService.createPoll(body, userId, apartmentId);
   res.status(201).send(new registerSuccessMessage());
 };
 
@@ -176,7 +176,7 @@ export const getPoll = async (req: Request, res: Response) => {
 /**
  * @openapi
  * /api/polls/{pollId}:
- *   patch:
+ *   put:
  *     summary: 투표 수정
  *     description: 관리자가 투표 정보를 수정합니다. 이미 시작된 투표는 수정할 수 없습니다.
  *     tags:
@@ -233,13 +233,10 @@ export const getPoll = async (req: Request, res: Response) => {
 export const editPoll = async (req: Request, res: Response) => {
   const { user } = req as AuthenticatedRequest;
   const { userId, role } = user;
-
-  validate(req.body, createPollSchema);
+  const body = create(req.body, createPollSchema);
   const pollId = req.params.pollId;
 
-  res
-    .status(200)
-    .json(await pollService.editPoll(pollId, req.body, userId, role));
+  res.status(200).json(await pollService.editPoll(pollId, body, userId, role));
 };
 
 /**

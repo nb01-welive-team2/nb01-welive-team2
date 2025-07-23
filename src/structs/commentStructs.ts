@@ -14,8 +14,8 @@ export const CreateCommentBodyStruct = object({
 });
 export type CreateCommentBodyType = Infer<typeof CreateCommentBodyStruct>;
 
-export const PatchCommentBodyStruct = partial(CreateCommentBodyStruct);
-export type PatchCommentBodyType = Infer<typeof PatchCommentBodyStruct>;
+// export const PatchCommentBodyStruct = partial(CreateCommentBodyStruct);
+// export type PatchCommentBodyType = Infer<typeof PatchCommentBodyStruct>;
 
 export const CommentIdParamStruct = object({
   commentId: UUID,

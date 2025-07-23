@@ -17,6 +17,15 @@ async function createVote(
       "You do not have permission to create an option for this poll."
     );
   }
+  for (const option of pollOption.poll.pollOptions) {
+    if (option.id === optionId) continue;
+
+    if (option.votes.some((vote) => vote.userId === userId)) {
+      throw new ForbiddenError(
+        "You have already voted for another option in this poll."
+      );
+    }
+  }
   await optionRepository.create({
     user: { connect: { id: userId } },
     option: { connect: { id: optionId } },

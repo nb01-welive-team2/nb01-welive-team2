@@ -6,7 +6,7 @@ import {
   markAllNotificationsAsRead,
 } from "../services/notificationService";
 import { PatchNotificationStruct } from "../structs/notificationStructs";
-import { validate } from "superstruct";
+import { create, validate } from "superstruct";
 
 /**
  * @openapi
@@ -156,18 +156,10 @@ export const patchNotificationHandler = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const [error] = validate(req.body, PatchNotificationStruct);
-  if (error) {
-    res.status(400).json({
-      code: 400,
-      message: "요청 형식이 올바르지 않습니다.",
-      data: null,
-    });
-    return;
-  }
+  const body = create(req.body, PatchNotificationStruct);
 
   const id = req.params.id;
-  const updated = await updateNotification(id, req.body.isRead);
+  const updated = await updateNotification(id, body.isRead);
 
   const referenceId =
     updated.complaintId || updated.noticeId || updated.pollId || null;

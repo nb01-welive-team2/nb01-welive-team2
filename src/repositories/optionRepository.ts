@@ -17,6 +17,7 @@ async function findPollByOptionId(optionId: string) {
         include: {
           pollOptions: {
             include: {
+              votes: true,
               _count: {
                 select: {
                   votes: true,

@@ -7,7 +7,7 @@ import { ResponseOptionDTO, ResponseWinnerOptionDTO } from "@/dto/optionDTO";
 
 export async function voteOption(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
-  const { optionId } = create(req.body, VoteBodyStruct);
+  const { optionId } = create(req.params, VoteBodyStruct);
   const option = await optionService.createVote(
     optionId,
     reqWithPayload.user.userId,
