@@ -1,167 +1,171 @@
 ```mermaid
 erDiagram
+%% 테이블 및 컬럼 정의 (PK, FK, UK 표기)
 Users {
-  UUID id PK
-  UUID residentId FK
-  Varchar username UK
-  Varchar encryptedPassword
-  Varchar contact UK
-  Varchar name
-  Varchar email UK
-  USER_ROLE role
-  JOIN_STATUS joinStatus
-  Varchar profileImage
+UUID id PK
+UUID residentId FK
+Varchar username UK
+Varchar encryptedPassword
+Varchar contact UK
+Varchar name
+Varchar email UK
+USER_ROLE role
+JOIN_STATUS joinStatus
+Varchar profileImage
 }
 %% USER_ROLE : SUPER_ADMIN, ADMIN, USER
 %% JOIN_STATUS : APPROVED, REJECTED, PENDING
-%% nullable : profileImage
+%% profileImage nullable
 
 ApartmentInfo {
-  UUID id PK
-  UUID userId FK
-  APPROVAL_STATUS approvalStatus
-  Varchar apartmentName
-  Varchar apartmentAddress
-  Varchar apartmentManagementNumber
-  Varchar description
-  Int startComplexNumber
-  Int endComplexNumber
-  Int startDongNumber
-  Int endDongNumber
-  Int startFloorNumber
-  Int endFloorNumber
-  Int startHoNumber
-  Int endHoNumber
-  Datetime createdAt
+UUID id PK
+UUID userId FK
+APPROVAL_STATUS approvalStatus
+Varchar apartmentName
+Varchar apartmentAddress
+Varchar apartmentManagementNumber
+Varchar description
+Int startComplexNumber
+Int endComplexNumber
+Int startDongNumber
+Int endDongNumber
+Int startFloorNumber
+Int endFloorNumber
+Int startHoNumber
+Int endHoNumber
+Datetime createdAt
 }
 %% APPROVAL_STATUS : UNRECEIVED, PENDING, APPROVED
 
 UserInfo {
-  UUID id PK
-  UUID userId FK
-  UUID apartmentId FK
-  Varchar apartmentName
-  Int apartmentDong
-  Int apartmentHo
+UUID id PK
+UUID userId FK
+UUID apartmentId FK
+Varchar apartmentName
+Int apartmentDong
+Int apartmentHo
 }
 
 Residents {
-  UUID id PK
-  UUID apartmentId FK
-  Int building
-  Int unitNumber
-  Varchar contact
-  Varchar name
-  Varchar email UK
-  ResidenceStatus residenceStatus
-  HouseholderStatus isHouseholder
-  Bool  isRegistered
-  APPROVAL_STATUS approvalStatus
+UUID id PK
+UUID apartmentId FK
+Int building
+Int unitNumber
+Varchar contact
+Varchar name
+Varchar email UK
+ResidenceStatus residenceStatus
+HouseholderStatus isHouseholder
+Bool isRegistered
+APPROVAL_STATUS approvalStatus
 }
 %% ResidenceStatus : RESIDENCE, NO_RESIDENCE
 %% HouseholderStatus : HOUSEHOLDER, MEMBER
 
 Complaints {
-  UUID id PK
-  UUID userId FK
-  UUID apartmentId FK
-  Varchar title
-  Varchar content
-  Datetime createdAt
-  Datetime updatedAt
-  Bool isPublic
-  APPROVAL_STATUS approvalStatus
-  Int viewCount
+UUID id PK
+UUID userId FK
+UUID apartmentId FK
+Varchar title
+Varchar content
+Datetime createdAt
+Datetime updatedAt
+Bool isPublic
+APPROVAL_STATUS approvalStatus
+Int viewCount
 }
 %% viewCount @default(0)
 
 ComplaintComments {
-  UUID id PK
-  UUID complaintId FK
-  UUID userId FK
-  Varchar content
-  Datetime createdAt
-  Datetime updatedAt
+UUID id PK
+UUID complaintId FK
+UUID userId FK
+Varchar content
+Datetime createdAt
+Datetime updatedAt
 }
 
 Events {
-  UUID id PK
-  Bool isActive
-  EVENT_TYPE eventType
+UUID id PK
+Bool isActive
+EVENT_TYPE eventType
 }
 %% isActive @default(false)
 %% EVENT_TYPE : NOTICE, POLL
 
 Polls {
-  UUID id PK
-  UUID userId FK
-  UUID apartmentId FK
-  UUID eventId FK
-  Varchar title
-  Varchar content
-  Datetime startDate
-  Datetime endDate
-  Datetime createdAt
-  Datetime updatedAt
-  POLL_STATUS status
-  Int buildingPermission
+UUID id PK
+UUID userId FK
+UUID apartmentId FK
+UUID eventId FK
+Varchar title
+Varchar content
+Datetime startDate
+Datetime endDate
+Datetime createdAt
+Datetime updatedAt
+POLL_STATUS status
+Int buildingPermission
 }
 %% POLL_STATUS : PENDING, IN_PROGRESS, CLOSED
 %% buildingPermission 0이면 전체, 그 이외에는 특정 '동' 하나 선택
 
 PollOptions {
-  UUID id PK
-  UUID pollId FK
-  Varchar title
+UUID id PK
+UUID pollId FK
+Varchar title
 }
 
 Votes {
-  UUID optionId PK, FK
-  UUID userId PK, FK
+  UUID optionId PK
+  UUID optionId FK
+  UUID userId PK
+  UUID userId FK
 }
 
 Notices {
-  UUID id PK
-  UUID userId FK
-  UUID apartmentId FK
-  Varchar title
-  Varchar content
-  Datetime startDate
-  Datetime endDate
-  Datetime createdAt
-  Datetime updatedAt
-  Bool isPinned
-  NOTICE_CATEGORY category
-  Int viewCount
+UUID id PK
+UUID userId FK
+UUID apartmentId FK
+Varchar title
+Varchar content
+Datetime startDate
+Datetime endDate
+Datetime createdAt
+Datetime updatedAt
+Bool isPinned
+NOTICE_CATEGORY category
+Int viewCount
 }
 %% NOTICE_CATEGORY : MAINTENANCE, EMERGENCY, COMMUNITY, RESIDENT_VOTE, ETC
 %% viewCount @default(0)
 
 NoticeComments {
-  UUID id PK
-  UUID noticeId FK
-  UUID userId FK
-  Varchar content
-  Datetime createdAt
-  Datetime updatedAt
+UUID id PK
+UUID noticeId FK
+UUID userId FK
+Varchar content
+Datetime createdAt
+Datetime updatedAt
 }
 
 Notifications {
-  UUID id PK
-  UUID userId FK
-  Varchar content
-  NOTIFICATION_TYPE notificationType
-  Datetime notifiedAt
-  Bool isChecked
-  UUID complaintId FK
-  UUID noticeId FK
-  UUID pollId FK
+UUID id PK
+UUID userId FK
+Varchar content
+NOTIFICATION_TYPE notificationType
+Datetime notifiedAt
+Bool isChecked
+UUID complaintId FK
+UUID noticeId FK
+UUID pollId FK
 }
 %% NOTIFICATION_TYPE : COMPLAINT_RESOLVED, 민원 등록, 공지 등록, 회원가입신청
 %% isChecked @default(false)
 %% notifiedAt @default(now())
 %% nullable : complaintId, noticeId, pollId
 
+%% 관계(Relationships)
 Users ||--o| ApartmentInfo : "관리자 계정"
 Users ||--o| UserInfo : "입주민 계정"
 Users |o--o| Residents : "입주민 목록의 입주민"
