@@ -35,6 +35,7 @@ async function getResidentsList(query: ResidentsFilter) {
     userId: resident.Users ? resident.Users.id : null,
     Users: undefined,
   }));
+
   return {
     residents: formatted,
     count: formatted.length,
