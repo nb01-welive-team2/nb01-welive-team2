@@ -5,8 +5,13 @@ import {
   countUnreadNotifications,
   markAllNotificationsAsRead,
 } from "../services/notificationService";
-import { PatchNotificationStruct } from "../structs/notificationStructs";
+import {
+  NotificaionParam,
+  PatchNotificationStruct,
+} from "../structs/notificationStructs";
 import { create, validate } from "superstruct";
+import { sseConnections } from "@/lib/sseHandler";
+import { AuthenticatedRequest } from "@/types/express";
 
 /**
  * @openapi
@@ -46,8 +51,12 @@ export const sseNotificationHandler = async (req: Request, res: Response) => {
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
+  console.log("[SSE] Connection established");
 
-  const userId = (req as any).user.id;
+  const reqWithPayload = req as AuthenticatedRequest;
+  const userId = reqWithPayload.user.userId;
+
+  sseConnections.set(userId, res);
 
   const sendUnreadNotifications = async () => {
     try {
@@ -70,12 +79,22 @@ export const sseNotificationHandler = async (req: Request, res: Response) => {
       console.error("[SSE] Error:", error);
     }
   };
+  console.log("[SSE] Sending initial unread notifications for user:", userId);
 
   await sendUnreadNotifications();
   const intervalId = setInterval(sendUnreadNotifications, 30000);
 
+  // 하트비트: 15초마다 전송
+  const heartbeat = setInterval(() => {
+    res.write(":heartbeat\n\n");
+  }, 15000);
+  console.log("[SSE] Heartbeat interval set for user:", userId);
+
+  // 연결 종료 시 cleanup
   req.on("close", () => {
     clearInterval(intervalId);
+    clearInterval(heartbeat);
+    sseConnections.delete(userId);
     res.end();
   });
 };
@@ -157,10 +176,9 @@ export const patchNotificationHandler = async (
   res: Response
 ): Promise<void> => {
   const body = create(req.body, PatchNotificationStruct);
-
-  const id = req.params.id;
-  const updated = await updateNotification(id, body.isRead);
-
+  const { notificationId } = create(req.params, NotificaionParam);
+  const updated = await updateNotification(notificationId, body.isRead);
+  console.log("[PATCH /notifications/:id/read] Updated notification:", updated);
   const referenceId =
     updated.complaintId || updated.noticeId || updated.pollId || null;
 

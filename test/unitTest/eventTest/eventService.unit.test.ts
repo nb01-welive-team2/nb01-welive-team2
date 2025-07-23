@@ -71,7 +71,7 @@ describe("eventService", () => {
         isActive: true,
       });
 
-      const result = await eventService.editEvent(body);
+      const result = await eventService.editEvent(body, "user-uuid");
 
       expect(updatePollForEvent).toHaveBeenCalledWith(body.boardId, {
         startDate: body.startDate,
@@ -96,7 +96,9 @@ describe("eventService", () => {
         eventId: null,
       });
 
-      await expect(eventService.editEvent(body)).rejects.toThrow(NotFoundError);
+      await expect(eventService.editEvent(body, "user-uuid")).rejects.toThrow(
+        NotFoundError
+      );
 
       expect(updatePollForEvent).toHaveBeenCalled();
       expect(updateEvent).not.toHaveBeenCalled();
@@ -117,7 +119,7 @@ describe("eventService", () => {
         isActive: true,
       });
 
-      const result = await eventService.editEvent(body);
+      const result = await eventService.editEvent(body, "user-uuid");
 
       expect(noticeRepository.update).toHaveBeenCalledWith(body.boardId, {
         startDate: body.startDate,
@@ -142,7 +144,9 @@ describe("eventService", () => {
         eventId: null,
       });
 
-      await expect(eventService.editEvent(body)).rejects.toThrow(NotFoundError);
+      await expect(eventService.editEvent(body, "user-uuid")).rejects.toThrow(
+        NotFoundError
+      );
 
       expect(noticeRepository.update).toHaveBeenCalled();
       expect(updateEvent).not.toHaveBeenCalled();
@@ -156,7 +160,7 @@ describe("eventService", () => {
 
       (updateEvent as jest.Mock).mockResolvedValue(updatedEvent);
 
-      const result = await eventService.removeEvent(eventId);
+      const result = await eventService.removeEvent(eventId, "user-uuid");
 
       expect(updateEvent).toHaveBeenCalledWith(eventId, { isActive: false });
       expect(result).toBe(updatedEvent);

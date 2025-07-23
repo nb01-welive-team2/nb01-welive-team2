@@ -21,6 +21,7 @@ import { seedDatabase } from "../prisma/seed";
 import { renderHtmlWithUrl } from "./lib/htmlRenderer";
 import optionsRouter from "./routes/optionRouter";
 import commentRouter from "./routes/commentRouter";
+import notificationsRouter from "./routes/notificationRouter";
 
 const app = express();
 
@@ -38,7 +39,7 @@ app.use("/api/polls", pollsRouter);
 app.use("/api/notices", noticesRouter);
 app.use("/api/complaints", complaintsRouter);
 app.use("/api/users", imagesRouter);
-// app.use('/notifications', notificationsRouter);
+app.use("/api/notifications", notificationsRouter);
 app.use("/api/events", eventsRouter);
 app.use("/api/options", optionsRouter);
 app.use("/api/comments", commentRouter);

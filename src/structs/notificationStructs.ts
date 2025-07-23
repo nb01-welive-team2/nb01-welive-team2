@@ -1,4 +1,5 @@
 import { boolean, object, optional, string, Infer } from "superstruct";
+import { UUID } from "./commonStructs";
 
 export const CreateNotificationStruct = object({
   userId: string(),
@@ -14,6 +15,10 @@ export const PatchNotificationStruct = object({
 });
 
 export type PatchNotificationInput = Infer<typeof PatchNotificationStruct>;
+
+export const NotificaionParam = object({
+  notificationId: UUID,
+});
 
 export const GetNotificationListStruct = object({
   userId: string(),

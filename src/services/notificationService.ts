@@ -7,7 +7,7 @@ import {
 } from "../repositories/notificationRepository";
 import { NOTIFICATION_TYPE, USER_ROLE, Notifications } from "@prisma/client";
 import { prisma } from "../lib/prisma";
-import { getIO } from "../sockets/registerSocketServer";
+import { sendNotificationToUser } from "@/lib/sseHandler";
 
 export const getNotifications = async (
   userId: string,
@@ -43,8 +43,6 @@ export const notifySuperAdminsOfAdminSignup = async (name: string) => {
     where: { role: USER_ROLE.SUPER_ADMIN },
   });
 
-  const io = getIO();
-
   await Promise.all(
     superAdmins.map(async (admin) => {
       const notification = await createNotificationInDb({
@@ -52,8 +50,7 @@ export const notifySuperAdminsOfAdminSignup = async (name: string) => {
         type: NOTIFICATION_TYPE.회원가입신청,
         content: `신규 관리자 ${name}님의 회원가입 신청이 도착했습니다.`,
       });
-
-      io.to(admin.id).emit("notification", {
+      sendNotificationToUser(admin.id, {
         id: notification.id,
         userId: notification.userId,
         type: notification.notificationType,
@@ -72,15 +69,13 @@ export const notifyAdminsOfResidentSignup = async (
   adminId: string,
   name: string
 ) => {
-  const io = getIO();
-
   const notification = await createNotificationInDb({
     userId: adminId,
     type: NOTIFICATION_TYPE.회원가입신청,
     content: `신규 입주민 ${name}님의 회원가입 신청이 도착했습니다.`,
   });
 
-  io.to(adminId).emit("notification", {
+  sendNotificationToUser(adminId, {
     id: notification.id,
     userId: notification.userId,
     type: notification.notificationType,
@@ -97,16 +92,13 @@ export const notifyAdminsOfNewComplaint = async (
   adminId: string,
   complaintId: string
 ) => {
-  const io = getIO();
-
   const notification = await createNotificationInDb({
     userId: adminId,
     type: NOTIFICATION_TYPE.민원_등록,
     content: "새로운 민원이 등록되었습니다.",
     referenceId: complaintId,
   });
-
-  io.to(adminId).emit("notification", {
+  sendNotificationToUser(adminId, {
     id: notification.id,
     userId: notification.userId,
     type: notification.notificationType,
@@ -130,8 +122,7 @@ export const notifyResidentOfComplaintStatusChange = async (
     referenceId: complaintId,
   });
 
-  const io = getIO();
-  io.to(userId).emit("notification", {
+  sendNotificationToUser(userId, {
     id: notification.id,
     userId: notification.userId,
     type: notification.notificationType,
@@ -152,8 +143,6 @@ export const notifyResidentsOfNewNotice = async (
     where: { apartmentId: apartmentId },
   });
 
-  const io = getIO();
-
   await Promise.all(
     residents.map(async (resident) => {
       const notification = await createNotificationInDb({
@@ -163,7 +152,7 @@ export const notifyResidentsOfNewNotice = async (
         referenceId: noticeId,
       });
 
-      io.to(resident.id).emit("notification", {
+      sendNotificationToUser(resident.id, {
         id: notification.id,
         userId: notification.userId,
         type: notification.notificationType,

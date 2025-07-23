@@ -8,7 +8,6 @@ import {
   countUnreadNotifications,
   markAllNotificationsAsRead,
 } from "@/services/notificationService";
-import { getIO } from "@/sockets/registerSocketServer";
 import {
   createNotificationInDb,
   updateNotificationById,

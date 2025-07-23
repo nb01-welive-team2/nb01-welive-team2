@@ -5,7 +5,7 @@ import { mockUsers, mockNotifications } from "../../prisma/mock";
 import TestAgent from "supertest/lib/agent";
 
 let agent: ReturnType<typeof authAgent>;
-
+let token: string;
 beforeEach(async () => {
   await seedDatabase();
 });
@@ -27,7 +27,7 @@ describe("Notification API Integration Test", () => {
     const login = await rawAgent
       .post("/api/auth/login")
       .send({ username: mockUsers[0].username, password: "alicepassword" });
-
+    token = login.body.accessToken;
     agent = authAgent(rawAgent, login.body.accessToken);
   });
 
@@ -36,7 +36,8 @@ describe("Notification API Integration Test", () => {
    */
   describe("GET /api/notifications/sse", () => {
     it("SSE 연결 성공", async () => {
-      const res = await agent.get("/api/notifications/sse");
+      const res = await agent.get("/api/notifications/sse").query({ token });
+      console.log("res header", res.headers);
       expect(res.status).toBe(200);
       expect(res.headers["content-type"]).toContain("text/event-stream");
     });
