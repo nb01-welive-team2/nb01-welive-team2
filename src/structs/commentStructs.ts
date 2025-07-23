@@ -1,11 +1,15 @@
-import { object, string, Infer, literal, union, partial } from "superstruct";
+import {
+  object,
+  string,
+  Infer,
+  literal,
+  union,
+  partial,
+  optional,
+} from "superstruct";
 import { UUID } from "./commonStructs";
 
-const CommentCategoryEnum = union([
-  literal("NOTICE"),
-  literal("COMPLAINT"),
-  literal("POLL"),
-]);
+const CommentCategoryEnum = union([literal("NOTICE"), literal("COMPLAINT")]);
 
 export const CreateCommentBodyStruct = object({
   content: string(),
@@ -14,8 +18,12 @@ export const CreateCommentBodyStruct = object({
 });
 export type CreateCommentBodyType = Infer<typeof CreateCommentBodyStruct>;
 
-// export const PatchCommentBodyStruct = partial(CreateCommentBodyStruct);
-// export type PatchCommentBodyType = Infer<typeof PatchCommentBodyStruct>;
+export const PatchCommentBodyStruct = object({
+  content: string(),
+  boardType: CommentCategoryEnum,
+  boardId: optional(string()),
+});
+export type PatchCommentBodyType = Infer<typeof PatchCommentBodyStruct>;
 
 export const CommentIdParamStruct = object({
   commentId: UUID,

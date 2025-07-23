@@ -51,7 +51,6 @@ export const sseNotificationHandler = async (req: Request, res: Response) => {
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
-  console.log("[SSE] Connection established");
 
   const reqWithPayload = req as AuthenticatedRequest;
   const userId = reqWithPayload.user.userId;
@@ -75,12 +74,8 @@ export const sseNotificationHandler = async (req: Request, res: Response) => {
         })),
       };
       res.write(`data: ${JSON.stringify(payload)}\n\n`);
-    } catch (error) {
-      console.error("[SSE] Error:", error);
-    }
+    } catch (error) {}
   };
-  console.log("[SSE] Sending initial unread notifications for user:", userId);
-
   await sendUnreadNotifications();
   const intervalId = setInterval(sendUnreadNotifications, 30000);
 
@@ -88,7 +83,6 @@ export const sseNotificationHandler = async (req: Request, res: Response) => {
   const heartbeat = setInterval(() => {
     res.write(":heartbeat\n\n");
   }, 15000);
-  console.log("[SSE] Heartbeat interval set for user:", userId);
 
   // 연결 종료 시 cleanup
   req.on("close", () => {
@@ -178,7 +172,6 @@ export const patchNotificationHandler = async (
   const body = create(req.body, PatchNotificationStruct);
   const { notificationId } = create(req.params, NotificaionParam);
   const updated = await updateNotification(notificationId, body.isRead);
-  console.log("[PATCH /notifications/:id/read] Updated notification:", updated);
   const referenceId =
     updated.complaintId || updated.noticeId || updated.pollId || null;
 

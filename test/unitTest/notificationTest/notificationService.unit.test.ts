@@ -8,32 +8,33 @@ import {
   countUnreadNotifications,
   markAllNotificationsAsRead,
 } from "@/services/notificationService";
+
 import {
   createNotificationInDb,
   updateNotificationById,
   countUnreadNotificationsInDb,
   markAllNotificationsAsReadInDb,
 } from "@/repositories/notificationRepository";
-import { NOTIFICATION_TYPE, USER_ROLE } from "@prisma/client";
+
 import { prisma } from "@/lib/prisma";
+import { NOTIFICATION_TYPE, USER_ROLE } from "@prisma/client";
+import { sendNotificationToUser } from "@/lib/sseHandler";
 
 jest.mock("@/repositories/notificationRepository");
-jest.mock("@/sockets/registerSocketServer");
 jest.mock("@/lib/prisma", () => ({
   prisma: {
     users: {
       findMany: jest.fn(),
     },
+    userInfo: {
+      findMany: jest.fn(),
+    },
   },
 }));
-
-const mockEmit = jest.fn();
+jest.mock("@/lib/sseHandler");
 
 beforeEach(() => {
   jest.clearAllMocks();
-  (getIO as jest.Mock).mockReturnValue({
-    to: () => ({ emit: mockEmit }),
-  });
 });
 
 describe("notificationService - notifySuperAdminsOfAdminSignup", () => {
@@ -54,8 +55,8 @@ describe("notificationService - notifySuperAdminsOfAdminSignup", () => {
     }));
   });
 
-  it("슈퍼 어드민에게 알림 전송", async () => {
-    await notifySuperAdminsOfAdminSignup();
+  it("슈퍼 어드민에게 SSE 알림 전송", async () => {
+    await notifySuperAdminsOfAdminSignup("홍길동");
 
     expect(prisma.users.findMany).toHaveBeenCalledWith({
       where: { role: USER_ROLE.SUPER_ADMIN },
@@ -65,11 +66,11 @@ describe("notificationService - notifySuperAdminsOfAdminSignup", () => {
       expect(createNotificationInDb).toHaveBeenCalledWith({
         userId: admin.id,
         type: NOTIFICATION_TYPE.회원가입신청,
-        content: "신규 관리자 회원가입 신청이 도착했습니다.",
+        content: expect.stringContaining("홍길동"),
       });
 
-      expect(mockEmit).toHaveBeenCalledWith(
-        "notification",
+      expect(sendNotificationToUser).toHaveBeenCalledWith(
+        admin.id,
         expect.objectContaining({
           userId: admin.id,
           type: NOTIFICATION_TYPE.회원가입신청,
@@ -80,82 +81,74 @@ describe("notificationService - notifySuperAdminsOfAdminSignup", () => {
 });
 
 describe("notificationService - notifyAdminsOfResidentSignup", () => {
-  const mockAdmins = [{ id: "admin-1" }, { id: "admin-2" }];
+  const adminId = "admin-1";
+  const name = "이순신";
 
   beforeEach(() => {
-    (prisma.users.findMany as jest.Mock).mockResolvedValue(mockAdmins);
-    (createNotificationInDb as jest.Mock).mockImplementation(({ userId }) => ({
-      id: `noti-${userId}`,
-      userId,
+    (createNotificationInDb as jest.Mock).mockResolvedValue({
+      id: "noti-1",
+      userId: adminId,
       notificationType: NOTIFICATION_TYPE.회원가입신청,
-      content: "신규 입주민 회원가입 신청이 도착했습니다.",
+      content: `신규 입주민 ${name}님의 회원가입 신청이 도착했습니다.`,
       isChecked: false,
       notifiedAt: new Date(),
       complaintId: null,
       noticeId: null,
       pollId: null,
-    }));
+    });
   });
 
-  it("관리자에게 알림 전송", async () => {
-    await notifyAdminsOfResidentSignup();
+  it("관리자에게 SSE 알림 전송", async () => {
+    await notifyAdminsOfResidentSignup(adminId, name);
 
-    expect(prisma.users.findMany).toHaveBeenCalledWith({
-      where: { role: USER_ROLE.ADMIN },
+    expect(createNotificationInDb).toHaveBeenCalledWith({
+      userId: adminId,
+      type: NOTIFICATION_TYPE.회원가입신청,
+      content: expect.stringContaining(name),
     });
 
-    for (const admin of mockAdmins) {
-      expect(createNotificationInDb).toHaveBeenCalledWith({
-        userId: admin.id,
+    expect(sendNotificationToUser).toHaveBeenCalledWith(
+      adminId,
+      expect.objectContaining({
+        userId: adminId,
         type: NOTIFICATION_TYPE.회원가입신청,
-        content: "신규 입주민 회원가입 신청이 도착했습니다.",
-      });
-
-      expect(mockEmit).toHaveBeenCalledWith(
-        "notification",
-        expect.objectContaining({
-          userId: admin.id,
-          type: NOTIFICATION_TYPE.회원가입신청,
-        })
-      );
-    }
+      })
+    );
   });
 });
 
 describe("notificationService - notifyAdminsOfNewComplaint", () => {
-  const mockAdmins = [{ id: "admin-1" }];
-  const mockComplaintId = "complaint-123";
+  const adminId = "admin-1";
+  const complaintId = "complaint-123";
 
   beforeEach(() => {
-    (prisma.users.findMany as jest.Mock).mockResolvedValue(mockAdmins);
-    (createNotificationInDb as jest.Mock).mockImplementation(({ userId }) => ({
-      id: `noti-${userId}`,
-      userId,
+    (createNotificationInDb as jest.Mock).mockResolvedValue({
+      id: "noti-complaint",
+      userId: adminId,
       notificationType: NOTIFICATION_TYPE.민원_등록,
       content: "새로운 민원이 등록되었습니다.",
       isChecked: false,
       notifiedAt: new Date(),
-      complaintId: mockComplaintId,
+      complaintId,
       noticeId: null,
       pollId: null,
-    }));
+    });
   });
 
-  it("관리자에게 민원 알림 전송", async () => {
-    await notifyAdminsOfNewComplaint(mockComplaintId);
+  it("민원 등록 알림 SSE 전송", async () => {
+    await notifyAdminsOfNewComplaint(adminId, complaintId);
 
     expect(createNotificationInDb).toHaveBeenCalledWith({
-      userId: "admin-1",
+      userId: adminId,
       type: NOTIFICATION_TYPE.민원_등록,
       content: "새로운 민원이 등록되었습니다.",
-      referenceId: mockComplaintId,
+      referenceId: complaintId,
     });
 
-    expect(mockEmit).toHaveBeenCalledWith(
-      "notification",
+    expect(sendNotificationToUser).toHaveBeenCalledWith(
+      adminId,
       expect.objectContaining({
-        userId: "admin-1",
-        referenceId: mockComplaintId,
+        referenceId: complaintId,
         type: NOTIFICATION_TYPE.민원_등록,
       })
     );
@@ -168,7 +161,7 @@ describe("notificationService - notifyResidentOfComplaintStatusChange", () => {
 
   beforeEach(() => {
     (createNotificationInDb as jest.Mock).mockResolvedValue({
-      id: "noti-complaint",
+      id: "noti-complaint-status",
       userId,
       notificationType: NOTIFICATION_TYPE.COMPLAINT_RESOLVED,
       content: "등록한 민원이 처리되었습니다.",
@@ -180,7 +173,7 @@ describe("notificationService - notifyResidentOfComplaintStatusChange", () => {
     });
   });
 
-  it("입주민에게 민원 상태 알림 전송", async () => {
+  it("입주민에게 SSE 알림 전송", async () => {
     await notifyResidentOfComplaintStatusChange(userId, complaintId);
 
     expect(createNotificationInDb).toHaveBeenCalledWith({
@@ -190,10 +183,9 @@ describe("notificationService - notifyResidentOfComplaintStatusChange", () => {
       referenceId: complaintId,
     });
 
-    expect(mockEmit).toHaveBeenCalledWith(
-      "notification",
+    expect(sendNotificationToUser).toHaveBeenCalledWith(
+      userId,
       expect.objectContaining({
-        userId,
         referenceId: complaintId,
         type: NOTIFICATION_TYPE.COMPLAINT_RESOLVED,
       })
@@ -206,7 +198,7 @@ describe("notificationService - notifyResidentsOfNewNotice", () => {
   const noticeId = "notice-999";
 
   beforeEach(() => {
-    (prisma.users.findMany as jest.Mock).mockResolvedValue(mockResidents);
+    (prisma.userInfo.findMany as jest.Mock).mockResolvedValue(mockResidents);
     (createNotificationInDb as jest.Mock).mockImplementation(({ userId }) => ({
       id: `noti-${userId}`,
       userId,
@@ -220,8 +212,12 @@ describe("notificationService - notifyResidentsOfNewNotice", () => {
     }));
   });
 
-  it("입주민 모두에게 공지 알림 전송", async () => {
-    await notifyResidentsOfNewNotice(noticeId);
+  it("입주민에게 SSE 공지 알림 전송", async () => {
+    await notifyResidentsOfNewNotice("apartment-1", noticeId);
+
+    expect(prisma.userInfo.findMany).toHaveBeenCalledWith({
+      where: { apartmentId: "apartment-1" },
+    });
 
     for (const resident of mockResidents) {
       expect(createNotificationInDb).toHaveBeenCalledWith({
@@ -231,10 +227,9 @@ describe("notificationService - notifyResidentsOfNewNotice", () => {
         referenceId: noticeId,
       });
 
-      expect(mockEmit).toHaveBeenCalledWith(
-        "notification",
+      expect(sendNotificationToUser).toHaveBeenCalledWith(
+        resident.id,
         expect.objectContaining({
-          userId: resident.id,
           referenceId: noticeId,
           type: NOTIFICATION_TYPE.공지_등록,
         })
@@ -243,7 +238,7 @@ describe("notificationService - notifyResidentsOfNewNotice", () => {
   });
 });
 
-describe("notificationService - updateNotification", () => {
+describe("notificationService - updateNotification & count/mark", () => {
   it("읽음 처리", async () => {
     const mockUpdated = {
       id: "noti-1",
@@ -263,9 +258,7 @@ describe("notificationService - updateNotification", () => {
     expect(updateNotificationById).toHaveBeenCalledWith("noti-1", true);
     expect(result).toEqual(mockUpdated);
   });
-});
 
-describe("notificationService", () => {
   it("읽지 않은 알림 수 조회", async () => {
     (countUnreadNotificationsInDb as jest.Mock).mockResolvedValue(5);
     const result = await countUnreadNotifications("user-1");

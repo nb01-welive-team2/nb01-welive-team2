@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import {
   CreateCommentBodyStruct,
   CommentIdParamStruct,
+  PatchCommentBodyStruct,
 } from "../structs/commentStructs";
 import commentService from "../services/commentService";
 import registerSuccessMessage from "../lib/responseJson/registerSuccess";
@@ -19,7 +20,7 @@ export async function createComment(req: Request, res: Response) {
 
 export async function editComment(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
-  const data = create(req.body, CreateCommentBodyStruct);
+  const data = create(req.body, PatchCommentBodyStruct);
   const { commentId } = create(req.params, CommentIdParamStruct);
   await commentService.updateComment(
     commentId,

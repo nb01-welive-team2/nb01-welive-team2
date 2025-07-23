@@ -1,5 +1,8 @@
 import commentRepository from "../repositories/commentRepository";
-import { CreateCommentBodyType } from "../structs/commentStructs";
+import {
+  CreateCommentBodyType,
+  PatchCommentBodyType,
+} from "../structs/commentStructs";
 import NotFoundError from "@/errors/NotFoundError";
 import ForbiddenError from "@/errors/ForbiddenError";
 import CommonError from "@/errors/CommonError";
@@ -24,7 +27,7 @@ async function createComment(comment: CreateCommentBodyType, userId: string) {
 
 async function updateComment(
   commentId: string,
-  body: CreateCommentBodyType,
+  body: PatchCommentBodyType,
   userId: string
 ) {
   if (body.boardType === "COMPLAINT") {

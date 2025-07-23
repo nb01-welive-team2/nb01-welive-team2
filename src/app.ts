@@ -49,8 +49,8 @@ app.get("/seed", async (req, res) => {
   await seedDatabase();
   res.send({ message: "Seeding completed." });
 });
-app.get("/socket", (req, res) => {
-  const html = renderHtmlWithUrl("socket-client-test.html");
+app.get("/sse", (req, res) => {
+  const html = renderHtmlWithUrl("sse-client-test.html");
   res.send(html);
 });
 app.get("/", (req, res) => {
