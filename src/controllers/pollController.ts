@@ -71,7 +71,6 @@ import registerSuccessMessage from "@/lib/responseJson/registerSuccess";
  */
 export const createPoll = async (req: Request, res: Response) => {
   const { user } = req as AuthenticatedRequest;
-  if (!user) throw new UnauthError();
   const { userId, role, apartmentId } = user;
 
   const body = create(req.body, createPollSchema);

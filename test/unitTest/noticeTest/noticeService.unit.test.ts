@@ -33,7 +33,9 @@ describe("noticeService", () => {
 
       const mockEvent = { id: "event-uuid", eventType: EVENT_TYPE.NOTICE };
       (createEvent as jest.Mock).mockResolvedValue(mockEvent);
-      (noticeRepository.create as jest.Mock).mockResolvedValue(undefined);
+      (noticeRepository.create as jest.Mock).mockResolvedValue({
+        id: "notice-uuid",
+      });
 
       await noticeService.createNotice(
         mockNotice,

@@ -7,259 +7,252 @@ import {
   changeStatus,
 } from "@/controllers/complaintController";
 import complaintService from "@/services/complaintService";
-import { USER_ROLE } from "@prisma/client";
-import ForbiddenError from "@/errors/ForbiddenError";
-import * as struct from "superstruct";
 import registerSuccessMessage from "@/lib/responseJson/registerSuccess";
 import removeSuccessMessage from "@/lib/responseJson/removeSuccess";
 import {
+  ResponseComplaintListDTO,
   ResponseComplaintCommentDTO,
   ResponseComplaintDTO,
-  ResponseComplaintListDTO,
 } from "@/dto/complaintDTO";
+import * as struct from "superstruct";
 
-jest.mock("@/services/complaintService");
-jest.mock("superstruct");
-jest.mock("@/lib/responseJson/registerSuccess");
-jest.mock("@/lib/responseJson/removeSuccess");
-
-const mockResponse = () => {
-  const res: any = {};
-  res.status = jest.fn().mockReturnValue(res);
-  res.send = jest.fn().mockReturnValue(res);
-  return res;
-};
-
-const mockUser = (
-  role: USER_ROLE,
-  userId = "user-1",
-  apartmentId = "apt-1"
-) => ({
-  user: {
-    role,
-    userId,
-    apartmentId,
-  },
+// ✅ superstruct 부분 모킹 (create만 mock)
+jest.mock("superstruct", () => {
+  const actual = jest.requireActual("superstruct");
+  return {
+    ...actual,
+    create: jest.fn(),
+  };
 });
 
-describe("Complaint Controller", () => {
+jest.mock("@/services/complaintService");
+
+describe("complaintController", () => {
+  const mockUser = {
+    userId: "user-1",
+    apartmentId: "apt-1",
+    role: "USER",
+  };
+
+  function getMockReqRes({
+    body = {},
+    params = {},
+    query = {},
+    user = mockUser,
+  } = {}) {
+    const req: any = {
+      body,
+      params,
+      query,
+      user,
+    };
+    const res: any = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+    return { req, res };
+  }
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe("createComplaint", () => {
-    it("should create complaint if user is USER", async () => {
-      (struct.create as jest.Mock).mockReturnValue({
-        title: "title",
-        content: "content",
-        isPublic: true,
-      });
+    it("성공적으로 complaint 생성 후 201 응답", async () => {
+      const data = { title: "title", content: "content", isPublic: true };
+      (struct.create as jest.Mock).mockReturnValue(data);
+      (complaintService.createComplaint as jest.Mock).mockResolvedValue(
+        undefined
+      );
 
-      const req: any = { body: {}, ...mockUser(USER_ROLE.USER) };
-      const res = mockResponse();
+      const { req, res } = getMockReqRes({ body: data });
 
       await createComplaint(req, res);
 
+      expect(struct.create).toHaveBeenCalledWith(req.body, expect.anything());
       expect(complaintService.createComplaint).toHaveBeenCalledWith(
-        { title: "title", content: "content", isPublic: true },
-        "user-1",
-        "apt-1"
+        data,
+        mockUser.userId,
+        mockUser.apartmentId
       );
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.send).toHaveBeenCalledWith(expect.any(registerSuccessMessage));
     });
-
-    it("should throw ForbiddenError if user is not USER", async () => {
-      const req: any = { body: {}, ...mockUser(USER_ROLE.ADMIN) };
-      await expect(createComplaint(req, mockResponse())).rejects.toThrow(
-        ForbiddenError
-      );
-    });
   });
 
   describe("getComplaintList", () => {
-    it("should return complaint list if not SUPER_ADMIN", async () => {
-      (struct.create as jest.Mock).mockReturnValue({ page: 1, limit: 10 });
-      (complaintService.getComplaintList as jest.Mock).mockResolvedValue({
-        complaints: [],
-        totalCount: 0,
-      });
+    it("성공적으로 complaint 리스트 반환", async () => {
+      const query = { page: "1", limit: "10" };
+      const data = { page: 1, limit: 10 };
+      (struct.create as jest.Mock).mockReturnValue(data);
 
-      const req: any = { query: {}, ...mockUser(USER_ROLE.USER) };
-      const res = mockResponse();
+      const serviceResult = { complaints: [], totalCount: 0 };
+      (complaintService.getComplaintList as jest.Mock).mockResolvedValue(
+        serviceResult
+      );
+
+      const { req, res } = getMockReqRes({ query });
 
       await getComplaintList(req, res);
 
-      expect(complaintService.getComplaintList).toHaveBeenCalled();
+      expect(struct.create).toHaveBeenCalledWith(req.query, expect.anything());
+      expect(complaintService.getComplaintList).toHaveBeenCalledWith(
+        mockUser.userId,
+        mockUser.role,
+        mockUser.apartmentId,
+        data
+      );
       expect(res.send).toHaveBeenCalledWith(
         expect.any(ResponseComplaintListDTO)
-      );
-    });
-
-    it("should throw ForbiddenError if SUPER_ADMIN", async () => {
-      const req: any = { query: {}, ...mockUser(USER_ROLE.SUPER_ADMIN) };
-      await expect(getComplaintList(req, mockResponse())).rejects.toThrow(
-        ForbiddenError
       );
     });
   });
 
   describe("getComplaint", () => {
-    it("should return single complaint if not SUPER_ADMIN", async () => {
-      (struct.create as jest.Mock).mockReturnValue({
-        complaintId: "complaint-1",
-      });
-      (complaintService.getComplaint as jest.Mock).mockResolvedValue({
-        id: "complaint-1",
-        title: "title",
-        content: "content",
-        isPublic: true,
+    it("성공적으로 complaint 반환", async () => {
+      const params = { complaintId: "cid-1" };
+      const complaintData = {
+        id: "cid-1",
+        title: "test",
+        content: "test content",
         createdAt: new Date(),
         updatedAt: new Date(),
-        user: {
-          username: "홍길동",
-          userInfo: {
-            apartmentDong: 101,
-            apartmentHo: 202,
-          },
-        },
-        _count: {
-          ComplaintComments: 0,
-        },
-        ComplaintComments: [],
-      });
+        isPublic: true,
+        user: { username: "mock-user" }, // ✅ 중요
+        ComplaintComments: [], // ✅ 필요 시 빈 배열
+      };
 
-      const req: any = { params: {}, ...mockUser(USER_ROLE.USER) };
-      const res = mockResponse();
+      (struct.create as jest.Mock).mockReturnValue(params);
+      (complaintService.getComplaint as jest.Mock).mockResolvedValue(
+        complaintData
+      );
+
+      const { req, res } = getMockReqRes({ params });
 
       await getComplaint(req, res);
 
+      expect(struct.create).toHaveBeenCalledWith(req.params, expect.anything());
       expect(complaintService.getComplaint).toHaveBeenCalledWith(
-        "complaint-1",
-        "user-1",
-        USER_ROLE.USER
+        params.complaintId,
+        mockUser.userId,
+        mockUser.role
       );
       expect(res.send).toHaveBeenCalledWith(
         expect.any(ResponseComplaintCommentDTO)
       );
     });
-
-    it("should throw ForbiddenError if SUPER_ADMIN", async () => {
-      const req: any = { params: {}, ...mockUser(USER_ROLE.SUPER_ADMIN) };
-      await expect(getComplaint(req, mockResponse())).rejects.toThrow(
-        ForbiddenError
-      );
-    });
   });
 
   describe("editComplaint", () => {
-    it("should edit complaint if user is USER", async () => {
-      (struct.create as jest.Mock)
-        .mockImplementationOnce(() => ({ title: "updated" })) // body
-        .mockImplementationOnce(() => ({ complaintId: "c1" })); // params
+    it("성공적으로 complaint 수정 후 200 응답", async () => {
+      const params = { complaintId: "cid-1" };
+      const body = { title: "updated title" };
 
-      (complaintService.updateComplaint as jest.Mock).mockResolvedValue({
-        id: "complaint-1",
-        title: "Updated title",
-        content: "Updated content",
-        isPublic: true,
+      const complaintUpdated = {
+        id: "cid-1",
+        title: "updated title",
+        content: "updated content",
         createdAt: new Date(),
         updatedAt: new Date(),
-        approvalStatus: "PENDING",
-        viewCount: 0,
-        userId: "user-id",
+        isPublic: true,
+        complaintStatus: "PENDING",
+        _count: {
+          ComplaintComments: 3,
+        },
         user: {
-          username: "홍길동",
+          username: "mock-user",
           userInfo: {
-            apartmentDong: 101,
-            apartmentHo: 202,
+            name: "mock name",
+            apartmentDong: 101, // ✅ 추가
+            apartmentHo: 1001, // ✅ 추가
           },
         },
-        _count: {
-          ComplaintComments: 0,
-        },
-        ComplaintComments: [],
+      };
+
+      (struct.create as jest.Mock).mockImplementation((input) => {
+        if ("title" in input) return body; // body
+        if ("complaintId" in input) return params; // params
       });
 
-      const req: any = { body: {}, params: {}, ...mockUser(USER_ROLE.USER) };
-      const res = mockResponse();
+      (complaintService.updateComplaint as jest.Mock).mockResolvedValue(
+        complaintUpdated
+      );
+
+      const { req, res } = getMockReqRes({ params, body });
 
       await editComplaint(req, res);
 
-      expect(complaintService.updateComplaint).toHaveBeenCalledWith("c1", {
-        title: "updated",
-      });
+      expect(struct.create).toHaveBeenCalledWith(req.body, expect.anything());
+      expect(struct.create).toHaveBeenCalledWith(req.params, expect.anything());
+      expect(complaintService.updateComplaint).toHaveBeenCalledWith(
+        params.complaintId,
+        body
+      );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.send).toHaveBeenCalledWith(expect.any(ResponseComplaintDTO));
-    });
-
-    it("should throw ForbiddenError if not USER", async () => {
-      const req: any = { body: {}, params: {}, ...mockUser(USER_ROLE.ADMIN) };
-      await expect(editComplaint(req, mockResponse())).rejects.toThrow(
-        ForbiddenError
-      );
     });
   });
 
   describe("removeComplaint", () => {
-    it("should remove complaint if user is ADMIN", async () => {
-      (struct.create as jest.Mock).mockReturnValue({ complaintId: "c9" });
+    it("성공적으로 complaint 삭제 후 200 응답", async () => {
+      const params = { complaintId: "cid-1" };
+      (struct.create as jest.Mock).mockReturnValue(params);
+      (complaintService.removeComplaint as jest.Mock).mockResolvedValue(
+        undefined
+      );
 
-      const req: any = { params: {}, ...mockUser(USER_ROLE.ADMIN) };
-      const res = mockResponse();
+      const { req, res } = getMockReqRes({ params });
 
       await removeComplaint(req, res);
 
-      expect(complaintService.removeComplaint).toHaveBeenCalledWith("c9");
+      expect(struct.create).toHaveBeenCalledWith(req.params, expect.anything());
+      expect(complaintService.removeComplaint).toHaveBeenCalledWith(
+        params.complaintId
+      );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.send).toHaveBeenCalledWith(expect.any(removeSuccessMessage));
-    });
-
-    it("should throw ForbiddenError if not ADMIN", async () => {
-      const req: any = { params: {}, ...mockUser(USER_ROLE.USER) };
-      await expect(removeComplaint(req, mockResponse())).rejects.toThrow(
-        ForbiddenError
-      );
     });
   });
 
   describe("changeStatus", () => {
-    it("should throw ForbiddenError if user is not ADMIN", async () => {
-      const req: any = {
-        body: {},
-        params: {},
-        ...mockUser(USER_ROLE.USER),
+    it("성공적으로 상태 변경 후 200 응답", async () => {
+      const params = { complaintId: "cid-1" };
+      const body = { status: "RESOLVED" };
+      const complaintUpdated = {
+        id: "cid-1",
+        complaintStatus: "RESOLVED",
+        title: "test complaint",
+        content: "test content",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isPublic: true,
+        user: { username: "mock-user" },
       };
-      await expect(changeStatus(req, mockResponse())).rejects.toThrow(
-        ForbiddenError
-      );
-    });
 
-    it("should call complaintService.changeStatus and send ResponseComplaintDTO if user is ADMIN", async () => {
-      const req: any = {
-        body: { status: "RESOLVED" },
-        params: { complaintId: "comp-1" },
-        ...mockUser(USER_ROLE.ADMIN),
-      };
-      const res = mockResponse();
+      // ✅ req.body vs req.params 구분
+      (struct.create as jest.Mock).mockImplementation((input) => {
+        if ("status" in input) return body; // body 요청
+        if ("complaintId" in input) return params; // params 요청
+      });
 
-      // superstruct.create mock: 1) body validation, 2) params validation
-      (struct.create as jest.Mock)
-        .mockImplementationOnce(() => ({ status: "RESOLVED" }))
-        .mockImplementationOnce(() => ({ complaintId: "comp-1" }));
-
-      const mockComplaint = { id: "comp-1", complaintStatus: "RESOLVED" };
       (complaintService.changeStatus as jest.Mock).mockResolvedValue(
-        mockComplaint
+        complaintUpdated
       );
+
+      const { req, res } = getMockReqRes({ params, body });
 
       await changeStatus(req, res);
 
-      expect(struct.create).toHaveBeenCalledTimes(2);
-      expect(complaintService.changeStatus).toHaveBeenCalledWith("comp-1", {
-        complaintStatus: "RESOLVED",
-      });
+      expect(struct.create).toHaveBeenCalledWith(req.body, expect.anything());
+      expect(struct.create).toHaveBeenCalledWith(req.params, expect.anything());
+      expect(complaintService.changeStatus).toHaveBeenCalledWith(
+        params.complaintId,
+        { complaintStatus: body.status }
+      );
       expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({ message: "상태 변경 성공" })
+      );
     });
   });
 });

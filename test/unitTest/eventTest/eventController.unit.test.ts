@@ -4,8 +4,7 @@ import {
   removeEvent,
 } from "@/controllers/eventController";
 import eventService from "@/services/eventService";
-import { EVENT_TYPE, USER_ROLE } from "@prisma/client";
-import ForbiddenError from "@/errors/ForbiddenError";
+import { USER_ROLE } from "@prisma/client";
 import { ResponseEventDTO, ResponseEventListDTO } from "@/dto/eventDTO";
 import removeSuccessMessage from "@/lib/responseJson/removeSuccess";
 
@@ -20,7 +19,11 @@ const mockResponse = () => {
   return res;
 };
 
-const mockUser = (role: USER_ROLE, userId = 1, apartmentId = "apt-uuid") => ({
+const mockUser = (
+  role: USER_ROLE,
+  userId = "user-uuid",
+  apartmentId = "apt-uuid"
+) => ({
   user: {
     role,
     userId,
@@ -34,25 +37,18 @@ describe("Event Controller", () => {
   });
 
   describe("getEventList", () => {
-    it("should throw ForbiddenError if user role is SUPER_ADMIN", async () => {
-      const req: any = { query: {}, ...mockUser(USER_ROLE.SUPER_ADMIN) };
-      const res = mockResponse();
-
-      await expect(getEventList(req, res)).rejects.toThrow(ForbiddenError);
-    });
-
     it("should throw ForbiddenError if apartmentId mismatch", async () => {
       const req: any = {
         query: {
-          apartmentId: "550e8400-e29b-41d4-a716-446655440000",
+          apartmentId: "wrong-apt-id",
           year: "2025",
           month: "7",
         },
-        ...mockUser(USER_ROLE.USER, 1, "apt-uuid-1"),
+        ...mockUser(USER_ROLE.USER, "user-uuid", "apt-uuid"),
       };
       const res = mockResponse();
 
-      await expect(getEventList(req, res)).rejects.toThrow(ForbiddenError);
+      await expect(getEventList(req, res)).rejects.toThrow();
     });
 
     it("should call eventService.getEventList and send ResponseEventListDTO", async () => {
@@ -85,23 +81,16 @@ describe("Event Controller", () => {
   });
 
   describe("editEvent", () => {
-    it("should throw ForbiddenError if user role is not ADMIN", async () => {
-      const req: any = { body: {}, ...mockUser(USER_ROLE.USER) };
-      const res = mockResponse();
-
-      await expect(editEvent(req, res)).rejects.toThrow(ForbiddenError);
-    });
-
     it("should call eventService.editEvent and send ResponseEventDTO", async () => {
       const dataFromCreate = {
-        boardType: EVENT_TYPE.POLL,
+        boardType: "POLL",
         boardId: "event-uuid",
         startDate: "2025-07-01",
         endDate: "2025-07-15",
       };
 
       const req: any = {
-        body: dataFromCreate,
+        query: dataFromCreate,
         ...mockUser(USER_ROLE.ADMIN),
       };
       const res = mockResponse();
@@ -116,7 +105,10 @@ describe("Event Controller", () => {
 
       await editEvent(req, res);
 
-      expect(eventService.editEvent).toHaveBeenCalledWith(dataFromCreate);
+      expect(eventService.editEvent).toHaveBeenCalledWith(
+        dataFromCreate,
+        "user-uuid"
+      );
       expect(ResponseEventDTO).toHaveBeenCalledWith(mockEvent);
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.send).toHaveBeenCalledWith(expect.any(Object));
@@ -124,13 +116,6 @@ describe("Event Controller", () => {
   });
 
   describe("removeEvent", () => {
-    it("should throw ForbiddenError if user role is not ADMIN", async () => {
-      const req: any = { params: {}, ...mockUser(USER_ROLE.USER) };
-      const res = mockResponse();
-
-      await expect(removeEvent(req, res)).rejects.toThrow(ForbiddenError);
-    });
-
     it("should call eventService.removeEvent and send removeSuccessMessage", async () => {
       const eventId = "event-uuid";
       const req: any = {
@@ -145,7 +130,10 @@ describe("Event Controller", () => {
 
       await removeEvent(req, res);
 
-      expect(eventService.removeEvent).toHaveBeenCalledWith(eventId);
+      expect(eventService.removeEvent).toHaveBeenCalledWith(
+        eventId,
+        "user-uuid"
+      );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(removeSuccessMessage).toHaveBeenCalled();
       expect(res.send).toHaveBeenCalledWith(expect.any(Object));

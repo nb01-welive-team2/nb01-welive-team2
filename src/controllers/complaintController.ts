@@ -17,7 +17,6 @@ import {
 } from "../dto/complaintDTO";
 import removeSuccessMessage from "../lib/responseJson/removeSuccess";
 import { AuthenticatedRequest } from "@/types/express";
-import ForbiddenError from "@/errors/ForbiddenError";
 
 /**
  * @openapi
