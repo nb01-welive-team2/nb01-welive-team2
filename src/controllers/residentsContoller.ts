@@ -7,8 +7,8 @@ import {
   UpdateResidentBodyStruct,
 } from "../structs/residentStruct";
 import { AuthenticatedRequest } from "@/types/express";
-import {} from "@/dto/residents.dto";
 import { RESIDENCE_STATUS } from "@prisma/client";
+import { parseResidentsQuery } from "@/utils/residentsQuery";
 
 // 입주민 명부 개별 등록
 /**
@@ -242,26 +242,10 @@ export async function downloadResidentsCsvController(
   const apartmentId = user.apartmentId;
   if (!apartmentId) throw new CommonError("아파트 정보가 없습니다.", 400);
 
-  const { building, unitNumber, residenceStatus, isRegistered, name, contact } =
-    req.query;
-
-  const query = {
-    apartmentId: user.apartmentId,
-    building: Number(building),
-    unitNumber: Number(unitNumber),
-    residenceStatus:
-      residenceStatus === "RESIDENCE" || residenceStatus === "NO_RESIDENCE"
-        ? (residenceStatus as RESIDENCE_STATUS)
-        : undefined,
-    isRegistered:
-      isRegistered === "true"
-        ? true
-        : isRegistered === "false"
-          ? false
-          : undefined,
-    name: typeof name === "string" ? name : undefined,
-    contact: typeof contact === "string" ? contact : undefined,
-  };
+  const query = parseResidentsQuery({
+    apartmentId,
+    ...req.query,
+  });
 
   const csv = await residentsService.getResidentsCsv(query);
   const filename = "residents.csv";
@@ -414,15 +398,17 @@ export async function getResidentsListFilteredController(
     throw new CommonError("권한이 없습니다.", 403);
   }
 
-  const { residents, count } = await residentsService.getResidentsList({
-    ...req.query,
+  const query = parseResidentsQuery({
     apartmentId,
+    ...req.query,
   });
 
+  const { residents, count } = await residentsService.getResidentsList(query);
+
   res.status(200).json({
-    residents: residents,
+    residents,
     message: `조회된 입주민 결과가 ${count}건 입니다.`,
-    count: count,
+    count,
   });
 }
 
