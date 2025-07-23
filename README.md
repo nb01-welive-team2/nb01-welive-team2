@@ -103,7 +103,7 @@ http://ec2-13-125-152-161.ap-northeast-2.compute.amazonaws.com/swagger/
 
 ### 📊 ERD
 
-![ERD](./welive-erd-diagram.png)
+![ERD](./erd.png)
 
 #### 프로젝트 회고록
 
