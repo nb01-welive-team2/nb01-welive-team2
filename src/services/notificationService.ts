@@ -38,7 +38,7 @@ export const markAllNotificationsAsRead = async (
 };
 
 // 관리자 회원가입 시, 슈퍼 어드민에게 알림 전송
-export const notifySuperAdminsOfAdminSignup = async () => {
+export const notifySuperAdminsOfAdminSignup = async (name: string) => {
   const superAdmins = await prisma.users.findMany({
     where: { role: USER_ROLE.SUPER_ADMIN },
   });
@@ -50,7 +50,7 @@ export const notifySuperAdminsOfAdminSignup = async () => {
       const notification = await createNotificationInDb({
         userId: admin.id,
         type: NOTIFICATION_TYPE.회원가입신청,
-        content: "신규 관리자 회원가입 신청이 도착했습니다.",
+        content: `신규 관리자 ${name}님의 회원가입 신청이 도착했습니다.`,
       });
 
       io.to(admin.id).emit("notification", {
@@ -68,70 +68,60 @@ export const notifySuperAdminsOfAdminSignup = async () => {
 };
 
 // 입주민 회원가입 시, 관리자에게 알림 전송
-export const notifyAdminsOfResidentSignup = async () => {
-  const admins = await prisma.users.findMany({
-    where: { role: USER_ROLE.ADMIN },
-  });
-
+export const notifyAdminsOfResidentSignup = async (
+  adminId: string,
+  name: string
+) => {
   const io = getIO();
 
-  await Promise.all(
-    admins.map(async (admin) => {
-      const notification = await createNotificationInDb({
-        userId: admin.id,
-        type: NOTIFICATION_TYPE.회원가입신청,
-        content: "신규 입주민 회원가입 신청이 도착했습니다.",
-      });
+  const notification = await createNotificationInDb({
+    userId: adminId,
+    type: NOTIFICATION_TYPE.회원가입신청,
+    content: `신규 입주민 ${name}님의 회원가입 신청이 도착했습니다.`,
+  });
 
-      io.to(admin.id).emit("notification", {
-        id: notification.id,
-        userId: notification.userId,
-        type: notification.notificationType,
-        content: notification.content,
-        isRead: notification.isChecked,
-        referenceId: null,
-        createdAt: notification.notifiedAt,
-        updatedAt: null,
-      });
-    })
-  );
+  io.to(adminId).emit("notification", {
+    id: notification.id,
+    userId: notification.userId,
+    type: notification.notificationType,
+    content: notification.content,
+    isRead: notification.isChecked,
+    referenceId: null,
+    createdAt: notification.notifiedAt,
+    updatedAt: null,
+  });
 };
 
 // 민원 등록 시, 관리자에게 알림 전송
-export const notifyAdminsOfNewComplaint = async (complaintId?: string) => {
-  const admins = await prisma.users.findMany({
-    where: { role: USER_ROLE.ADMIN },
-  });
-
+export const notifyAdminsOfNewComplaint = async (
+  adminId: string,
+  complaintId: string
+) => {
   const io = getIO();
 
-  await Promise.all(
-    admins.map(async (admin) => {
-      const notification = await createNotificationInDb({
-        userId: admin.id,
-        type: NOTIFICATION_TYPE.민원_등록,
-        content: "새로운 민원이 등록되었습니다.",
-        referenceId: complaintId,
-      });
+  const notification = await createNotificationInDb({
+    userId: adminId,
+    type: NOTIFICATION_TYPE.민원_등록,
+    content: "새로운 민원이 등록되었습니다.",
+    referenceId: complaintId,
+  });
 
-      io.to(admin.id).emit("notification", {
-        id: notification.id,
-        userId: notification.userId,
-        type: notification.notificationType,
-        content: notification.content,
-        isRead: notification.isChecked,
-        referenceId: complaintId ?? null,
-        createdAt: notification.notifiedAt,
-        updatedAt: null,
-      });
-    })
-  );
+  io.to(adminId).emit("notification", {
+    id: notification.id,
+    userId: notification.userId,
+    type: notification.notificationType,
+    content: notification.content,
+    isRead: notification.isChecked,
+    referenceId: complaintId ?? null,
+    createdAt: notification.notifiedAt,
+    updatedAt: null,
+  });
 };
 
 // 민원 상태 변경 시, 해당 입주민에게 알림 전송
 export const notifyResidentOfComplaintStatusChange = async (
   userId: string,
-  complaintId?: string
+  complaintId: string
 ) => {
   const notification = await createNotificationInDb({
     userId,
@@ -147,16 +137,19 @@ export const notifyResidentOfComplaintStatusChange = async (
     type: notification.notificationType,
     content: notification.content,
     isRead: notification.isChecked,
-    referenceId: complaintId ?? null,
+    referenceId: complaintId,
     createdAt: notification.notifiedAt,
     updatedAt: null,
   });
 };
 
 // 공지사항 등록 시, 전체 입주민에게 알림 전송
-export const notifyResidentsOfNewNotice = async (noticeId?: string) => {
-  const residents = await prisma.users.findMany({
-    where: { role: USER_ROLE.USER },
+export const notifyResidentsOfNewNotice = async (
+  apartmentId: string,
+  noticeId?: string
+) => {
+  const residents = await prisma.userInfo.findMany({
+    where: { apartmentId: apartmentId },
   });
 
   const io = getIO();

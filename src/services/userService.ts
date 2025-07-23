@@ -12,6 +12,10 @@ import { UpdateUserDTO } from "@/structs/userStruct";
 import { USER_ROLE, Users } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { deleteAllUserRefreshTokens } from "./authService";
+import {
+  notifyAdminsOfResidentSignup,
+  notifySuperAdminsOfAdminSignup,
+} from "./notificationService";
 
 export const signupUser = async (data: SignupUserRequestDTO) => {
   const { password } = data;
@@ -26,6 +30,7 @@ export const signupUser = async (data: SignupUserRequestDTO) => {
   };
 
   const signupUser = await userRepository.createUser(user);
+  await notifyAdminsOfResidentSignup(apartment.userId, signupUser.name);
 
   return signupUser;
 };
@@ -40,6 +45,7 @@ export const signupAdmin = async (data: SignupAdminRequestDTO) => {
   };
 
   const signupUser = await userRepository.createAdmin(user);
+  await notifySuperAdminsOfAdminSignup(signupUser.name);
 
   return signupUser;
 };

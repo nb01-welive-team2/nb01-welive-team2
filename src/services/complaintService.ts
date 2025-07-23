@@ -12,19 +12,30 @@ import NotFoundError from "@/errors/NotFoundError";
 import ForbiddenError from "@/errors/ForbiddenError";
 import { getUserId } from "@/repositories/userRepository";
 import CommonError from "@/errors/CommonError";
+import apartmentInfoRepository from "@/repositories/apartmentInfoRepository";
+import {
+  notifyAdminsOfNewComplaint,
+  notifyResidentOfComplaintStatusChange,
+} from "./notificationService";
 
 async function createComplaint(
   complaint: CreateComplaintBodyType,
   userId: string,
   apartmentId: string
 ) {
-  await complaintRepository.create({
+  const apartment = await apartmentInfoRepository.findById(apartmentId);
+  const adminId = apartment?.userId;
+  if (!adminId) {
+    throw new NotFoundError("Apartment admin", apartmentId);
+  }
+  const createdComplaint = await complaintRepository.create({
     user: { connect: { id: userId } },
     ApartmentInfo: { connect: { id: apartmentId } },
     title: complaint.title,
     content: complaint.content,
     isPublic: complaint.isPublic,
   });
+  await notifyAdminsOfNewComplaint(adminId, createdComplaint.id);
 }
 
 async function getComplaintList(
@@ -125,7 +136,12 @@ async function changeStatus(
   complaintId: string,
   body: { complaintStatus: COMPLAINT_STATUS }
 ) {
-  return await complaintRepository.update(complaintId, body);
+  const complaint = await complaintRepository.update(complaintId, body);
+  if (!complaint) {
+    throw new NotFoundError("Complaint", complaintId);
+  }
+  await notifyResidentOfComplaintStatusChange(complaint.userId, complaintId);
+  return complaint;
 }
 
 async function removeComplaint(complaintId: string) {
