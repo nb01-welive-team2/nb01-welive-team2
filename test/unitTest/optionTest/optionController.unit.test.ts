@@ -19,14 +19,11 @@ describe("Option Controller", () => {
       const optionId = "9a7e8f23-1a4b-4e6f-91c3-33a8ff1d4c6e"; // UUID
       const mockOption = {
         id: optionId,
-        content: "Option 1",
+        title: "Option 1", // title 필드 추가
         pollId: "c4b4a3ff-3b6c-4d8f-8f07-ef04a9a8b66e", // UUID
         votes: [],
         poll: {
-          pollOptions: [
-            { id: optionId, votes: [] }, // 자기 자신 포함
-            // 필요하면 다른 옵션도 추가 가능
-          ],
+          pollOptions: [{ id: optionId, title: "Option 1", votes: [] }],
         },
       };
 
@@ -56,13 +53,13 @@ describe("Option Controller", () => {
       );
 
       const responseDto = res.send.mock.calls[0][0];
-      expect(responseDto).toEqual(
+
+      // 내부 전체를 엄격 비교하기보다 핵심 프로퍼티만 검사
+      expect(responseDto.message).toBe("Vote created successfully");
+      expect(responseDto.winnerOption).toEqual(
         expect.objectContaining({
-          message: "Vote created successfully",
-          option: expect.objectContaining({
-            id: optionId,
-            content: "Option 1",
-          }),
+          id: optionId,
+          title: "Option 1",
         })
       );
     });
@@ -73,14 +70,11 @@ describe("Option Controller", () => {
       const optionId = "a3d5b25e-6cfa-43d2-9f6e-273a15265f07"; // UUID
       const mockOption = {
         id: optionId,
-        content: "Option 2",
+        title: "Option 2", // title 필드 추가
         pollId: "e67f23a1-bc39-4e38-8d8e-2437b153c098", // UUID
         votes: [],
         poll: {
-          pollOptions: [
-            { id: optionId, votes: [] }, // 자기 자신 포함
-            // 필요 시 다른 옵션 추가 가능
-          ],
+          pollOptions: [{ id: optionId, title: "Option 2", votes: [] }],
         },
       };
 
@@ -107,13 +101,12 @@ describe("Option Controller", () => {
       expect(res.send).toHaveBeenCalledWith(expect.any(ResponseOptionDTO));
 
       const responseDto = res.send.mock.calls[0][0];
-      expect(responseDto).toEqual(
+
+      expect(responseDto.message).toBe("Vote removed successfully");
+      expect(responseDto.updatedOption).toEqual(
         expect.objectContaining({
-          message: "Vote removed successfully",
-          option: expect.objectContaining({
-            id: optionId,
-            content: "Option 2",
-          }),
+          id: optionId,
+          title: "Option 2",
         })
       );
     });
