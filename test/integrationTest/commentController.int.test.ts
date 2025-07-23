@@ -71,7 +71,7 @@ describe("Comment API Integration Test", () => {
       const res = await agent
         .put(`/api/comments/${mockComplaintComments[0].id}`)
         .send({
-          postId: mockComplaintComments[0].complaintId,
+          boardId: mockComplaintComments[0].complaintId,
           boardType: "COMPLAINT",
           content: "수정된 댓글",
         });
@@ -82,7 +82,7 @@ describe("Comment API Integration Test", () => {
     it("없는 댓글 ID 수정 시 404 반환", async () => {
       const fakeId = "8f09eabc-1234-4abc-bdef-000000000000";
       const res = await agent.put(`/api/comments/${fakeId}`).send({
-        postId: mockComplaintComments[0].complaintId,
+        boardId: mockComplaintComments[0].complaintId,
         content: "수정 불가",
         boardType: "COMPLAINT",
       });
@@ -103,7 +103,7 @@ describe("Comment API Integration Test", () => {
         .put(`/api/comments/${mockComplaintComments[0].id}`)
         .send({
           content: "권한 없음",
-          postId: mockComplaintComments[0].complaintId,
+          boardId: mockComplaintComments[0].complaintId,
           boardType: "COMPLAINT",
         });
 

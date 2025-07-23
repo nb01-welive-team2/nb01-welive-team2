@@ -123,9 +123,7 @@ export async function createComment(req: Request, res: Response) {
 export async function editComment(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
   const data = create(req.body, PatchCommentBodyStruct);
-  console.log("editComment data:", data);
   const { commentId } = create(req.params, CommentIdParamStruct);
-  console.log("editComment commentId:", commentId);
   await commentService.updateComment(
     commentId,
     data,

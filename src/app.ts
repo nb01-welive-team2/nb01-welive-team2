@@ -40,7 +40,7 @@ app.use("/api/notices", noticesRouter);
 app.use("/api/complaints", complaintsRouter);
 app.use("/api/users", imagesRouter);
 app.use("/api/notifications", notificationsRouter);
-app.use("/api/events", eventsRouter);
+app.use("/api/event", eventsRouter);
 app.use("/api/options", optionsRouter);
 app.use("/api/comments", commentRouter);
 

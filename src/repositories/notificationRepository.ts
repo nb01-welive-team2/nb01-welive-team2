@@ -36,12 +36,14 @@ export const createNotificationInDb = async (data: {
 
   return prisma.notifications.create({
     data: {
-      userId,
+      user: { connect: { id: userId } },
       notificationType: type,
       content,
       isChecked: false,
-      ...(type === "민원_등록" && referenceId && { complaintId: referenceId }),
-      ...(type === "공지_등록" && referenceId && { noticeId: referenceId }),
+      ...(type === "민원_등록" &&
+        referenceId && { complaint: { connect: { id: referenceId } } }),
+      ...(type === "공지_등록" &&
+        referenceId && { notice: { connect: { id: referenceId } } }),
     },
   });
 };

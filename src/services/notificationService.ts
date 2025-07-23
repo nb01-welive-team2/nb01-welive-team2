@@ -139,20 +139,20 @@ export const notifyResidentsOfNewNotice = async (
   apartmentId: string,
   noticeId?: string
 ) => {
-  const residents = await prisma.userInfo.findMany({
+  const userInfos = await prisma.userInfo.findMany({
     where: { apartmentId: apartmentId },
   });
 
   await Promise.all(
-    residents.map(async (resident) => {
+    userInfos.map(async (userInfos) => {
       const notification = await createNotificationInDb({
-        userId: resident.id,
+        userId: userInfos.userId,
         type: NOTIFICATION_TYPE.공지_등록,
         content: "새로운 공지사항이 등록되었습니다.",
         referenceId: noticeId,
       });
 
-      sendNotificationToUser(resident.id, {
+      sendNotificationToUser(userInfos.userId, {
         id: notification.id,
         userId: notification.userId,
         type: notification.notificationType,
