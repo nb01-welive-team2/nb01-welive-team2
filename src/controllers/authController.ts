@@ -28,8 +28,8 @@ import { loginResponseDTO } from "@/dto/userDTO";
  *           schema:
  *             $ref: '#/components/schemas/LoginRequestDTO'
  *           example:
- *             username: testuser
- *             password: "password1234!"
+ *             username: bob456
+ *             password: "bobpassword"
  *     responses:
  *       200:
  *         description: 로그인이 완료되었습니다.

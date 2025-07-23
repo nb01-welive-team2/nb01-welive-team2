@@ -111,7 +111,7 @@ export const createPoll = async (req: Request, res: Response) => {
  *         required: false
  *         schema:
  *           type: string
- *         example: IN_PROGRESS
+ *           enum: [PENDING, IN_PROGRESS, CLOSED]
  *     responses:
  *       200:
  *         description: 투표 목록 조회 성공

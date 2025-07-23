@@ -129,7 +129,6 @@ export async function editComment(req: Request, res: Response) {
     data,
     reqWithPayload.user.userId
   );
-  console.log("Comment updated successfully");
   res.status(200).send("공지사항 정보가 성공적으로 수정되었습니다.");
 }
 

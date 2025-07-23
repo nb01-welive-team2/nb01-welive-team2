@@ -11,7 +11,7 @@ import { GetEventStruct } from "@/structs/eventStructs";
 
 /**
  * @openapi
- * /api/events:
+ * /api/event:
  *   get:
  *     summary: 이벤트 목록 조회 [관리자/입주민]
  *     description: 아파트 단지별로 특정 연도와 월에 해당하는 이벤트 목록을 조회합니다. SUPER_ADMIN 권한 사용자는 접근할 수 없습니다
@@ -33,7 +33,7 @@ import { GetEventStruct } from "@/structs/eventStructs";
  *         required: true
  *         schema:
  *           type: integer
- *           example: 2025
+ *           example: 2026
  *         description: 조회할 연도 네 자리 숫자
  *       - in: query
  *         name: month
@@ -96,7 +96,7 @@ export async function getEventList(req: Request, res: Response) {
 
 /**
  * @openapi
- * /api/events:
+ * /api/event:
  *   put:
  *     summary: 이벤트 정보 수정 [관리자]
  *     description: 관리자가 특정 게시물의 이벤트 기간을 수정합니다. 이벤트가 없으면 새로 등록합니다
@@ -162,7 +162,7 @@ export async function editEvent(req: Request, res: Response) {
 
 /**
  * @openapi
- * /api/events/{eventId}:
+ * /api/event/{eventId}:
  *   delete:
  *     summary: 이벤트 삭제 [관리자]
  *     description: 관리자가 특정 이벤트를 삭제합니다
