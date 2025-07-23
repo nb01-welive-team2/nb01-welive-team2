@@ -66,7 +66,7 @@ describe("Comment Service", () => {
 
       await commentService.updateComment(
         mockCommentId,
-        { boardType: "COMPLAINT", postId: "post-1", content: "수정된 댓글" },
+        { boardType: "COMPLAINT", boardId: "post-1", content: "수정된 댓글" },
         mockUserId
       );
 
@@ -84,7 +84,7 @@ describe("Comment Service", () => {
 
       await commentService.updateComment(
         mockCommentId,
-        { boardType: "NOTICE", postId: "post-2", content: "수정된 공지 댓글" },
+        { boardType: "NOTICE", boardId: "post-2", content: "수정된 공지 댓글" },
         mockUserId
       );
 
@@ -102,7 +102,7 @@ describe("Comment Service", () => {
       await expect(
         commentService.updateComment(
           mockCommentId,
-          { boardType: "COMPLAINT", postId: "post-1", content: "수정" },
+          { boardType: "COMPLAINT", boardId: "post-1", content: "수정" },
           mockUserId
         )
       ).rejects.toThrow(NotFoundError);
@@ -119,7 +119,7 @@ describe("Comment Service", () => {
       await expect(
         commentService.updateComment(
           mockCommentId,
-          { boardType: "COMPLAINT", postId: "post-1", content: "수정" },
+          { boardType: "COMPLAINT", boardId: "post-1", content: "수정" },
           mockUserId
         )
       ).rejects.toThrow(ForbiddenError);

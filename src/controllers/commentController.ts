@@ -21,12 +21,15 @@ export async function createComment(req: Request, res: Response) {
 export async function editComment(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
   const data = create(req.body, PatchCommentBodyStruct);
+  console.log("editComment data:", data);
   const { commentId } = create(req.params, CommentIdParamStruct);
+  console.log("editComment commentId:", commentId);
   await commentService.updateComment(
     commentId,
     data,
     reqWithPayload.user.userId
   );
+  console.log("Comment updated successfully");
   res.status(200).send("공지사항 정보가 성공적으로 수정되었습니다.");
 }
 

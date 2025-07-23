@@ -1,7 +1,7 @@
 import commentRepository from "@/repositories/commentRepository";
 import { prisma } from "@/lib/prisma";
 
-jest.mock("../lib/prisma", () => ({
+jest.mock("@/lib/prisma", () => ({
   prisma: {
     noticeComments: {
       create: jest.fn(),

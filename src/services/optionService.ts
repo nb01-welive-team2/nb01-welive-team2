@@ -1,5 +1,4 @@
 import optionRepository from "../repositories/optionRepository";
-import { VoteBodyType } from "../structs/optionStructs";
 import NotFoundError from "@/errors/NotFoundError";
 import ForbiddenError from "@/errors/ForbiddenError";
 
