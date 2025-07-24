@@ -55,7 +55,7 @@ function authenticate(options = { optional: false }): RequestHandler {
         req.user = userData as AuthenticatedUser;
         return next();
       } catch (error) {
-        return next(error);
+        return next(new UnauthError());
       }
     } else {
       if (!refreshToken) {
@@ -96,7 +96,7 @@ export function optionalAuth(): RequestHandler {
       const userData = await verifyAccessTokenNUser(accessToken);
       req.user = userData as AuthenticatedUser;
     } catch (error) {
-      return next(error);
+      return next(new UnauthError());
     }
     return next();
   };
@@ -114,7 +114,7 @@ export function queryAuth(): RequestHandler {
       const userData = await verifyAccessTokenNUser(accessToken);
       req.user = userData as AuthenticatedUser;
     } catch (error) {
-      return next(error);
+      return next(new UnauthError());
     }
     return next();
   };
