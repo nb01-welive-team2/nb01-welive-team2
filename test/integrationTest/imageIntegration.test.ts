@@ -7,7 +7,6 @@ import path from "path";
 import fs from "fs";
 
 const PUBLIC_PATH = path.join(__dirname, "../../public");
-const UPLOADS_DIR_NAME = "uploads";
 
 afterEach(() => {
   const filesAndDirs = fs.readdirSync(PUBLIC_PATH);

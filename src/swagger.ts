@@ -1420,6 +1420,122 @@ const swaggerDefinition = {
         },
         required: ["id", "start", "end", "title", "category", "type"],
       },
+      //options
+      ResponseOptionDTO: {
+        type: "object",
+        description: "투표 옵션 응답 DTO",
+        properties: {
+          message: {
+            type: "string",
+            description: "응답 메시지",
+            example: "Vote removed successfully",
+          },
+          updatedOption: {
+            type: "object",
+            description: "업데이트된 투표 옵션 정보",
+            properties: {
+              id: {
+                type: "string",
+                description: "옵션 ID",
+                example: "opt123",
+              },
+              title: {
+                type: "string",
+                description: "옵션 제목",
+                example: "첫 번째 옵션",
+              },
+              votes: {
+                type: "number",
+                description: "해당 옵션에 투표된 수",
+                example: 10,
+              },
+            },
+            required: ["id", "title", "votes"],
+          },
+        },
+        required: ["message", "updatedOption"],
+      },
+      ResponseWinnerOptionDTO: {
+        type: "object",
+        description: "투표 결과 및 상세 옵션 응답 DTO",
+        properties: {
+          message: {
+            type: "string",
+            description: "응답 메시지",
+            example: "Vote created successfully",
+          },
+          updatedOption: {
+            type: "object",
+            description: "최근에 투표한 옵션 정보",
+            properties: {
+              id: {
+                type: "string",
+                description: "옵션 ID",
+                example: "opt123",
+              },
+              title: {
+                type: "string",
+                description: "옵션 제목",
+                example: "첫 번째 옵션",
+              },
+              votes: {
+                type: "number",
+                description: "해당 옵션에 투표된 수",
+                example: 10,
+              },
+            },
+            required: ["id", "title", "votes"],
+          },
+          winnerOption: {
+            type: "object",
+            description: "가장 많은 표를 받은 옵션 정보",
+            properties: {
+              id: {
+                type: "string",
+                description: "우승 옵션 ID",
+                example: "opt999",
+              },
+              title: {
+                type: "string",
+                description: "우승 옵션 제목",
+                example: "우승 옵션",
+              },
+              votes: {
+                type: "number",
+                description: "우승 옵션에 투표된 수",
+                example: 25,
+              },
+            },
+            required: ["id", "title", "votes"],
+          },
+          options: {
+            type: "array",
+            description: "모든 투표 옵션 리스트",
+            items: {
+              type: "object",
+              properties: {
+                id: {
+                  type: "string",
+                  description: "옵션 ID",
+                  example: "opt123",
+                },
+                title: {
+                  type: "string",
+                  description: "옵션 제목",
+                  example: "첫 번째 옵션",
+                },
+                votes: {
+                  type: "number",
+                  description: "투표 수",
+                  example: 10,
+                },
+              },
+              required: ["id", "title", "votes"],
+            },
+          },
+        },
+        required: ["message", "updatedOption", "winnerOption", "options"],
+      },
     },
   },
 };
