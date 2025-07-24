@@ -20,10 +20,9 @@ jobs:
             cd /home/ec2-user/welive-app/nb01-welive-team2
             git pull origin main
             npm install
-            npx prisma migrate dev
+            npx prisma migrate deploy
             npm run build
             npx tsc-alias -p tsconfig.json
-            npm run prisma:deploy
             pm2 delete welive-server || true
-            pm2 start ecosystem.config.js --env production
+            pm2 start ecosystem.config.js
             pm2 save
