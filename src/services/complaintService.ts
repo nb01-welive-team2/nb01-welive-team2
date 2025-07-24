@@ -1,36 +1,60 @@
 import complaintRepository from "../repositories/complaintRepository";
 import {
+  ComplaintStatusType,
   CreateComplaintBodyType,
   PatchComplaintBodyType,
 } from "../structs/complaintStructs";
-import { USER_ROLE } from "@prisma/client";
+import { COMPLAINT_STATUS, USER_ROLE } from "@prisma/client";
 import { PageParamsType } from "../structs/commonStructs";
 import { buildSearchCondition } from "../lib/searchCondition";
 import userInfoRepository from "@/repositories/userInfoRepository";
 import NotFoundError from "@/errors/NotFoundError";
 import ForbiddenError from "@/errors/ForbiddenError";
 import { getUserId } from "@/repositories/userRepository";
+import CommonError from "@/errors/CommonError";
+import apartmentInfoRepository from "@/repositories/apartmentInfoRepository";
+import {
+  notifyAdminsOfNewComplaint,
+  notifyResidentOfComplaintStatusChange,
+} from "./notificationService";
 
 async function createComplaint(
   complaint: CreateComplaintBodyType,
   userId: string,
   apartmentId: string
 ) {
-  await complaintRepository.create({
+  const apartment = await apartmentInfoRepository.findById(apartmentId);
+  const adminId = apartment?.userId;
+  if (!adminId) {
+    throw new NotFoundError("Apartment admin", apartmentId);
+  }
+  const createdComplaint = await complaintRepository.create({
     user: { connect: { id: userId } },
     ApartmentInfo: { connect: { id: apartmentId } },
     title: complaint.title,
     content: complaint.content,
     isPublic: complaint.isPublic,
   });
+  await notifyAdminsOfNewComplaint(adminId, createdComplaint.id);
 }
 
-async function getComplaintList(apartmentId: string, params: PageParamsType) {
+async function getComplaintList(
+  userId: string,
+  role: USER_ROLE,
+  apartmentId: string,
+  params: PageParamsType
+) {
+  let addtionalCondition = {};
+  if (role === USER_ROLE.USER) {
+    addtionalCondition = {
+      OR: [{ isSecret: false }, { userId: userId, isSecret: true }],
+    };
+  }
   const searchCondition = await buildSearchCondition(
     params.page,
     params.limit,
     "",
-    { apartmentId }
+    { ...addtionalCondition, apartmentId }
   );
   const totalCount = await complaintRepository.getCount({
     where: searchCondition.whereCondition,
@@ -79,9 +103,17 @@ async function getComplaint(
   if (!complaint) {
     throw new NotFoundError("Complaint", complaintId);
   }
-
   if (apartmentId !== complaint.apartmentId) {
     throw new ForbiddenError();
+  }
+  if (
+    complaint.isSecret &&
+    role === USER_ROLE.USER &&
+    complaint.userId !== userId
+  ) {
+    throw new ForbiddenError(
+      "You do not have permission to view this complaint."
+    );
   }
   return complaint;
 }
@@ -90,10 +122,36 @@ async function updateComplaint(
   complaintId: string,
   body: PatchComplaintBodyType
 ) {
+  const complaint = await complaintRepository.findById(complaintId);
+  if (complaint?.complaintStatus !== COMPLAINT_STATUS.PENDING) {
+    throw new CommonError(
+      "Complaint can only be updated when it is in PENDING status.",
+      403
+    );
+  }
   return await complaintRepository.update(complaintId, body);
 }
 
+async function changeStatus(
+  complaintId: string,
+  body: { complaintStatus: COMPLAINT_STATUS }
+) {
+  const complaint = await complaintRepository.update(complaintId, body);
+  if (!complaint) {
+    throw new NotFoundError("Complaint", complaintId);
+  }
+  await notifyResidentOfComplaintStatusChange(complaint.userId, complaintId);
+  return complaint;
+}
+
 async function removeComplaint(complaintId: string) {
+  const complaint = await complaintRepository.findById(complaintId);
+  if (complaint?.complaintStatus !== COMPLAINT_STATUS.PENDING) {
+    throw new CommonError(
+      "Complaint can only be removed when it is in PENDING status.",
+      403
+    );
+  }
   return await complaintRepository.deleteById(complaintId);
 }
 
@@ -103,4 +161,5 @@ export default {
   getComplaint,
   getComplaintList,
   removeComplaint,
+  changeStatus,
 };

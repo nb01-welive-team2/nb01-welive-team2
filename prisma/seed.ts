@@ -11,6 +11,8 @@ import {
   mockNotices,
   mockNotifications,
   mockEvents,
+  mockComplaintComments,
+  mockNoticeComments,
 } from "./mock";
 
 const prisma = new PrismaClient();
@@ -21,7 +23,9 @@ export async function seedDatabase(): Promise<void> {
   await prisma.votes.deleteMany();
   await prisma.pollOptions.deleteMany();
   await prisma.polls.deleteMany();
+  await prisma.noticeComments.deleteMany();
   await prisma.notices.deleteMany();
+  await prisma.complaintComments.deleteMany();
   await prisma.complaints.deleteMany();
   await prisma.events.deleteMany();
   await prisma.userInfo.deleteMany();
@@ -60,8 +64,18 @@ export async function seedDatabase(): Promise<void> {
     skipDuplicates: false,
   });
 
+  await prisma.complaintComments.createMany({
+    data: mockComplaintComments,
+    skipDuplicates: false,
+  });
+
   await prisma.notices.createMany({
     data: mockNotices,
+    skipDuplicates: false,
+  });
+
+  await prisma.noticeComments.createMany({
+    data: mockNoticeComments,
     skipDuplicates: false,
   });
 

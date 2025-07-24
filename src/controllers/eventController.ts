@@ -11,47 +11,81 @@ import { GetEventStruct } from "@/structs/eventStructs";
 
 /**
  * @openapi
- * /events:
+ * /api/event:
  *   get:
- *     summary: 공지사항 목록 조회
- *     description: 사용자 권한에 따라 공지사항 목록을 페이지 단위로 조회합니다.
- *                  SUPER_ADMIN 권한 사용자는 접근이 제한됩니다.
+ *     summary: 이벤트 목록 조회 [관리자/입주민]
+ *     description: 아파트 단지별로 특정 연도와 월에 해당하는 이벤트 목록을 조회합니다. SUPER_ADMIN 권한 사용자는 접근할 수 없습니다
  *     tags:
  *       - Events
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *         description: 페이지 번호 기본값 1
- *       - in: query
- *         name: pageSize
- *         schema:
- *           type: integer
- *           default: 11
- *         description: 페이지 크기 기본값 11
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: apartmentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *           example: 2149430f-2892-463f-b3e7-4e893548c6d6
+ *         description: 조회할 아파트 단지 ID
+ *       - in: query
+ *         name: year
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 2026
+ *         description: 조회할 연도 네 자리 숫자
+ *       - in: query
+ *         name: month
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 12
+ *           example: 5
+ *         description: 조회할 월 1에서 12 사이 값
  *     responses:
  *       200:
- *         description: 공지사항 목록이 성공적으로 반환되었습니다.
+ *         description: 이벤트 목록이 성공적으로 반환되었습니다
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ResponseEventListDTO'
- *       401:
- *         description: 권한이 없는 사용자입니다.
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                     format: uuid
+ *                     description: 이벤트 ID
+ *                   start:
+ *                     type: string
+ *                     format: date-time
+ *                     description: 이벤트 시작일
+ *                   end:
+ *                     type: string
+ *                     format: date-time
+ *                     description: 이벤트 종료일
+ *                   title:
+ *                     type: string
+ *                     description: 이벤트 제목
+ *                   category:
+ *                     type: string
+ *                     description: 이벤트 카테고리 공지사항 또는 투표
+ *                     example: MAINTENANCE
+ *                   type:
+ *                     type: string
+ *                     description: 이벤트 타입 NOTICE 또는 POLL
+ *                     example: NOTICE
  *       400:
- *         description: 잘못된 요청입니다. 유효하지 않은 페이지 번호 또는 페이지 크기일 수 있습니다.
+ *         description: 잘못된 요청입니다. 유효하지 않은 연도 또는 월 값입니다
+ *       403:
+ *         description: 권한이 없거나 다른 아파트 ID를 요청했습니다
  *       500:
- *         description: 서버 오류가 발생했습니다.
+ *         description: 서버 오류가 발생했습니다
  */
 export async function getEventList(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
-  if ((reqWithPayload.user.role as string) === USER_ROLE.SUPER_ADMIN) {
-    throw new ForbiddenError();
-  }
   const data = create(req.query, GetEventStruct);
   if (data.apartmentId !== reqWithPayload.user.apartmentId) {
     throw new ForbiddenError();
@@ -62,76 +96,92 @@ export async function getEventList(req: Request, res: Response) {
 
 /**
  * @openapi
- * /companies/{companyId}:
- *   patch:
- *     summary: 회사 정보 수정
- *     description: 지정된 회사의 정보를 수정합니다. 관리자의 권한을 가진 사용자만 접근할 수 있습니다.
+ * /api/event:
+ *   put:
+ *     summary: 이벤트 정보 수정 [관리자]
+ *     description: 관리자가 특정 게시물의 이벤트 기간을 수정합니다. 이벤트가 없으면 새로 등록합니다
  *     tags:
- *       - Company
+ *       - Events
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: companyId
+ *       - in: query
+ *         name: boardType
  *         required: true
  *         schema:
- *           type: integer
- *         description: 수정할 회사 ID
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               companyName:
- *                 type: string
- *                 description: 수정할 회사 이름
- *                 example: 햇살카 수정
- *               companyCode:
- *                 type: string
- *                 description: 수정할 회사 코드
- *                 example: HS-001
+ *           type: string
+ *           enum:
+ *             - NOTICE
+ *             - POLL
+ *           example: NOTICE
+ *         description: 이벤트와 연결된 게시판 타입 NOTICE 또는 POLL
+ *       - in: query
+ *         name: boardId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *           example: f1c531ea-8f03-4f12-a8bb-7899148354df
+ *         description: 연결된 게시물 ID
+ *       - in: query
+ *         name: startDate
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *           example: 2025-07-22T09:00:00Z
+ *         description: 이벤트 시작일
+ *       - in: query
+ *         name: endDate
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *           example: 2025-07-25T18:00:00Z
+ *         description: 이벤트 종료일
  *     responses:
  *       200:
- *         description: 회사 정보가 성공적으로 수정되었습니다.
+ *         description: 이벤트 정보가 성공적으로 수정되었습니다
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ResponseCompanyDTO'
+ *               $ref: '#/components/schemas/ResponseEventDTO'
  *       400:
- *         description: 잘못된 요청입니다. 필수 필드가 누락되었거나 잘못된 형식일 수 있습니다.
+ *         description: 잘못된 요청입니다. 필수 필드가 누락되었거나 형식이 잘못되었습니다
  *       401:
- *         description: 관리자 권한이 없는 사용자입니다.
+ *         description: 관리자 권한이 없는 사용자입니다
  *       500:
- *         description: 서버 오류가 발생했습니다.
+ *         description: 서버 오류가 발생했습니다
  */
 export async function editEvent(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
-  if (reqWithPayload.user.role !== USER_ROLE.ADMIN) {
-    throw new ForbiddenError();
-  }
   const data = create(req.query, UpdateEventStruct);
-  const event = await eventService.editEvent(data);
+  const event = await eventService.editEvent(data, reqWithPayload.user.userId);
   res.status(200).send(new ResponseEventDTO(event));
 }
 
 /**
  * @openapi
- * /companies/{companyId}:
+ * /api/event/{eventId}:
  *   delete:
- *     summary: 회사 삭제
- *     description: 지정된 회사의 정보를 삭제합니다. 관리자의 권한을 가진 사용자만 접근할 수 있습니다.
+ *     summary: 이벤트 삭제 [관리자]
+ *     description: 관리자가 특정 이벤트를 삭제합니다
  *     tags:
- *       - Company
+ *       - Events
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: companyId
+ *         name: eventId
  *         required: true
  *         schema:
- *           type: integer
- *         description: 삭제할 회사 ID
+ *           type: string
+ *           format: uuid
+ *           example: 3f8d3f9e-5b6a-4c4e-8a3b-1c7a7e5e7c2f
+ *         description: 삭제할 이벤트의 ID
  *     responses:
  *       200:
- *         description: 회사가 성공적으로 삭제되었습니다.
+ *         description: 이벤트가 성공적으로 삭제되었습니다
  *         content:
  *           application/json:
  *             schema:
@@ -139,18 +189,17 @@ export async function editEvent(req: Request, res: Response) {
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "회사 삭제 성공"
+ *                   example: 정상적으로 삭제 처리되었습니다
  *       401:
- *         description: 관리자 권한이 없는 사용자입니다.
+ *         description: 관리자 권한이 없는 사용자입니다
+ *       404:
+ *         description: 이벤트를 찾을 수 없습니다
  *       500:
- *         description: 서버 오류가 발생했습니다.
+ *         description: 서버 오류가 발생했습니다
  */
 export async function removeEvent(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
-  if (reqWithPayload.user.role !== USER_ROLE.ADMIN) {
-    throw new ForbiddenError();
-  }
   const { eventId } = create(req.params, EventIdParamStruct);
-  await eventService.removeEvent(eventId);
+  await eventService.removeEvent(eventId, reqWithPayload.user.userId);
   res.status(200).send(new removeSuccessMessage());
 }

@@ -26,14 +26,6 @@ export const updateNotificationById = async (
   });
 };
 
-export const findNotificationById = async (
-  id: string
-): Promise<Notifications | null> => {
-  return prisma.notifications.findUnique({
-    where: { id },
-  });
-};
-
 export const createNotificationInDb = async (data: {
   userId: string;
   type: NOTIFICATION_TYPE;
@@ -44,12 +36,39 @@ export const createNotificationInDb = async (data: {
 
   return prisma.notifications.create({
     data: {
-      userId,
+      user: { connect: { id: userId } },
       notificationType: type,
       content,
       isChecked: false,
-      ...(type === "민원_등록" && referenceId && { complaintId: referenceId }),
-      ...(type === "공지_등록" && referenceId && { noticeId: referenceId }),
+      ...(type === "민원_등록" &&
+        referenceId && { complaint: { connect: { id: referenceId } } }),
+      ...(type === "공지_등록" &&
+        referenceId && { notice: { connect: { id: referenceId } } }),
+    },
+  });
+};
+
+export const countUnreadNotificationsInDb = async (
+  userId: string
+): Promise<number> => {
+  return prisma.notifications.count({
+    where: {
+      userId,
+      isChecked: false,
+    },
+  });
+};
+
+export const markAllNotificationsAsReadInDb = async (
+  userId: string
+): Promise<void> => {
+  await prisma.notifications.updateMany({
+    where: {
+      userId,
+      isChecked: false,
+    },
+    data: {
+      isChecked: true,
     },
   });
 };

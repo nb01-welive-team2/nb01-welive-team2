@@ -11,6 +11,7 @@ import { getUserId } from "@/repositories/userRepository";
 import NotFoundError from "@/errors/NotFoundError";
 import ForbiddenError from "@/errors/ForbiddenError";
 import { createEvent, updateEvent } from "@/repositories/eventRepository";
+import { notifyResidentsOfNewNotice } from "./notificationService";
 
 async function createNotice(
   notice: CreateNoticeBodyType,
@@ -22,7 +23,7 @@ async function createNotice(
     eventType: EVENT_TYPE.NOTICE,
     isActive: isEvent,
   });
-  await noticeRepository.create({
+  const createdNotice = await noticeRepository.create({
     user: { connect: { id: userId } },
     ApartmentInfo: { connect: { id: apartmentId } },
     title: notice.title,
@@ -33,6 +34,7 @@ async function createNotice(
     ...(notice.startDate && { startDate: notice.startDate }),
     ...(notice.endDate && { endDate: notice.endDate }),
   });
+  await notifyResidentsOfNewNotice(apartmentId, createdNotice.id);
 }
 
 async function getNoticeList(

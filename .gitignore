@@ -8,4 +8,3 @@ node_modules
 prisma/migrations/
 coverage/
 upload/*
-public/uploads/*

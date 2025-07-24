@@ -103,5 +103,25 @@ module.exports = {
       ...commonConfig,
       testMatch: ["**/unitTest/noticeTest/notice*.test.ts"],
     },
+    {
+      displayName: "comment-unit",
+      ...commonConfig,
+      testMatch: ["**/unitTest/commentTest/comment*.test.ts"],
+    },
+    {
+      displayName: "comment-integration",
+      ...commonConfig,
+      testMatch: ["**/integrationTest/comment*.test.ts"],
+    },
+    {
+      displayName: "option-unit",
+      ...commonConfig,
+      testMatch: ["**/unitTest/optionTest/option*.test.ts"],
+    },
+    {
+      displayName: "option-integration",
+      ...commonConfig,
+      testMatch: ["**/integrationTest/option*.test.ts"],
+    },
   ],
 };

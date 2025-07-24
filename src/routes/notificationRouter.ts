@@ -1,33 +1,37 @@
 import express from "express";
 import { withAsync } from "../lib/withAsync";
-import authenticate from "@/middlewares/authenticate";
+import authenticate, { queryAuth } from "@/middlewares/authenticate";
 import {
-  getNotificationsHandler,
+  sseNotificationHandler,
   patchNotificationHandler,
-  getNotificationByIdHandler,
-  createNotificationHandler,
+  getUnreadNotificationCountHandler,
+  markAllNotificationsAsReadHandler,
 } from "../controllers/notificationController";
 
 const notificationsRouter = express.Router();
 
+// SSE 알림 수신
+notificationsRouter.get("/sse", queryAuth(), withAsync(sseNotificationHandler));
+
+// 읽지 않은 알림 개수 조회
 notificationsRouter.get(
-  "/notifications",
+  "/me/unread-count",
   authenticate(),
-  withAsync(getNotificationsHandler)
-);
-notificationsRouter.patch(
-  "/notifications/:id",
-  withAsync(patchNotificationHandler)
+  withAsync(getUnreadNotificationCountHandler)
 );
 
-notificationsRouter.get(
-  "/notifications/:id",
-  withAsync(getNotificationByIdHandler)
-);
-
+// 모든 알림 읽음 처리
 notificationsRouter.post(
-  "/notifications",
-  withAsync(createNotificationHandler)
+  "/mark-all-read",
+  authenticate(),
+  withAsync(markAllNotificationsAsReadHandler)
+);
+
+// 개별 알림 읽음 처리
+notificationsRouter.patch(
+  "/:notificationId/read",
+  authenticate(),
+  withAsync(patchNotificationHandler)
 );
 
 export default notificationsRouter;

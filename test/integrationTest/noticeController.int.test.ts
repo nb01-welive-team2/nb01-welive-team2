@@ -31,7 +31,6 @@ describe("Notice API Integration Test", () => {
     const login = await rawAgent
       .post("/api/auth/login")
       .send({ username: mockUsers[1].username, password: "bobpassword" });
-
     agent = authAgent(rawAgent, login.body.accessToken);
   });
 
