@@ -4,7 +4,7 @@
   "description": "### (팀 협업 문서 링크 게시)",
   "main": "index.js",
   "scripts": {
-    "build": "tsc && tsc-alias",
+    "build": "tsc && tsc-alias -p tsconfig.json",
     "start": "node dist/src/server.js",
     "dev": "nodemon -r tsconfig-paths/register --watch src src/server.ts",
     "typecheck": "tsc --noEmit",

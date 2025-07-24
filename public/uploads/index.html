@@ -47,10 +47,11 @@
   </div>
 
   <p>
-    1번 사용자 : alice@example.com, hashedpassword1<br>
-    - 1번 게시글과 1번 상품 작성, 2번 게시글에 좋아요<br>
-  2번 사용자 : bob@example.com, hashedpassword2<br>
-  - 2번 게시글 작성, 1번 게시글에 좋아요<br>
+    입주민 : alice123, alicepassword<br>
+    관리자 : bob456, bobpassword<br>
+  - swagger에서 네트워크 검사 켜고 관리자 로그인 -> 헤더에서 토큰 습득 -> sse페이지에서 토큰으로 연결<br>
+  - swagger에서 네트워크 검사 켜고 입주민 로그인 -> 헤더에서 토큰 습득 -> swagger 우상단의 Authorize에 입력<br>
+  - swagger에서 입주민으로 민원등록 -> sse페이지에서 네트워크 혹은 콘솔 탭으로 알림 확인<br>
 </p>
 
   <script>
