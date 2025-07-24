@@ -758,7 +758,7 @@ export const rejectAllAdmins = async (
  *       - bearerAuth: []   # MUST be ADMIN
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: userId
  *         required: true
  *         schema:
  *           type: string
@@ -844,7 +844,7 @@ export const approveUser = async (
  *       - bearerAuth: []   # MUST be ADMIN
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: userId
  *         required: true
  *         schema:
  *           type: string
@@ -920,7 +920,7 @@ export const rejectUser = async (
  * @openapi
  * /api/auth/approve-users:
  *   post:
- *     summary: "[관리자] 사용자 가입 요청 승인(전체)"
+ *     summary: "[관리자] 입주민 가입 요청 승인(전체)"
  *     description: |
  *       현재 **가입 대기(PENDING)** 상태인 입주민(USER)의 신청들을 **일괄 승인(APPROVED)** 처리합니다.
  *       호출자는 반드시 **ADMIN 권한**이어야 하며, 일반적으로 *자신이 관리하는 아파트에 속한 신청 건*만 승인됩니다.
@@ -981,7 +981,7 @@ export const approveAllUsers = async (
  * @openapi
  * /api/auth/reject-users:
  *   post:
- *     summary: "[관리자] 사용자 가입 요청 거절(전체)"
+ *     summary: "[관리자] 입주민 가입 요청 거절(전체)"
  *     description: |
  *       현재 **가입 대기(PENDING)** 상태인 입주민(USER)의 신청들을 **일괄 거절(REJECTED)** 처리합니다.
  *       호출자는 반드시 **ADMIN 권한**이어야 하며, 일반적으로 *자신이 관리하는 아파트 소속 신청 건*만 처리됩니다.
