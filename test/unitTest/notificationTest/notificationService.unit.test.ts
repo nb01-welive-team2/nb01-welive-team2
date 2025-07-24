@@ -194,11 +194,14 @@ describe("notificationService - notifyResidentOfComplaintStatusChange", () => {
 });
 
 describe("notificationService - notifyResidentsOfNewNotice", () => {
-  const mockResidents = [{ id: "resident-1" }, { id: "resident-2" }];
+  const mockUserInfo = [
+    { id: "info-1", userId: "resident-1", apartmentId: "apartment-1" },
+    { id: "info-2", userId: "resident-2", apartmentId: "apartment-1" },
+  ];
   const noticeId = "notice-999";
 
   beforeEach(() => {
-    (prisma.userInfo.findMany as jest.Mock).mockResolvedValue(mockResidents);
+    (prisma.userInfo.findMany as jest.Mock).mockResolvedValue(mockUserInfo);
     (createNotificationInDb as jest.Mock).mockImplementation(({ userId }) => ({
       id: `noti-${userId}`,
       userId,
@@ -215,20 +218,23 @@ describe("notificationService - notifyResidentsOfNewNotice", () => {
   it("입주민에게 SSE 공지 알림 전송", async () => {
     await notifyResidentsOfNewNotice("apartment-1", noticeId);
 
+    // userInfo에서 apartmentId로 조회 확인
     expect(prisma.userInfo.findMany).toHaveBeenCalledWith({
       where: { apartmentId: "apartment-1" },
     });
 
-    for (const resident of mockResidents) {
+    for (const userInfo of mockUserInfo) {
+      // DB 알림 생성 확인
       expect(createNotificationInDb).toHaveBeenCalledWith({
-        userId: resident.id,
+        userId: userInfo.userId, // ✅ userInfo 기반
         type: NOTIFICATION_TYPE.공지_등록,
         content: "새로운 공지사항이 등록되었습니다.",
         referenceId: noticeId,
       });
 
+      // SSE 전송 확인
       expect(sendNotificationToUser).toHaveBeenCalledWith(
-        resident.id,
+        userInfo.userId,
         expect.objectContaining({
           referenceId: noticeId,
           type: NOTIFICATION_TYPE.공지_등록,

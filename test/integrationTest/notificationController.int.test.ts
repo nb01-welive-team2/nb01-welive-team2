@@ -27,7 +27,18 @@ describe("Notification API Integration Test", () => {
     const login = await rawAgent
       .post("/api/auth/login")
       .send({ username: mockUsers[0].username, password: "alicepassword" });
-    token = login.body.accessToken;
+    const cookies = login.headers["set-cookie"];
+    let accessTokenCookie: string | undefined;
+    if (Array.isArray(cookies)) {
+      accessTokenCookie = cookies.find((cookie) =>
+        cookie.startsWith("access-token=")
+      );
+    } else if (typeof cookies === "string") {
+      if (cookies.startsWith("access-token=")) {
+        accessTokenCookie = cookies;
+      }
+    }
+    token = accessTokenCookie?.split(";")[0].split("=")[1] || "";
     agent = authAgent(rawAgent, login.body.accessToken);
   });
 
@@ -36,7 +47,10 @@ describe("Notification API Integration Test", () => {
    */
   describe("GET /api/notifications/sse", () => {
     it("SSE 연결 성공", async () => {
-      const res = await agent.get("/api/notifications/sse").query({ token });
+      console.log("token", token);
+      const res = await agent.get(
+        `/api/notifications/sse?token=${token}&closeAfter=1000`
+      );
       console.log("res header", res.headers);
       expect(res.status).toBe(200);
       expect(res.headers["content-type"]).toContain("text/event-stream");

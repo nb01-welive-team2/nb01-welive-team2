@@ -96,7 +96,7 @@ describe("notificationRepository", () => {
 
       expect(prisma.notifications.create).toHaveBeenCalledWith({
         data: {
-          userId: "u-1",
+          user: { connect: { id: "u-1" } }, // ✅ 수정
           notificationType: NOTIFICATION_TYPE.공지_등록,
           content: "공지 등록됨",
           isChecked: false,
@@ -116,7 +116,8 @@ describe("notificationRepository", () => {
 
       expect(prisma.notifications.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
-          complaintId: "complaint-123",
+          user: { connect: { id: "u-1" } }, // ✅ 관계 연결 확인
+          complaint: { connect: { id: "complaint-123" } }, // ✅ 수정된 부분
         }),
       });
     });
