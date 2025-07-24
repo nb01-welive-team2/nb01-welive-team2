@@ -47,6 +47,7 @@ function authenticate(options = { optional: false }): RequestHandler {
 
     if (!options.optional) {
       if (!accessToken) {
+        req.resume();
         return next(new UnauthError());
       }
       try {
@@ -104,17 +105,13 @@ export function optionalAuth(): RequestHandler {
 export function queryAuth(): RequestHandler {
   return async (req: Request, res: Response, next: NextFunction) => {
     const accessToken = req.query.token as string;
-    console.log("Query parameters:", req.query);
-    console.log("Query access token:", accessToken);
 
     if (!accessToken) {
       return next(new UnauthError());
     }
 
     try {
-      console.log("Verifying access token from query:", accessToken);
       const userData = await verifyAccessTokenNUser(accessToken);
-      console.log("Authenticated user data:", userData);
       req.user = userData as AuthenticatedUser;
     } catch (error) {
       return next(error);

@@ -102,7 +102,6 @@ export default async function uploadImage(
     if (!req.file) {
       throw new BadRequestError("File is required");
     }
-    // const filePath = path.join(host, STATIC_PATH, req.file.filename); //윈도우에서는 \\로 join됨
     url = `http://${host}${STATIC_PATH}/${req.file.filename}`;
   }
 

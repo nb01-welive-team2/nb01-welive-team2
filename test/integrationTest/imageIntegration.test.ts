@@ -6,6 +6,22 @@ import { USER_ROLE, JOIN_STATUS, APPROVAL_STATUS } from "@prisma/client";
 import path from "path";
 import fs from "fs";
 
+const PUBLIC_PATH = path.join(__dirname, "../../public");
+const UPLOADS_DIR_NAME = "uploads";
+
+afterEach(() => {
+  const filesAndDirs = fs.readdirSync(PUBLIC_PATH);
+
+  for (const name of filesAndDirs) {
+    const fullPath = path.join(PUBLIC_PATH, name);
+    const stat = fs.statSync(fullPath);
+
+    if (stat.isFile()) {
+      fs.unlinkSync(fullPath);
+    }
+  }
+});
+
 describe("Image Integration Tests", () => {
   beforeEach(async () => {
     await prisma.userInfo.deleteMany();
@@ -99,9 +115,7 @@ describe("Image Integration Tests", () => {
       const testImageBuffer = Buffer.from("fake-image-data");
       fs.writeFileSync(testImagePath, testImageBuffer);
 
-      const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
-        .attach("image", testImagePath);
+      const uploadResponse = await request(app).patch("/api/users/avatar");
 
       expect(uploadResponse.status).toBe(401);
 
@@ -974,10 +988,7 @@ describe("Image Integration Tests", () => {
       const testImageBuffer = Buffer.from("fake-unauth-data");
       fs.writeFileSync(testImagePath, testImageBuffer);
 
-      const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
-        .attach("image", testImagePath);
-
+      const uploadResponse = await request(app).patch("/api/users/avatar");
       expect(uploadResponse.status).toBe(401);
 
       if (fs.existsSync(testImagePath)) {

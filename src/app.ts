@@ -15,7 +15,7 @@ import userRouter from "./routes/userRoute";
 import apartmentsRouter from "./routes/apartmentInfoRoute";
 import pollsRouter from "./routes/pollRouter";
 import imagesRouter from "./routes/imageRouter";
-import { PUBLIC_PATH } from "./lib/constance";
+import { PUBLIC_PATH, STATIC_PATH } from "./lib/constance";
 import eventsRouter from "./routes/eventRouter";
 import { seedDatabase } from "../prisma/seed";
 import { renderHtmlWithUrl } from "./lib/htmlRenderer";
@@ -29,6 +29,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(STATIC_PATH, express.static(PUBLIC_PATH));
 
 app.use("/api/auth", authRouter);
 app.use("/api/auth", userRouter);
