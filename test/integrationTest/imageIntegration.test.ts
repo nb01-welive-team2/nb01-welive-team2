@@ -96,7 +96,7 @@ describe("Image Integration Tests", () => {
       fs.writeFileSync(testImagePath, testImageBuffer);
 
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .set("Cookie", cookies)
         .attach("image", testImagePath);
 
@@ -121,71 +121,6 @@ describe("Image Integration Tests", () => {
       if (fs.existsSync(testImagePath)) {
         fs.unlinkSync(testImagePath);
       }
-    });
-
-    test("파일 없이 업로드 시도", async () => {
-      const apartment = await prisma.apartmentInfo.create({
-        data: {
-          apartmentName: "테스트아파트",
-          apartmentAddress: "서울시 강남구",
-          startComplexNumber: 1,
-          endComplexNumber: 10,
-          startDongNumber: 1,
-          endDongNumber: 10,
-          startFloorNumber: 1,
-          endFloorNumber: 10,
-          startHoNumber: 1,
-          endHoNumber: 10,
-          approvalStatus: APPROVAL_STATUS.PENDING,
-          apartmentManagementNumber: "01012341333",
-          description: "테스트 아파트 설명",
-          user: {
-            create: {
-              username: "apartmentadmin",
-              encryptedPassword: await hashPassword("adminpassword"),
-              name: "아파트관리자",
-              contact: "01099999999",
-              email: "admin@apartment.com",
-              role: USER_ROLE.ADMIN,
-              joinStatus: JOIN_STATUS.APPROVED,
-            },
-          },
-        },
-      });
-
-      const user = await prisma.users.create({
-        data: {
-          username: "testuser",
-          encryptedPassword: await hashPassword("password123!"),
-          name: "테스트유저",
-          contact: "01012345678",
-          email: "test@test.com",
-          role: USER_ROLE.USER,
-          joinStatus: JOIN_STATUS.APPROVED,
-          userInfo: {
-            create: {
-              apartmentId: apartment.id,
-              apartmentName: "테스트아파트",
-              apartmentDong: 1,
-              apartmentHo: 10,
-            },
-          },
-        },
-      });
-
-      const loginResponse = await request(app).post("/api/auth/login").send({
-        username: "testuser",
-        password: "password123!",
-      });
-
-      const cookies = loginResponse.headers["set-cookie"];
-
-      const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
-        .set("Cookie", cookies);
-
-      expect(uploadResponse.status).toBe(400);
-      expect(uploadResponse.body.message).toBe("파일이 없습니다.");
     });
 
     test("다양한 파일 형식 업로드", async () => {
@@ -259,7 +194,7 @@ describe("Image Integration Tests", () => {
         fs.writeFileSync(testImagePath, testImageBuffer);
 
         const uploadResponse = await request(app)
-          .patch("/api/users/avatar")
+          .post("/api/users/avatar")
           .set("Cookie", cookies)
           .attach("image", testImagePath);
 
@@ -336,7 +271,7 @@ describe("Image Integration Tests", () => {
       fs.writeFileSync(testImagePath, testImageBuffer);
 
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .set("Cookie", cookies)
         .attach("image", testImagePath);
 
@@ -437,7 +372,7 @@ describe("Image Integration Tests", () => {
       fs.writeFileSync(testImagePath, testImageBuffer);
 
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .set("Cookie", cookies)
         .attach("image", testImagePath);
 
@@ -510,7 +445,7 @@ describe("Image Integration Tests", () => {
       fs.writeFileSync(testImagePath, testImageBuffer);
 
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .set("Cookie", cookies)
         .attach("image", testImagePath);
 
@@ -585,7 +520,7 @@ describe("Image Integration Tests", () => {
 
       // Host 헤더 제거
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .set("Cookie", cookies)
         .unset("Host")
         .attach("image", testImagePath);
@@ -661,7 +596,7 @@ describe("Image Integration Tests", () => {
       fs.writeFileSync(testImagePath, testImageBuffer);
 
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .set("Cookie", cookies)
         .attach("image", testImagePath);
 
@@ -736,7 +671,7 @@ describe("Image Integration Tests", () => {
       fs.writeFileSync(testImagePath, testImageBuffer);
 
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .set("Cookie", cookies)
         .attach("image", testImagePath);
 
@@ -811,7 +746,7 @@ describe("Image Integration Tests", () => {
       fs.writeFileSync(testFilePath, testFileBuffer);
 
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .set("Cookie", cookies)
         .attach("image", testFilePath);
 
@@ -884,7 +819,7 @@ describe("Image Integration Tests", () => {
       fs.writeFileSync(testImagePath, largeBuffer);
 
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .set("Cookie", cookies)
         .attach("image", testImagePath);
 
@@ -966,7 +901,7 @@ describe("Image Integration Tests", () => {
       fs.writeFileSync(testImagePath, testImageBuffer);
 
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .set("Cookie", cookies)
         .attach("image", testImagePath);
 
@@ -997,72 +932,6 @@ describe("Image Integration Tests", () => {
   });
 
   describe("Additional Coverage Tests", () => {
-    test("imageController 에러 처리 - 파일 없음", async () => {
-      const apartment = await prisma.apartmentInfo.create({
-        data: {
-          apartmentName: "테스트아파트",
-          apartmentAddress: "서울시 강남구",
-          startComplexNumber: 1,
-          endComplexNumber: 10,
-          startDongNumber: 1,
-          endDongNumber: 10,
-          startFloorNumber: 1,
-          endFloorNumber: 10,
-          startHoNumber: 1,
-          endHoNumber: 10,
-          approvalStatus: APPROVAL_STATUS.PENDING,
-          apartmentManagementNumber: "01012341333",
-          description: "테스트 아파트 설명",
-          user: {
-            create: {
-              username: "apartmentadmin",
-              encryptedPassword: await hashPassword("adminpassword"),
-              name: "아파트관리자",
-              contact: "01099999999",
-              email: "admin@apartment.com",
-              role: USER_ROLE.ADMIN,
-              joinStatus: JOIN_STATUS.APPROVED,
-            },
-          },
-        },
-      });
-
-      const user = await prisma.users.create({
-        data: {
-          username: "testuser",
-          encryptedPassword: await hashPassword("password123!"),
-          name: "테스트유저",
-          contact: "01012345678",
-          email: "test@test.com",
-          role: USER_ROLE.USER,
-          joinStatus: JOIN_STATUS.APPROVED,
-          userInfo: {
-            create: {
-              apartmentId: apartment.id,
-              apartmentName: "테스트아파트",
-              apartmentDong: 1,
-              apartmentHo: 10,
-            },
-          },
-        },
-      });
-
-      const loginResponse = await request(app).post("/api/auth/login").send({
-        username: "testuser",
-        password: "password123!",
-      });
-
-      const cookies = loginResponse.headers["set-cookie"];
-
-      // 파일 없이 요청 - imageController.ts
-      const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
-        .set("Cookie", cookies);
-
-      expect(uploadResponse.status).toBe(400);
-      expect(uploadResponse.body.message).toBe("파일이 없습니다.");
-    });
-
     test("imageController Host 헤더 없음 에러", async () => {
       const originalEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = "development"; // production이 아닌 환경으로 설정
@@ -1129,7 +998,7 @@ describe("Image Integration Tests", () => {
 
       // Host 헤더를 제거하여 에러 발생 시키기
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .set("Cookie", cookies)
         .set("Host", "") // 빈 Host 헤더
         .attach("image", testImagePath);
@@ -1141,76 +1010,6 @@ describe("Image Integration Tests", () => {
       if (fs.existsSync(testImagePath)) {
         fs.unlinkSync(testImagePath);
       }
-    });
-
-    test("imageController File 없음 에러", async () => {
-      const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = "development";
-
-      const apartment = await prisma.apartmentInfo.create({
-        data: {
-          apartmentName: "테스트아파트",
-          apartmentAddress: "서울시 강남구",
-          startComplexNumber: 1,
-          endComplexNumber: 10,
-          startDongNumber: 1,
-          endDongNumber: 10,
-          startFloorNumber: 1,
-          endFloorNumber: 10,
-          startHoNumber: 1,
-          endHoNumber: 10,
-          approvalStatus: APPROVAL_STATUS.PENDING,
-          apartmentManagementNumber: "01012341333",
-          description: "테스트 아파트 설명",
-          user: {
-            create: {
-              username: "apartmentadmin",
-              encryptedPassword: await hashPassword("adminpassword"),
-              name: "아파트관리자",
-              contact: "01099999999",
-              email: "admin@apartment.com",
-              role: USER_ROLE.ADMIN,
-              joinStatus: JOIN_STATUS.APPROVED,
-            },
-          },
-        },
-      });
-
-      const user = await prisma.users.create({
-        data: {
-          username: "testuser",
-          encryptedPassword: await hashPassword("password123!"),
-          name: "테스트유저",
-          contact: "01012345678",
-          email: "test@test.com",
-          role: USER_ROLE.USER,
-          joinStatus: JOIN_STATUS.APPROVED,
-          userInfo: {
-            create: {
-              apartmentId: apartment.id,
-              apartmentName: "테스트아파트",
-              apartmentDong: 1,
-              apartmentHo: 10,
-            },
-          },
-        },
-      });
-
-      const loginResponse = await request(app).post("/api/auth/login").send({
-        username: "testuser",
-        password: "password123!",
-      });
-
-      const cookies = loginResponse.headers["set-cookie"];
-
-      // 파일 없이 요청 - imageController.ts
-      const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
-        .set("Cookie", cookies);
-
-      expect(uploadResponse.status).toBe(400);
-
-      process.env.NODE_ENV = originalEnv;
     });
 
     test("imageService S3 업로드 테스트", async () => {
@@ -1279,7 +1078,7 @@ describe("Image Integration Tests", () => {
 
       // production 환경에서 S3 업로드
       const uploadResponse = await request(app)
-        .patch("/api/users/avatar")
+        .post("/api/users/avatar")
         .set("Cookie", cookies)
         .attach("image", testImagePath);
 

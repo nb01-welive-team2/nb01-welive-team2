@@ -4,10 +4,36 @@ import path from "path";
 import BadRequestError from "@/errors/BadRequestError";
 import { NODE_ENV, STATIC_PATH } from "@/lib/constance";
 
+export async function reqFile(
+  req: Request,
+  res: Response
+): Promise<string | undefined> {
+  const isProduction = NODE_ENV === "production";
+
+  if (!req.file) return undefined;
+
+  let url: string;
+
+  if (isProduction) {
+    const { buffer, originalname, mimetype } = req.file;
+    return (url = await uploadBufferToS3(buffer, originalname, mimetype));
+  } else {
+    const host = req.get("host");
+    if (!host) {
+      throw new BadRequestError("Host is required");
+    }
+    if (!req.file) {
+      throw new BadRequestError("File is required");
+    }
+    const filePath = path.join(host, STATIC_PATH, req.file.filename);
+    return (url = `http://${filePath}`);
+  }
+}
+
 /**
  * @openapi
  * /api/users/avatar:
- *   patch:
+ *   post:
  *     summary: 프로필 아바타 변경
  *     description: |
  *       인증된 사용자의 **프로필 아바타 이미지를 업로드**합니다.
@@ -34,7 +60,7 @@ import { NODE_ENV, STATIC_PATH } from "@/lib/constance";
  *             type: object
  *             required: [image]
  *             properties:
- *               file:
+ *               image:
  *                 type: string
  *                 format: binary
  *                 description: 아바타 이미지 파일.
@@ -82,28 +108,7 @@ export default async function uploadImage(
   req: Request,
   res: Response
 ): Promise<void> {
-  const isProduction = NODE_ENV === "production";
-
-  if (!req.file) {
-    res.status(400).json({ message: "파일이 없습니다." });
-    return;
-  }
-
-  let url: string;
-
-  if (isProduction) {
-    const { buffer, originalname, mimetype } = req.file;
-    url = await uploadBufferToS3(buffer, originalname, mimetype);
-  } else {
-    const host = req.get("host");
-    if (!host) {
-      throw new BadRequestError("Host is required");
-    }
-    if (!req.file) {
-      throw new BadRequestError("File is required");
-    }
-    url = `http://${host}${STATIC_PATH}/${req.file.filename}`;
-  }
+  const url = await reqFile(req, res);
 
   res
     .status(200)

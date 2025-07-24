@@ -48,7 +48,7 @@ import { loginResponseDTO } from "@/dto/userDTO";
  *               email: "testuser-mail@example.com"
  *               role: "USER"
  *               username: "testuser"
- *               contact: "010-1234-5678"
+ *               contact: "01012345678"
  *               avatar: "https://example.com/avatar.jpg"
  *               joinStatus: "APPROVED"
  *               isActive: true

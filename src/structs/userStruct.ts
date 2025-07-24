@@ -10,6 +10,7 @@ import {
   pattern,
   nullable,
   boolean,
+  coerce,
 } from "superstruct";
 
 const strictEmailRegex = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
@@ -85,9 +86,15 @@ const PasswordStruct = object({
 export const UpdatePasswordBodyStruct = PasswordStruct;
 export type UpdatePasswordDTO = Infer<typeof UpdatePasswordBodyStruct>;
 
+const EmptyToUndefinedPassword = coerce(
+  optional(password),
+  string(),
+  (value) => (value === "" ? undefined : value)
+);
+
 export const UpdateUserBodyStruct = object({
-  currentPassword: optional(nullable(password)),
-  newPassword: optional(nullable(password)),
+  currentPassword: EmptyToUndefinedPassword,
+  newPassword: EmptyToUndefinedPassword,
   profileImage: optional(nullable(string())),
 });
 
