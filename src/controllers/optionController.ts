@@ -7,7 +7,7 @@ import { ResponseOptionDTO, ResponseWinnerOptionDTO } from "@/dto/optionDTO";
 
 /**
  * @openapi
- * /api/options/:optionId/vote:
+ * /api/options/{optionId}/vote:
  *   post:
  *     summary: 투표 옵션에 투표하기
  *     description: 인증된 사용자가 특정 투표 옵션에 투표를 합니다. 중복 투표는 허용되지 않습니다.(테스트용 투표id는 관리자 기준)
@@ -61,7 +61,7 @@ export async function voteOption(req: Request, res: Response) {
 
 /**
  * @swagger
- * /api/options/:optionId/vote:
+ * /api/options/{optionId}/vote:
  *   delete:
  *     summary: 투표 취소
  *     description: 사용자가 특정 옵션에 대해 했던 투표를 취소합니다.(테스트용 취소id는 입주민 기준)

@@ -31,6 +31,7 @@ describe("notificationController", () => {
       const mockReq = {
         user: { userId: "user-1" },
         on: jest.fn(),
+        query: { closeAfter: "100" },
       } as any;
 
       (getNotifications as jest.Mock).mockResolvedValue([
@@ -67,6 +68,7 @@ describe("notificationController", () => {
       const mockReq = {
         user: { userId: "user-1" },
         on: jest.fn(),
+        query: { closeAfter: "1000" },
       } as any;
 
       (getNotifications as jest.Mock).mockResolvedValue([]);
