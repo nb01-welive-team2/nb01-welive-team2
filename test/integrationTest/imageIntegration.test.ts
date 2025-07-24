@@ -110,17 +110,9 @@ describe("Image Integration Tests", () => {
     });
 
     test("인증되지 않은 사용자 이미지 업로드 실패", async () => {
-      const testImagePath = path.join(__dirname, "test-image.png");
-      const testImageBuffer = Buffer.from("fake-image-data");
-      fs.writeFileSync(testImagePath, testImageBuffer);
-
-      const uploadResponse = await request(app).patch("/api/users/avatar");
+      const uploadResponse = await request(app).post("/api/users/avatar");
 
       expect(uploadResponse.status).toBe(401);
-
-      if (fs.existsSync(testImagePath)) {
-        fs.unlinkSync(testImagePath);
-      }
     });
 
     test("다양한 파일 형식 업로드", async () => {
@@ -918,16 +910,8 @@ describe("Image Integration Tests", () => {
     });
 
     test("비인증 상태에서 이미지 업로드 시도 - 에러 처리", async () => {
-      const testImagePath = path.join(__dirname, "test-unauth.png");
-      const testImageBuffer = Buffer.from("fake-unauth-data");
-      fs.writeFileSync(testImagePath, testImageBuffer);
-
-      const uploadResponse = await request(app).patch("/api/users/avatar");
+      const uploadResponse = await request(app).post("/api/users/avatar");
       expect(uploadResponse.status).toBe(401);
-
-      if (fs.existsSync(testImagePath)) {
-        fs.unlinkSync(testImagePath);
-      }
     });
   });
 
