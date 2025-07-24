@@ -14,18 +14,16 @@ import { sseConnections } from "@/lib/sseHandler";
 import { AuthenticatedRequest } from "@/types/express";
 
 /**
- * @openapi
- * /notifications/sse:
+ * @swagger
+ * /api/notifications/sse:
  *   get:
- *     summary: 실시간 알림 수신
- *     description: Server-Sent Events (SSE)를 통해 실시간 알림을 스트리밍합니다.
+ *     summary: 읽지 않은 알림 실시간 수신 (SSE)
+ *     description: 로그인된 사용자가 서버로부터 실시간 알림을 받기 위해 SSE 연결을 설정합니다.
  *     tags:
  *       - Notifications
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: 실시간 알림 스트림 시작
+ *         description: SSE 연결 성공
  *         content:
  *           text/event-stream:
  *             schema:
@@ -35,17 +33,19 @@ import { AuthenticatedRequest } from "@/types/express";
  *                   "type": "alarm",
  *                   "data": [
  *                     {
- *                       "notificationId": "noti-123",
- *                       "content": "새로운 공지사항이 등록되었습니다.",
- *                       "notificationType": "공지_등록",
- *                       "notifiedAt": "2025-07-18T10:00:00Z",
+ *                       "notificationId": "string",
+ *                       "content": "string",
+ *                       "notificationType": "COMPLAINT",
+ *                       "notifiedAt": "2024-07-23T12:34:56.000Z",
  *                       "isChecked": false,
- *                       "complaintId": null,
- *                       "noticeId": "notice-456",
+ *                       "complaintId": "string",
+ *                       "noticeId": null,
  *                       "pollId": null
  *                     }
  *                   ]
  *                 }
+ *       401:
+ *         description: 인증 실패
  */
 export const sseNotificationHandler = async (req: Request, res: Response) => {
   res.setHeader("Content-Type", "text/event-stream");
@@ -94,22 +94,21 @@ export const sseNotificationHandler = async (req: Request, res: Response) => {
 };
 
 /**
- * @openapi
- * /notifications/{id}/read:
+ * @swagger
+ * /api/notifications/:notificationId/read:
  *   patch:
- *     summary: 개별 알림 읽음 처리
- *     description: 지정된 알림을 읽음 처리합니다.
+ *     summary: 알림 상태 업데이트
+ *     description: 알림의 읽음 상태(isRead)를 true 또는 false로 업데이트합니다.
  *     tags:
  *       - Notifications
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: notificationId
  *         required: true
  *         schema:
  *           type: string
- *         description: 알림 ID
+ *           format: uuid
+ *         description: 업데이트할 알림의 ID
  *     requestBody:
  *       required: true
  *       content:
@@ -119,17 +118,19 @@ export const sseNotificationHandler = async (req: Request, res: Response) => {
  *             properties:
  *               isRead:
  *                 type: boolean
- *                 example: true
+ *                 description: 알림 읽음 상태
+ *             required:
+ *               - isRead
  *     responses:
  *       200:
- *         description: 알림 상태가 업데이트되었습니다.
+ *         description: 알림 상태 업데이트 성공
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
  *                 code:
- *                   type: number
+ *                   type: integer
  *                   example: 200
  *                 message:
  *                   type: string
@@ -139,31 +140,30 @@ export const sseNotificationHandler = async (req: Request, res: Response) => {
  *                   properties:
  *                     id:
  *                       type: string
- *                       example: noti-123
+ *                       format: uuid
+ *                       example: "f9b3b79d-8a24-4f26-b19d-afe334cb87a9"
  *                     userId:
  *                       type: string
- *                       example: user-1
+ *                       format: uuid
  *                     type:
  *                       type: string
- *                       example: 공지_등록
+ *                       description: "알림 종류 (예: complaint, notice, poll)"
  *                     content:
  *                       type: string
- *                       example: 새로운 공지사항이 등록되었습니다.
  *                     isRead:
  *                       type: boolean
- *                       example: true
  *                     referenceId:
  *                       type: string
  *                       nullable: true
- *                       example: notice-456
+ *                       description: "관련 게시물 ID (complaintId, noticeId, pollId 중 하나)"
  *                     createdAt:
  *                       type: string
  *                       format: date-time
- *                       example: 2025-07-18T10:00:00Z
  *                     updatedAt:
  *                       type: string
  *                       nullable: true
- *                       example: null
+ *     security:
+ *       - access-token: []
  */
 export const patchNotificationHandler = async (
   req: Request,
@@ -192,25 +192,23 @@ export const patchNotificationHandler = async (
 };
 
 /**
- * @openapi
- * /notifications/me/unread-count:
+ * @swagger
+ * /api/notifications/me/unread-count:
  *   get:
  *     summary: 읽지 않은 알림 개수 조회
- *     description: 현재 로그인된 사용자의 읽지 않은 알림 개수를 반환합니다.
+ *     description: 로그인된 사용자의 읽지 않은 알림 개수를 반환합니다.
  *     tags:
  *       - Notifications
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: 성공적으로 읽지 않은 알림 개수를 반환
+ *         description: 읽지 않은 알림 개수 조회에 성공했습니다.
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
  *                 code:
- *                   type: number
+ *                   type: integer
  *                   example: 200
  *                 message:
  *                   type: string
@@ -219,7 +217,7 @@ export const patchNotificationHandler = async (
  *                   type: object
  *                   properties:
  *                     count:
- *                       type: number
+ *                       type: integer
  *                       example: 3
  */
 export const getUnreadNotificationCountHandler = async (
@@ -240,33 +238,35 @@ export const getUnreadNotificationCountHandler = async (
 };
 
 /**
- * @openapi
+ * @swagger
  * /notifications/mark-all-read:
- *   post:
+ *   patch:
  *     summary: 모든 알림 읽음 처리
- *     description: 현재 로그인된 사용자의 모든 알림을 읽음 처리합니다.
+ *     description: 현재 로그인한 사용자의 모든 알림을 읽음 처리합니다.
  *     tags:
  *       - Notifications
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: 모든 알림이 읽음 처리되었습니다.
+ *         description: 모든 알림이 읽음 처리됨
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
  *                 code:
- *                   type: number
+ *                   type: integer
  *                   example: 200
  *                 message:
  *                   type: string
  *                   example: 모든 알림이 읽음 처리되었습니다.
  *                 data:
- *                   type: string
- *                   nullable: true
- *                   example: null
+ *                   type: "null"
+ *       401:
+ *         description: 인증되지 않은 사용자
+ *       500:
+ *         description: 서버 오류
  */
 export const markAllNotificationsAsReadHandler = async (
   req: Request,
