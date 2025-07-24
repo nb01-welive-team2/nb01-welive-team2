@@ -101,7 +101,10 @@ export const sseNotificationHandler = async (req: Request, res: Response) => {
   });
 
   // 클라이언트가 closeAfter 쿼리 파라미터를 보낸 경우 일정 시간 후 연결 종료
-  if (process.env.NODE_ENV !== "production") {
+  if (
+    process.env.NODE_ENV !== "production" ||
+    req.originalUrl.startsWith("/swagger")
+  ) {
     setTimeout(() => {
       clearInterval(intervalId);
       sseConnections.delete(userId);

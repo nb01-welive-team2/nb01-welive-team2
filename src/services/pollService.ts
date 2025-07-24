@@ -56,11 +56,7 @@ export const createPoll = async (
   await pollRepo.createPollOptions(poll.id, dto.options);
 
   // 스케줄러에 투표 상태 변경 등록
-  await schedulePollStatus(
-    poll.id,
-    new Date(dto.startDate),
-    new Date(dto.endDate)
-  );
+  schedulePollStatus(poll.id, new Date(dto.startDate), new Date(dto.endDate));
 };
 
 // 투표 전체 조회
@@ -159,11 +155,7 @@ export const editPoll = async (
   await pollRepo.replacePollOptions(pollId, dto.options);
 
   // 스케줄러에 투표 상태 변경 등록
-  await schedulePollStatus(
-    poll.id,
-    new Date(dto.startDate),
-    new Date(dto.endDate)
-  );
+  schedulePollStatus(poll.id, new Date(dto.startDate), new Date(dto.endDate));
 
   return {
     id: updated.id,
