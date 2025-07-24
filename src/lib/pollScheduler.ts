@@ -47,10 +47,6 @@ export async function schedulePollStatus(
     // Map에 저장
     jobs.set(`${pollId}-start`, startJob);
     jobs.set(`${pollId}-end`, endJob);
-
-    console.log(
-      `스케줄러 등록: ${pollId}, 시작: ${startDate}, 종료: ${endDate}`
-    );
   }
 }
 
