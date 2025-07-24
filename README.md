@@ -96,6 +96,15 @@
 ├── 📂 utils
 │   └── jwt.ts
 └── main.ts
+📂 test
+├── 📂 integrationTest
+│   ├── PollController.int.test.ts
+│   └── NoticeController.int.test.ts
+├── 📂 unitTest
+│   └── 📂 pollTest
+│        ├── pollController.unit.test.ts
+│        ├── pollRepository.unit.test.ts
+│        └── pollService.unit.test.ts 
 ```
 
 ### 🚀 배포 AWS EC2
