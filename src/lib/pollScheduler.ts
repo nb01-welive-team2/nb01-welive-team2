@@ -14,41 +14,44 @@ export async function schedulePollStatus(
 ) {
   // 기존 작업 삭제
   cancelPollJobs(pollId);
-
-  // 시작 시간에 RUNNING으로 변경
-  const startJob = cron.schedule(getCronExpression(startDate), async () => {
-    await updatePollForEvent(pollId, {
-      status: POLL_STATUS.IN_PROGRESS,
+  if (process.env.NODE_ENV === "production") {
+    // 시작 시간에 RUNNING으로 변경
+    const startJob = cron.schedule(getCronExpression(startDate), async () => {
+      await updatePollForEvent(pollId, {
+        status: POLL_STATUS.IN_PROGRESS,
+      });
     });
-  });
 
-  // 종료 시간에 ENDED로 변경
-  const endJob = cron.schedule(getCronExpression(endDate), async () => {
-    const poll = await updatePollForEvent(pollId, {
-      status: POLL_STATUS.CLOSED,
+    // 종료 시간에 ENDED로 변경
+    const endJob = cron.schedule(getCronExpression(endDate), async () => {
+      const poll = await updatePollForEvent(pollId, {
+        status: POLL_STATUS.CLOSED,
+      });
+      await noticeService.createNotice(
+        {
+          category: NOTICE_CATEGORY.RESIDENT_VOTE,
+          title: poll.title,
+          content:
+            poll.content +
+            poll.pollOptions
+              .map((option) => `\n- ${option.title} : ${option.votes.length}`)
+              .join(""),
+          isPinned: false,
+        },
+        poll.userId,
+        poll.apartmentId,
+        false
+      );
     });
-    await noticeService.createNotice(
-      {
-        category: NOTICE_CATEGORY.RESIDENT_VOTE,
-        title: poll.title,
-        content:
-          poll.content +
-          poll.pollOptions
-            .map((option) => `\n- ${option.title} : ${option.votes.length}`)
-            .join(""),
-        isPinned: false,
-      },
-      poll.userId,
-      poll.apartmentId,
-      false
+
+    // Map에 저장
+    jobs.set(`${pollId}-start`, startJob);
+    jobs.set(`${pollId}-end`, endJob);
+
+    console.log(
+      `스케줄러 등록: ${pollId}, 시작: ${startDate}, 종료: ${endDate}`
     );
-  });
-
-  // Map에 저장
-  jobs.set(`${pollId}-start`, startJob);
-  jobs.set(`${pollId}-end`, endJob);
-
-  console.log(`스케줄러 등록: ${pollId}, 시작: ${startDate}, 종료: ${endDate}`);
+  }
 }
 
 export function cancelPollJobs(pollId: string) {
