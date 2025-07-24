@@ -175,6 +175,13 @@ export const updatePollForEvent = async (
   return await prisma.polls.update({
     where: { id: pollId },
     data,
+    include: {
+      pollOptions: {
+        include: {
+          votes: true,
+        },
+      },
+    },
   });
 };
 

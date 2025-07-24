@@ -1,89 +1,43 @@
 import {
-  createNotification,
   notifySuperAdminsOfAdminSignup,
   notifyAdminsOfResidentSignup,
   notifyAdminsOfNewComplaint,
   notifyResidentOfComplaintStatusChange,
   notifyResidentsOfNewNotice,
-  getNotifications,
-  getNotificationById,
   updateNotification,
+  countUnreadNotifications,
+  markAllNotificationsAsRead,
 } from "@/services/notificationService";
-import { getIO } from "@/sockets/registerSocketServer";
+
 import {
   createNotificationInDb,
-  findNotifications,
-  findNotificationById,
   updateNotificationById,
+  countUnreadNotificationsInDb,
+  markAllNotificationsAsReadInDb,
 } from "@/repositories/notificationRepository";
-import { NOTIFICATION_TYPE, USER_ROLE } from "@prisma/client";
-import { CreateNotificationRequestDto } from "@/dto/notificationDto";
+
 import { prisma } from "@/lib/prisma";
+import { NOTIFICATION_TYPE, USER_ROLE } from "@prisma/client";
+import { sendNotificationToUser } from "@/lib/sseHandler";
 
 jest.mock("@/repositories/notificationRepository");
-jest.mock("@/sockets/registerSocketServer");
 jest.mock("@/lib/prisma", () => ({
   prisma: {
     users: {
       findMany: jest.fn(),
     },
+    userInfo: {
+      findMany: jest.fn(),
+    },
   },
 }));
+jest.mock("@/lib/sseHandler");
 
-describe("notificationService - createNotification", () => {
-  const mockNotification = {
-    id: "noti-123",
-    userId: "user-1",
-    notificationType: NOTIFICATION_TYPE.회원가입신청,
-    content: "테스트 알림입니다.",
-    isChecked: false,
-    notifiedAt: new Date(),
-    complaintId: null,
-    noticeId: null,
-    pollId: null,
-  };
-
-  const mockEmit = jest.fn();
-
-  beforeEach(() => {
-    (createNotificationInDb as jest.Mock).mockResolvedValue(mockNotification);
-    (getIO as jest.Mock).mockReturnValue({
-      to: () => ({ emit: mockEmit }),
-    });
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("알림 생성 후 실시간 전송", async () => {
-    const input: CreateNotificationRequestDto = {
-      userId: "user-1",
-      type: NOTIFICATION_TYPE.회원가입신청,
-      content: "테스트 알림입니다.",
-    };
-
-    const result = await createNotification(input);
-
-    expect(createNotificationInDb).toHaveBeenCalledWith(input);
-
-    expect(mockEmit).toHaveBeenCalledWith("notification", {
-      id: mockNotification.id,
-      userId: mockNotification.userId,
-      type: mockNotification.notificationType,
-      content: mockNotification.content,
-      isRead: mockNotification.isChecked,
-      referenceId: null,
-      createdAt: mockNotification.notifiedAt,
-      updatedAt: null,
-    });
-
-    expect(result).toEqual(mockNotification);
-  });
+beforeEach(() => {
+  jest.clearAllMocks();
 });
 
 describe("notificationService - notifySuperAdminsOfAdminSignup", () => {
-  const mockEmit = jest.fn();
   const mockAdmins = [{ id: "admin-1" }, { id: "admin-2" }];
 
   beforeEach(() => {
@@ -99,17 +53,10 @@ describe("notificationService - notifySuperAdminsOfAdminSignup", () => {
       noticeId: null,
       pollId: null,
     }));
-    (getIO as jest.Mock).mockReturnValue({
-      to: () => ({ emit: mockEmit }),
-    });
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("알림 생성 후 슈퍼 어드민에게 전송", async () => {
-    await notifySuperAdminsOfAdminSignup();
+  it("슈퍼 어드민에게 SSE 알림 전송", async () => {
+    await notifySuperAdminsOfAdminSignup("홍길동");
 
     expect(prisma.users.findMany).toHaveBeenCalledWith({
       where: { role: USER_ROLE.SUPER_ADMIN },
@@ -119,11 +66,11 @@ describe("notificationService - notifySuperAdminsOfAdminSignup", () => {
       expect(createNotificationInDb).toHaveBeenCalledWith({
         userId: admin.id,
         type: NOTIFICATION_TYPE.회원가입신청,
-        content: "신규 관리자 회원가입 신청이 도착했습니다.",
+        content: expect.stringContaining("홍길동"),
       });
 
-      expect(mockEmit).toHaveBeenCalledWith(
-        "notification",
+      expect(sendNotificationToUser).toHaveBeenCalledWith(
+        admin.id,
         expect.objectContaining({
           userId: admin.id,
           type: NOTIFICATION_TYPE.회원가입신청,
@@ -134,122 +81,87 @@ describe("notificationService - notifySuperAdminsOfAdminSignup", () => {
 });
 
 describe("notificationService - notifyAdminsOfResidentSignup", () => {
-  const mockAdmins = [{ id: "admin-1" }, { id: "admin-2" }];
-  const mockEmit = jest.fn();
+  const adminId = "admin-1";
+  const name = "이순신";
 
   beforeEach(() => {
-    (prisma.users.findMany as jest.Mock).mockResolvedValue(mockAdmins);
-
-    (createNotificationInDb as jest.Mock).mockImplementation(({ userId }) => ({
-      id: `noti-${userId}`,
-      userId,
+    (createNotificationInDb as jest.Mock).mockResolvedValue({
+      id: "noti-1",
+      userId: adminId,
       notificationType: NOTIFICATION_TYPE.회원가입신청,
-      content: "신규 입주민 회원가입 신청이 도착했습니다.",
+      content: `신규 입주민 ${name}님의 회원가입 신청이 도착했습니다.`,
       isChecked: false,
       notifiedAt: new Date(),
       complaintId: null,
       noticeId: null,
       pollId: null,
-    }));
-
-    (getIO as jest.Mock).mockReturnValue({
-      to: () => ({ emit: mockEmit }),
     });
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
+  it("관리자에게 SSE 알림 전송", async () => {
+    await notifyAdminsOfResidentSignup(adminId, name);
 
-  it("알림 생성 후 관리자에게 전송", async () => {
-    await notifyAdminsOfResidentSignup();
-
-    expect(prisma.users.findMany).toHaveBeenCalledWith({
-      where: { role: USER_ROLE.ADMIN },
+    expect(createNotificationInDb).toHaveBeenCalledWith({
+      userId: adminId,
+      type: NOTIFICATION_TYPE.회원가입신청,
+      content: expect.stringContaining(name),
     });
 
-    for (const admin of mockAdmins) {
-      expect(createNotificationInDb).toHaveBeenCalledWith({
-        userId: admin.id,
+    expect(sendNotificationToUser).toHaveBeenCalledWith(
+      adminId,
+      expect.objectContaining({
+        userId: adminId,
         type: NOTIFICATION_TYPE.회원가입신청,
-        content: "신규 입주민 회원가입 신청이 도착했습니다.",
-      });
-
-      expect(mockEmit).toHaveBeenCalledWith(
-        "notification",
-        expect.objectContaining({
-          userId: admin.id,
-          type: NOTIFICATION_TYPE.회원가입신청,
-        })
-      );
-    }
+      })
+    );
   });
 });
 
 describe("notificationService - notifyAdminsOfNewComplaint", () => {
-  const mockAdmins = [{ id: "admin-1" }, { id: "admin-2" }];
-  const mockComplaintId = "complaint-123";
-  const mockEmit = jest.fn();
+  const adminId = "admin-1";
+  const complaintId = "complaint-123";
 
   beforeEach(() => {
-    (prisma.users.findMany as jest.Mock).mockResolvedValue(mockAdmins);
-
-    (createNotificationInDb as jest.Mock).mockImplementation(({ userId }) => ({
-      id: `noti-${userId}`,
-      userId,
+    (createNotificationInDb as jest.Mock).mockResolvedValue({
+      id: "noti-complaint",
+      userId: adminId,
       notificationType: NOTIFICATION_TYPE.민원_등록,
       content: "새로운 민원이 등록되었습니다.",
       isChecked: false,
       notifiedAt: new Date(),
-      complaintId: mockComplaintId,
+      complaintId,
       noticeId: null,
       pollId: null,
-    }));
-
-    (getIO as jest.Mock).mockReturnValue({
-      to: () => ({ emit: mockEmit }),
     });
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
+  it("민원 등록 알림 SSE 전송", async () => {
+    await notifyAdminsOfNewComplaint(adminId, complaintId);
 
-  it("관리자에게 민원 알림을 전송해야 한다", async () => {
-    await notifyAdminsOfNewComplaint(mockComplaintId);
-
-    expect(prisma.users.findMany).toHaveBeenCalledWith({
-      where: { role: USER_ROLE.ADMIN },
+    expect(createNotificationInDb).toHaveBeenCalledWith({
+      userId: adminId,
+      type: NOTIFICATION_TYPE.민원_등록,
+      content: "새로운 민원이 등록되었습니다.",
+      referenceId: complaintId,
     });
 
-    for (const admin of mockAdmins) {
-      expect(createNotificationInDb).toHaveBeenCalledWith({
-        userId: admin.id,
+    expect(sendNotificationToUser).toHaveBeenCalledWith(
+      adminId,
+      expect.objectContaining({
+        referenceId: complaintId,
         type: NOTIFICATION_TYPE.민원_등록,
-        content: "새로운 민원이 등록되었습니다.",
-        referenceId: mockComplaintId,
-      });
-
-      expect(mockEmit).toHaveBeenCalledWith(
-        "notification",
-        expect.objectContaining({
-          userId: admin.id,
-          type: NOTIFICATION_TYPE.민원_등록,
-          referenceId: mockComplaintId,
-        })
-      );
-    }
+      })
+    );
   });
 });
 
 describe("notificationService - notifyResidentOfComplaintStatusChange", () => {
   const userId = "resident-1";
   const complaintId = "complaint-456";
-  const mockEmit = jest.fn();
 
   beforeEach(() => {
     (createNotificationInDb as jest.Mock).mockResolvedValue({
-      id: "noti-complaint",
+      id: "noti-complaint-status",
       userId,
       notificationType: NOTIFICATION_TYPE.COMPLAINT_RESOLVED,
       content: "등록한 민원이 처리되었습니다.",
@@ -259,17 +171,9 @@ describe("notificationService - notifyResidentOfComplaintStatusChange", () => {
       noticeId: null,
       pollId: null,
     });
-
-    (getIO as jest.Mock).mockReturnValue({
-      to: () => ({ emit: mockEmit }),
-    });
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("민원 상태 변경 시 해당 입주민에게 알림을 전송해야 한다", async () => {
+  it("입주민에게 SSE 알림 전송", async () => {
     await notifyResidentOfComplaintStatusChange(userId, complaintId);
 
     expect(createNotificationInDb).toHaveBeenCalledWith({
@@ -279,25 +183,25 @@ describe("notificationService - notifyResidentOfComplaintStatusChange", () => {
       referenceId: complaintId,
     });
 
-    expect(mockEmit).toHaveBeenCalledWith(
-      "notification",
+    expect(sendNotificationToUser).toHaveBeenCalledWith(
+      userId,
       expect.objectContaining({
-        userId,
-        type: NOTIFICATION_TYPE.COMPLAINT_RESOLVED,
         referenceId: complaintId,
+        type: NOTIFICATION_TYPE.COMPLAINT_RESOLVED,
       })
     );
   });
 });
 
 describe("notificationService - notifyResidentsOfNewNotice", () => {
-  const mockResidents = [{ id: "resident-1" }, { id: "resident-2" }];
+  const mockUserInfo = [
+    { id: "info-1", userId: "resident-1", apartmentId: "apartment-1" },
+    { id: "info-2", userId: "resident-2", apartmentId: "apartment-1" },
+  ];
   const noticeId = "notice-999";
-  const mockEmit = jest.fn();
 
   beforeEach(() => {
-    (prisma.users.findMany as jest.Mock).mockResolvedValue(mockResidents);
-
+    (prisma.userInfo.findMany as jest.Mock).mockResolvedValue(mockUserInfo);
     (createNotificationInDb as jest.Mock).mockImplementation(({ userId }) => ({
       id: `noti-${userId}`,
       userId,
@@ -309,144 +213,66 @@ describe("notificationService - notifyResidentsOfNewNotice", () => {
       noticeId,
       pollId: null,
     }));
-
-    (getIO as jest.Mock).mockReturnValue({
-      to: () => ({ emit: mockEmit }),
-    });
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
+  it("입주민에게 SSE 공지 알림 전송", async () => {
+    await notifyResidentsOfNewNotice("apartment-1", noticeId);
 
-  it("모든 입주민에게 공지 알림을 전송해야 한다", async () => {
-    await notifyResidentsOfNewNotice(noticeId);
-
-    expect(prisma.users.findMany).toHaveBeenCalledWith({
-      where: { role: USER_ROLE.USER },
+    // userInfo에서 apartmentId로 조회 확인
+    expect(prisma.userInfo.findMany).toHaveBeenCalledWith({
+      where: { apartmentId: "apartment-1" },
     });
 
-    for (const resident of mockResidents) {
+    for (const userInfo of mockUserInfo) {
+      // DB 알림 생성 확인
       expect(createNotificationInDb).toHaveBeenCalledWith({
-        userId: resident.id,
+        userId: userInfo.userId, // ✅ userInfo 기반
         type: NOTIFICATION_TYPE.공지_등록,
         content: "새로운 공지사항이 등록되었습니다.",
         referenceId: noticeId,
       });
 
-      expect(mockEmit).toHaveBeenCalledWith(
-        "notification",
+      // SSE 전송 확인
+      expect(sendNotificationToUser).toHaveBeenCalledWith(
+        userInfo.userId,
         expect.objectContaining({
-          userId: resident.id,
-          type: NOTIFICATION_TYPE.공지_등록,
           referenceId: noticeId,
+          type: NOTIFICATION_TYPE.공지_등록,
         })
       );
     }
   });
 });
 
-describe("notificationService - getNotifications", () => {
-  const mockNotifications = [
-    {
+describe("notificationService - updateNotification & count/mark", () => {
+  it("읽음 처리", async () => {
+    const mockUpdated = {
       id: "noti-1",
       userId: "user-1",
-      notificationType: "공지_등록",
+      notificationType: NOTIFICATION_TYPE.공지_등록,
       content: "공지입니다",
-      isChecked: false,
+      isChecked: true,
       notifiedAt: new Date(),
       complaintId: null,
       noticeId: null,
       pollId: null,
-    },
-  ];
+    };
 
-  beforeEach(() => {
-    (findNotifications as jest.Mock).mockResolvedValue(mockNotifications);
-  });
+    (updateNotificationById as jest.Mock).mockResolvedValue(mockUpdated);
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("userId만 전달해도 알림을 조회할 수 있다", async () => {
-    const result = await getNotifications("user-1");
-
-    expect(findNotifications).toHaveBeenCalledWith("user-1", undefined);
-    expect(result).toEqual(mockNotifications);
-  });
-
-  it("userId와 isRead가 모두 전달되면 조건 포함 조회된다", async () => {
-    const result = await getNotifications("user-1", true);
-
-    expect(findNotifications).toHaveBeenCalledWith("user-1", true);
-    expect(result).toEqual(mockNotifications);
-  });
-});
-
-describe("notificationService - getNotificationById", () => {
-  const mockNotification = {
-    id: "noti-1",
-    userId: "user-1",
-    notificationType: "공지_등록",
-    content: "공지입니다",
-    isChecked: false,
-    notifiedAt: new Date(),
-    complaintId: null,
-    noticeId: null,
-    pollId: null,
-  };
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("ID가 존재하는 경우 알림을 반환해야 한다", async () => {
-    (findNotificationById as jest.Mock).mockResolvedValue(mockNotification);
-
-    const result = await getNotificationById("noti-1");
-
-    expect(findNotificationById).toHaveBeenCalledWith("noti-1");
-    expect(result).toEqual(mockNotification);
-  });
-
-  it("ID가 존재하지 않는 경우 null을 반환해야 한다", async () => {
-    (findNotificationById as jest.Mock).mockResolvedValue(null);
-
-    const result = await getNotificationById("noti-x");
-
-    expect(findNotificationById).toHaveBeenCalledWith("noti-x");
-    expect(result).toBeNull();
-  });
-});
-
-describe("notificationService - updateNotification", () => {
-  const mockUpdatedNotification = {
-    id: "noti-1",
-    userId: "user-1",
-    notificationType: "공지_등록",
-    content: "공지입니다",
-    isChecked: true,
-    notifiedAt: new Date(),
-    complaintId: null,
-    noticeId: null,
-    pollId: null,
-  };
-
-  beforeEach(() => {
-    (updateNotificationById as jest.Mock).mockResolvedValue(
-      mockUpdatedNotification
-    );
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("알림을 읽음 처리하고 반환해야 한다", async () => {
     const result = await updateNotification("noti-1", true);
-
     expect(updateNotificationById).toHaveBeenCalledWith("noti-1", true);
-    expect(result).toEqual(mockUpdatedNotification);
+    expect(result).toEqual(mockUpdated);
+  });
+
+  it("읽지 않은 알림 수 조회", async () => {
+    (countUnreadNotificationsInDb as jest.Mock).mockResolvedValue(5);
+    const result = await countUnreadNotifications("user-1");
+    expect(result).toBe(5);
+  });
+
+  it("모든 알림 읽음 처리", async () => {
+    await markAllNotificationsAsRead("user-1");
+    expect(markAllNotificationsAsReadInDb).toHaveBeenCalledWith("user-1");
   });
 });

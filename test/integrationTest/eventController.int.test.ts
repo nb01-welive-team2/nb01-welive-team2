@@ -2,14 +2,19 @@ import request from "supertest";
 import app from "@/app";
 import { prisma } from "@/lib/prisma";
 import { seedDatabase } from "../../prisma/seed";
-import { mockUsers, mockNotices, mockPolls } from "../../prisma/mock";
+import {
+  mockUsers,
+  mockNotices,
+  mockPolls,
+  mockApartmentInfo,
+} from "../../prisma/mock";
 import SuperAgentTest from "supertest/lib/agent";
 import { v4 as uuid } from "uuid";
 
 let agent: ReturnType<typeof authAgent>;
 let createdEventId_NOTICE: string;
 let createdEventId_POLL: string;
-let apartmentId: string;
+const apartmentId = mockApartmentInfo[0].id;
 
 function authAgent(agent: SuperAgentTest, token: string) {
   return {
@@ -35,20 +40,6 @@ describe("Event API Integration Test", () => {
     });
 
     agent = authAgent(rawAgent, login.body.accessToken);
-
-    // apartmentId 조회
-    const dbUser = await prisma.users.findUnique({
-      where: { id: "0f9e7654-dfbb-46df-b93c-cc491ff9f5bd" },
-      include: {
-        apartmentInfo: true,
-      },
-    });
-
-    if (!dbUser?.apartmentInfo?.id) {
-      throw new Error("apartmentId not found for mockUsers[1]");
-    }
-
-    apartmentId = dbUser.apartmentInfo.id;
   });
 
   describe("NOTICE 게시글 이벤트", () => {

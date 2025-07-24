@@ -105,6 +105,7 @@ model Complaints {
   isPublic        Boolean
   complaintStatus COMPLAINT_STATUS @default(PENDING)
   viewCount       Int              @default(0)
+  isSecret        Boolean          @default(false)
 
   user              Users               @relation(fields: [userId], references: [id], onDelete: Cascade)
   notifications     Notifications[]
@@ -249,7 +250,7 @@ enum APPROVAL_STATUS {
 enum COMPLAINT_STATUS {
   PENDING
   IN_PROGRESS
-  CLOSED
+  RESOLVED
 }
 
 enum RESIDENCE_STATUS {

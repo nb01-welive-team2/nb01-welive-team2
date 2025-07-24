@@ -11,9 +11,14 @@ import * as userRepository from "@/repositories/userRepository";
 import { UpdateUserDTO } from "@/structs/userStruct";
 import { USER_ROLE, Users } from "@prisma/client";
 import bcrypt from "bcrypt";
+import { deleteAllUserRefreshTokens } from "./authService";
+import {
+  notifyAdminsOfResidentSignup,
+  notifySuperAdminsOfAdminSignup,
+} from "./notificationService";
 
 export const signupUser = async (data: SignupUserRequestDTO) => {
-  const { username, password, contact, email } = data;
+  const { password } = data;
 
   const apartment = await userRepository.findApartment(data.apartmentName);
   if (!apartment) throw new BadRequestError("존재하지 않는 아파트입니다.");
@@ -25,12 +30,13 @@ export const signupUser = async (data: SignupUserRequestDTO) => {
   };
 
   const signupUser = await userRepository.createUser(user);
+  await notifyAdminsOfResidentSignup(apartment.userId, signupUser.name);
 
   return signupUser;
 };
 
 export const signupAdmin = async (data: SignupAdminRequestDTO) => {
-  const { username, password, contact, email } = data;
+  const { password } = data;
 
   const encryptedPassword = await hashPassword(password);
   const user = {
@@ -39,12 +45,13 @@ export const signupAdmin = async (data: SignupAdminRequestDTO) => {
   };
 
   const signupUser = await userRepository.createAdmin(user);
+  await notifySuperAdminsOfAdminSignup(signupUser.name);
 
   return signupUser;
 };
 
 export const signupSuperAdmin = async (data: SignupSuperAdminRequestDTO) => {
-  const { username, contact, email, password } = data;
+  const { password } = data;
 
   const encryptedPassword = await hashPassword(password);
   const user = {
@@ -86,17 +93,22 @@ export const updateUser = async (
   data: Partial<UpdateUserDTO>
 ): Promise<Users> => {
   const user = await userRepository.getUserId(id);
-  if (!user) {
-    throw new UnauthError();
-  }
 
   const { currentPassword, newPassword, profileImage } = data;
+
+  if ((currentPassword && !newPassword) || (!currentPassword && newPassword)) {
+    throw new BadRequestError(
+      "currentPassword와 newPassword를 모두 전달해야 합니다."
+    );
+  }
+
   const updateData: Partial<Users> = {};
+  let passwordChanged = false;
 
   if (currentPassword && newPassword) {
     const isPasswordValid = await bcrypt.compare(
       currentPassword,
-      user.encryptedPassword
+      user!.encryptedPassword
     );
 
     if (!isPasswordValid) {
@@ -105,12 +117,17 @@ export const updateUser = async (
 
     const hashedPassword = await hashPassword(newPassword);
     updateData.encryptedPassword = hashedPassword;
+    passwordChanged = true;
   }
 
   if (profileImage !== undefined) {
     updateData.profileImage = profileImage;
   }
   const updatedUser = await userRepository.updateUser(id, updateData);
+
+  if (passwordChanged) {
+    await deleteAllUserRefreshTokens(id); // 비밀번호 변경 시 사용자의 모든 쿠키 무효화하여 재로그인하도록 구현
+  }
 
   return updatedUser;
 };

@@ -16,12 +16,10 @@ jest.mock("@/services/pollService");
 describe("pollController.createPoll", () => {
   const validBody = {
     title: "테스트 투표",
-    description: "설명",
     startDate: new Date().toISOString(),
     endDate: new Date(Date.now() + 1000 * 60 * 60).toISOString(),
-    options: ["찬성", "반대"],
+    options: [{ title: "찬성" }, { title: "반대" }],
     buildingPermission: 0,
-    articleId: "article-uuid",
     apartmentId: "apt-uuid",
   };
 
@@ -51,23 +49,6 @@ describe("pollController.createPoll", () => {
 
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.send).toHaveBeenCalledWith(new registerSuccessMessage());
-  });
-
-  it("로그인하지 않은 경우 UnauthError", async () => {
-    const req: any = { body: validBody, user: undefined };
-    const res = mockRes();
-
-    await expect(createPoll(req, res)).rejects.toThrow(UnauthError);
-  });
-
-  it("일반 사용자 접근 시 AccessDeniedError", async () => {
-    const req: any = {
-      body: validBody,
-      user: { userId: "user-id", role: "USER" },
-    };
-    const res = mockRes();
-
-    await expect(createPoll(req, res)).rejects.toThrow(ForbiddenError);
   });
 });
 
@@ -144,7 +125,7 @@ describe("pollController.getPoll", () => {
       id: "poll-123",
       title: "투표 제목",
       description: "설명",
-      options: ["찬성", "반대"],
+      options: [{ title: "찬성" }, { title: "반대" }],
     };
 
     (pollService.getPoll as jest.Mock).mockResolvedValue(mockDetail);
@@ -168,13 +149,11 @@ describe("pollController.editPoll", () => {
 
   const mockBody = {
     title: "수정된 제목",
-    description: "수정된 내용",
     startDate: new Date(Date.now() + 1000 * 60 * 60).toISOString(),
     endDate: new Date(Date.now() + 1000 * 60 * 60 * 2).toISOString(),
-    options: ["찬성", "반대"],
+    options: [{ title: "찬성" }, { title: "반대" }],
     buildingPermission: 0,
     status: "PENDING",
-    articleId: "article-id",
     apartmentId: "apt-id",
   };
 
@@ -189,7 +168,6 @@ describe("pollController.editPoll", () => {
     const mockResult = {
       id: "poll-123",
       title: "수정된 제목",
-      description: "수정된 내용",
     };
 
     (pollService.editPoll as jest.Mock).mockResolvedValue(mockResult);
@@ -204,16 +182,6 @@ describe("pollController.editPoll", () => {
     );
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(mockResult);
-  });
-
-  it("비로그인 사용자 UnauthError 발생", async () => {
-    const req: any = {
-      params: { pollId: "poll-123" },
-      body: mockBody,
-    };
-    const res = mockRes();
-
-    await expect(editPoll(req, res)).rejects.toThrow(UnauthError);
   });
 });
 

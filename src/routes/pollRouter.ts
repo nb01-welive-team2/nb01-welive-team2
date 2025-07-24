@@ -8,12 +8,39 @@ import {
   getPollList,
 } from "../controllers/pollController";
 import authenticate from "@/middlewares/authenticate";
+import { requireRole } from "@/middlewares/requireRole";
+import { USER_ROLE } from "@prisma/client";
 
 const pollsRouter = express.Router();
-pollsRouter.get("/:pollId", authenticate(), withAsync(getPoll));
-pollsRouter.put("/:pollId", authenticate(), withAsync(editPoll));
-pollsRouter.delete("/:pollId", authenticate(), withAsync(removePoll));
-pollsRouter.post("/", authenticate(), withAsync(createPoll));
-pollsRouter.get("/", authenticate(), withAsync(getPollList));
+pollsRouter.get(
+  "/:pollId",
+  authenticate(),
+  requireRole([USER_ROLE.ADMIN, USER_ROLE.USER]),
+  withAsync(getPoll)
+);
+pollsRouter.put(
+  "/:pollId",
+  authenticate(),
+  requireRole([USER_ROLE.ADMIN]),
+  withAsync(editPoll)
+);
+pollsRouter.delete(
+  "/:pollId",
+  authenticate(),
+  requireRole([USER_ROLE.ADMIN]),
+  withAsync(removePoll)
+);
+pollsRouter.post(
+  "/",
+  authenticate(),
+  requireRole([USER_ROLE.ADMIN]),
+  withAsync(createPoll)
+);
+pollsRouter.get(
+  "/",
+  authenticate(),
+  requireRole([USER_ROLE.ADMIN, USER_ROLE.USER]),
+  withAsync(getPollList)
+);
 
 export default pollsRouter;

@@ -77,6 +77,15 @@ interface Complaints {
   complaintStatus: COMPLAINT_STATUS;
 }
 
+interface ComplaintComments {
+  id: string;
+  complaintId: string;
+  userId: string;
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 interface Polls {
   id: string;
   userId: string;
@@ -113,6 +122,15 @@ interface Notices {
   category: NOTICE_CATEGORY;
   viewCount: number;
   eventId: string;
+}
+
+interface NoticeComments {
+  id: string;
+  noticeId: string;
+  userId: string;
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface Events {
@@ -236,6 +254,17 @@ const mockComplaints: Complaints[] = [
   },
 ];
 
+const mockComplaintComments: ComplaintComments[] = [
+  {
+    id: "e1f2d3c4-b5a6-7d8e-9f0a-b1c2d3e4f5a6",
+    complaintId: "693cd12f-d156-4e07-9934-ad02a4fce664",
+    userId: "18c35b60-b56c-470d-8713-73446c585859",
+    content: "I agree, the noise is unbearable.",
+    createdAt: new Date("2024-04-02T08:00:00Z"),
+    updatedAt: new Date("2024-04-02T09:00:00Z"),
+  },
+];
+
 const mockEvents: Events[] = [
   {
     id: "3f8d3f9e-5b6a-4c4e-8a3b-1c7a7e5e7c2f",
@@ -256,9 +285,9 @@ const mockPolls: Polls[] = [
     apartmentId: "2149430f-2892-463f-b3e7-4e893548c6d6",
     title: "Vote on new playground",
     content: "Please vote for the playground location.",
-    startDate: new Date("2025-12-01T00:00:00Z"),
-    endDate: new Date("2025-12-10T00:00:00Z"),
-    status: POLL_STATUS.IN_PROGRESS,
+    startDate: new Date("2026-05-01T00:00:00Z"),
+    endDate: new Date("2026-06-10T00:00:00Z"),
+    status: POLL_STATUS.PENDING,
     buildingPermission: 1,
     eventId: "3f8d3f9e-5b6a-4c4e-8a3b-1c7a7e5e7c2f", // Poll event
   },
@@ -291,12 +320,23 @@ const mockNotices: Notices[] = [
     apartmentId: "2149430f-2892-463f-b3e7-4e893548c6d6",
     title: "Community Meeting",
     content: "Next community meeting is on May 1st.",
-    startDate: new Date("2024-04-25T00:00:00Z"),
-    endDate: new Date("2024-05-01T00:00:00Z"),
+    startDate: new Date("2025-04-25T00:00:00Z"),
+    endDate: new Date("2025-05-01T00:00:00Z"),
     isPinned: true,
     category: NOTICE_CATEGORY.COMMUNITY,
     viewCount: 50,
     eventId: "a7e21d2d-0b49-4e9a-97cb-66df3e3bfb74", // Notice event
+  },
+];
+
+const mockNoticeComments: NoticeComments[] = [
+  {
+    id: "d3c4a1f2-b6a5-4d7e-8f09-c1d2e3f4a5b6",
+    noticeId: "f1c531ea-8f03-4f12-a8bb-7899148354df",
+    userId: "18c35b60-b56c-470d-8713-73446c585859",
+    content: "Looking forward to the meeting!",
+    createdAt: new Date("2025-04-26T10:00:00Z"),
+    updatedAt: new Date("2025-04-26T11:00:00Z"),
   },
 ];
 
@@ -337,4 +377,6 @@ export {
   mockVotes,
   mockNotices,
   mockNotifications,
+  mockComplaintComments,
+  mockNoticeComments,
 };

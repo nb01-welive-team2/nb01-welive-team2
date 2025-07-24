@@ -125,12 +125,11 @@ describe("PollController Logined", () => {
   describe("PUT /api/polls/:pollId", () => {
     it("should edit poll and return 200 with updated data", async () => {
       const validBody = {
-        userId: "0f9e7654-dfbb-46df-b93c-cc491ff9f5bd", //bob admin
         title: "제 2회 돌려돌려 돌림판",
         content: "관리비 몰빵 묻고 더블로 갑니다.",
         buildingPermission: 0,
-        startDate: "2025-06-11T12:00:00.000Z",
-        endDate: "2025-06-12T20:00:00.000Z",
+        startDate: "2026-06-11T12:00:00.000Z",
+        endDate: "2026-06-12T20:00:00.000Z",
         status: "PENDING",
         options: [
           {
@@ -147,7 +146,7 @@ describe("PollController Logined", () => {
     });
 
     it("should return 400 if required fields are missing", async () => {
-      const invalidBody = { title: "제목만 있음" };
+      const invalidBody = {};
       const response = await agent
         .put(`/api/polls/${mockPolls[0].id}`)
         .send(invalidBody);
@@ -181,7 +180,6 @@ describe("PollController Logined", () => {
 
     it("should return 404 if article not found", async () => {
       const validBody = {
-        userId: "0f9e7654-dfbb-46df-b93c-cc491ff9f5bd", //bob admin
         title: "제 2회 돌려돌려 돌림판",
         content: "관리비 몰빵 묻고 더블로 갑니다.",
         buildingPermission: 0,

@@ -73,13 +73,6 @@ describe("Notice Controller", () => {
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.send).toHaveBeenCalledWith(expect.any(registerSuccessMessage));
     });
-
-    it("should throw ForbiddenError if not admin", async () => {
-      const req: any = { body: {}, ...mockUser(USER_ROLE.USER) };
-      await expect(createNotice(req, mockResponse())).rejects.toThrow(
-        ForbiddenError
-      );
-    });
   });
 
   describe("getNoticeList", () => {
@@ -126,13 +119,6 @@ describe("Notice Controller", () => {
         limit: 10,
       });
       expect(res.send).toHaveBeenCalledWith(expect.any(ResponseNoticeListDTO));
-    });
-
-    it("should throw ForbiddenError if SUPER_ADMIN", async () => {
-      const req: any = { query: {}, ...mockUser(USER_ROLE.SUPER_ADMIN) };
-      await expect(getNoticeList(req, mockResponse())).rejects.toThrow(
-        ForbiddenError
-      );
     });
   });
 
@@ -199,13 +185,6 @@ describe("Notice Controller", () => {
         expect.any(ResponseNoticeCommentDTO)
       );
     });
-
-    it("should throw ForbiddenError if SUPER_ADMIN", async () => {
-      const req: any = { params: {}, ...mockUser(USER_ROLE.SUPER_ADMIN) };
-      await expect(getNotice(req, mockResponse())).rejects.toThrow(
-        ForbiddenError
-      );
-    });
   });
 
   describe("editNotice", () => {
@@ -254,13 +233,6 @@ describe("Notice Controller", () => {
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.send).toHaveBeenCalledWith(expect.any(ResponseNoticeDTO));
     });
-
-    it("should throw ForbiddenError if not admin", async () => {
-      const req: any = { body: {}, params: {}, ...mockUser(USER_ROLE.USER) };
-      await expect(editNotice(req, mockResponse())).rejects.toThrow(
-        ForbiddenError
-      );
-    });
   });
 
   describe("removeNotice", () => {
@@ -275,13 +247,6 @@ describe("Notice Controller", () => {
       expect(noticeService.removeNotice).toHaveBeenCalledWith("notice-uuid");
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.send).toHaveBeenCalledWith(expect.any(removeSuccessMessage));
-    });
-
-    it("should throw ForbiddenError if not admin", async () => {
-      const req: any = { params: {}, ...mockUser(USER_ROLE.USER) };
-      await expect(removeNotice(req, mockResponse())).rejects.toThrow(
-        ForbiddenError
-      );
     });
   });
 });

@@ -14,12 +14,9 @@ import {
 } from "superstruct";
 import { validate as validateUUID } from "uuid";
 
-export const emailRegExp = pattern(
-  string(),
-  /^[\w.-]+@([\w.-]+\.)+[\w]{2,4}$/i
-);
-
-export const UUID = refine(string(), "UUID", (value) => validateUUID(value));
+export const UUID = refine(string(), "UUID", (value) => {
+  return validateUUID(value);
+});
 
 // export const phoneNumberRegExp = pattern(string(), /^\d{2,3}-\d{3,4}-\d{4}$/);
 
@@ -66,8 +63,6 @@ export const DateTimeStringStruct = define<string>(
 export const PageParamsStruct = object({
   page: defaulted(integerString, 1),
   limit: defaulted(integerString, 11),
-  // searchBy: optional(string()),
-  // keyword: optional(string()),
 });
 export type PageParamsType = Infer<typeof PageParamsStruct>;
 

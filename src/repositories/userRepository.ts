@@ -12,10 +12,18 @@ export const getUserByUsername = async (username: string) => {
     where: { username },
     include: {
       apartmentInfo: {
-        select: { id: true },
+        select: {
+          id: true,
+          apartmentName: true,
+        },
       },
       userInfo: {
-        select: { id: true, apartmentId: true },
+        select: {
+          id: true,
+          apartmentId: true,
+          apartmentName: true,
+          apartmentDong: true,
+        },
       },
     },
   });
@@ -30,16 +38,27 @@ export const getUserId = async (id: string) => {
       apartmentInfo: {
         select: { id: true },
       },
+      userInfo: {
+        select: { apartmentId: true },
+      },
     },
   });
-  return user;
+  return user
+    ? {
+        ...user,
+        apartmentId:
+          user.role === USER_ROLE.USER
+            ? (user.userInfo?.apartmentId ?? null)
+            : (user.apartmentInfo?.id ?? null),
+      }
+    : null;
 };
 
 export const createUser = async (input: SignupUserRequestDTO) => {
-  const apartment = await findApartment(input.apartmentName); // TODO: 프로젝트 합친 후 apartment관련 리포지토리 있으면 거기에 맞춰 수정
-
+  const apartment = await findApartment(input.apartmentName);
   const user = await prisma.users.create({
     data: {
+      id: input.id,
       username: input.username,
       encryptedPassword: input.password,
       contact: input.contact,
@@ -60,6 +79,7 @@ export const createUser = async (input: SignupUserRequestDTO) => {
       },
     },
     select: {
+      id: true,
       username: true,
       encryptedPassword: true,
       contact: true,
@@ -84,6 +104,7 @@ export const createUser = async (input: SignupUserRequestDTO) => {
 export const createAdmin = async (input: SignupAdminRequestDTO) => {
   const user = await prisma.users.create({
     data: {
+      id: input.id,
       username: input.username,
       encryptedPassword: input.password,
       contact: input.contact,
@@ -111,6 +132,7 @@ export const createAdmin = async (input: SignupAdminRequestDTO) => {
       },
     },
     select: {
+      id: true,
       username: true,
       encryptedPassword: true,
       contact: true,
@@ -144,6 +166,7 @@ export const createAdmin = async (input: SignupAdminRequestDTO) => {
 export const createSuperAdmin = async (input: SignupSuperAdminRequestDTO) => {
   const user = await prisma.users.create({
     data: {
+      id: input.id,
       username: input.username,
       encryptedPassword: input.password,
       contact: input.contact,
@@ -157,14 +180,6 @@ export const createSuperAdmin = async (input: SignupSuperAdminRequestDTO) => {
 
   return user;
 };
-
-// export const findUserEmail = async (email: string) => {
-//   const data = await prisma.users.findUnique({
-//     where: { email },
-//   });
-
-//   return data;
-// };
 
 export const findApartment = async (apartmentName: string) => {
   const data = await prisma.apartmentInfo.findFirst({

@@ -1,4 +1,4 @@
-import { optional } from "superstruct";
+import { getUserId } from "@/repositories/userRepository";
 import UnauthError from "../errors/UnauthError";
 import {
   ACCESS_TOKEN_COOKIE_NAME,
@@ -6,6 +6,8 @@ import {
 } from "../lib/constance";
 import { verifyAccessToken, verifyRefreshToken } from "../lib/utils/token";
 import { NextFunction, Request, RequestHandler, Response } from "express";
+import { AuthenticatedUser } from "@/types/User";
+import { redis } from "@/lib/redis";
 
 /**
  * authenticate 미들웨어 사용방법
@@ -16,6 +18,28 @@ import { NextFunction, Request, RequestHandler, Response } from "express";
  * [ex] authRouter.post("/refresh", authenticate({ optional: true }), withAsync(refreshToken));
  **/
 
+async function verifyAccessTokenNUser(accessToken: string) {
+  const { userId, role, apartmentId, jti } = verifyAccessToken(accessToken);
+  const isBlacklisted = await redis.get(`blacklist:access_token:${jti}`);
+
+  if (isBlacklisted) {
+    throw new UnauthError();
+  }
+
+  const user = await getUserId(userId);
+
+  if (
+    !user ||
+    user.id !== userId ||
+    user.role !== role ||
+    user.apartmentId !== apartmentId
+  ) {
+    throw new UnauthError();
+  }
+
+  return { userId, role, apartmentId };
+}
+
 function authenticate(options = { optional: false }): RequestHandler {
   return async (req: Request, res: Response, next: NextFunction) => {
     const accessToken = req.cookies[ACCESS_TOKEN_COOKIE_NAME];
@@ -23,12 +47,12 @@ function authenticate(options = { optional: false }): RequestHandler {
 
     if (!options.optional) {
       if (!accessToken) {
+        req.resume();
         return next(new UnauthError());
       }
-
       try {
-        const { userId, role, apartmentId } = verifyAccessToken(accessToken);
-        req.user = { userId, role, apartmentId };
+        const userData = await verifyAccessTokenNUser(accessToken);
+        req.user = userData as AuthenticatedUser;
         return next();
       } catch (error) {
         return next(new UnauthError());
@@ -40,7 +64,18 @@ function authenticate(options = { optional: false }): RequestHandler {
 
       try {
         const { userId, role, apartmentId } = verifyRefreshToken(refreshToken);
-        req.user = { userId, role, apartmentId };
+        const user = await getUserId(userId);
+
+        if (
+          !user ||
+          user.id !== userId ||
+          user.role !== role ||
+          user.apartmentId !== apartmentId
+        ) {
+          return next(new UnauthError());
+        }
+
+        req.user = { userId, role, apartmentId } as AuthenticatedUser;
         return next();
       } catch (error) {
         return next(new UnauthError());
@@ -50,7 +85,7 @@ function authenticate(options = { optional: false }): RequestHandler {
 }
 
 export function optionalAuth(): RequestHandler {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     const accessToken = req.cookies[ACCESS_TOKEN_COOKIE_NAME];
 
     if (!accessToken) {
@@ -58,8 +93,26 @@ export function optionalAuth(): RequestHandler {
     }
 
     try {
-      const { userId, role, apartmentId } = verifyAccessToken(accessToken);
-      req.user = { userId, role, apartmentId };
+      const userData = await verifyAccessTokenNUser(accessToken);
+      req.user = userData as AuthenticatedUser;
+    } catch (error) {
+      return next(new UnauthError());
+    }
+    return next();
+  };
+}
+
+export function queryAuth(): RequestHandler {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    const accessToken = req.query.token as string;
+
+    if (!accessToken) {
+      return next(new UnauthError());
+    }
+
+    try {
+      const userData = await verifyAccessTokenNUser(accessToken);
+      req.user = userData as AuthenticatedUser;
     } catch (error) {
       return next(new UnauthError());
     }

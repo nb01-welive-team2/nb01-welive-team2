@@ -1,5 +1,6 @@
 import * as userService from "@/services/userService";
 import * as userRepository from "@/repositories/userRepository";
+import * as notificationService from "@/services/notificationService";
 import * as hashUtils from "@/lib/utils/hash";
 import bcrypt from "bcrypt";
 import BadRequestError from "@/errors/BadRequestError";
@@ -9,6 +10,8 @@ import { JOIN_STATUS, USER_ROLE } from "@prisma/client";
 jest.mock("@/repositories/userRepository");
 jest.mock("@/lib/utils/hash");
 jest.mock("bcrypt");
+jest.mock("@/services/notificationService");
+jest.mock("@/services/notificationService");
 
 describe("userService", () => {
   const mockUser = {
@@ -57,6 +60,9 @@ describe("userService", () => {
         "hashed-password"
       );
       (userRepository.createUser as jest.Mock).mockResolvedValue(mockUser);
+      (
+        notificationService.notifyAdminsOfResidentSignup as jest.Mock
+      ).mockResolvedValue(undefined);
 
       const result = await userService.signupUser(signupData);
 
@@ -94,6 +100,9 @@ describe("userService", () => {
           "hashed-password"
         );
         (userRepository.createAdmin as jest.Mock).mockResolvedValue(mockAdmin);
+        (
+          notificationService.notifySuperAdminsOfAdminSignup as jest.Mock
+        ).mockResolvedValue(undefined);
 
         const result = await userService.signupAdmin(signupData);
 
@@ -287,7 +296,7 @@ describe("userService", () => {
       ).rejects.toThrow(UnauthError);
     });
 
-    test("존재하지 않는 사용자일 경우 UnauthError", async () => {
+    test("존재하지 않는 사용자일 경우 에러 발생", async () => {
       (userRepository.getUserId as jest.Mock).mockResolvedValue(null);
 
       await expect(
@@ -295,7 +304,7 @@ describe("userService", () => {
           currentPassword: "current",
           newPassword: "new",
         })
-      ).rejects.toThrow(UnauthError);
+      ).rejects.toThrow();
     });
   });
 

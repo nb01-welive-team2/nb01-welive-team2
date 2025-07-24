@@ -8,7 +8,7 @@ const imagesRouter = express.Router();
 
 imagesRouter.post(
   "/avatar",
-  authenticate(),
+  authenticate({ optional: false }),
   uploader.single("image"),
   withAsync(uploadImage)
 );

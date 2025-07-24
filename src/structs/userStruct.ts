@@ -8,9 +8,9 @@ import {
   size,
   Infer,
   pattern,
-  partial,
   nullable,
-  assign,
+  boolean,
+  coerce,
 } from "superstruct";
 
 const strictEmailRegex = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
@@ -36,6 +36,7 @@ const baseUserStruct = object({
   email: pattern(string(), strictEmailRegex),
   role: enums(["USER", "ADMIN", "SUPER_ADMIN"]),
   profileImage: optional(size(string(), 0, 2048)),
+  isActive: optional(require("superstruct").defaulted(boolean(), true)),
 });
 
 export const signupUserStruct = object({
@@ -85,9 +86,15 @@ const PasswordStruct = object({
 export const UpdatePasswordBodyStruct = PasswordStruct;
 export type UpdatePasswordDTO = Infer<typeof UpdatePasswordBodyStruct>;
 
+const EmptyToUndefinedPassword = coerce(
+  optional(password),
+  string(),
+  (value) => (value === "" ? undefined : value)
+);
+
 export const UpdateUserBodyStruct = object({
-  currentPassword: optional(nullable(password)),
-  newPassword: optional(nullable(password)),
+  currentPassword: EmptyToUndefinedPassword,
+  newPassword: EmptyToUndefinedPassword,
   profileImage: optional(nullable(string())),
 });
 

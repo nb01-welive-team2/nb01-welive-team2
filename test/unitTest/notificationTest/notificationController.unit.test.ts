@@ -1,11 +1,16 @@
 import {
-  getNotificationsHandler,
-  getNotificationByIdHandler,
+  sseNotificationHandler,
   patchNotificationHandler,
-  createNotificationHandler,
+  getUnreadNotificationCountHandler,
+  markAllNotificationsAsReadHandler,
 } from "@/controllers/notificationController";
-
-import * as notificationService from "@/services/notificationService";
+import {
+  getNotifications,
+  updateNotification,
+  countUnreadNotifications,
+  markAllNotificationsAsRead,
+} from "@/services/notificationService";
+import { sseConnections } from "@/lib/sseHandler";
 import { NOTIFICATION_TYPE } from "@prisma/client";
 
 jest.mock("@/services/notificationService");
@@ -13,98 +18,77 @@ jest.mock("@/services/notificationService");
 describe("notificationController", () => {
   afterEach(() => {
     jest.clearAllMocks();
+    sseConnections.clear();
   });
 
-  describe("getNotificationsHandler", () => {
-    it("userId 없이 요청 시 400 응답", async () => {
-      const req = { query: {} } as any;
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
+  describe("sseNotificationHandler", () => {
+    it("SSE 연결 시 헤더 설정, sseConnections 저장 및 초기 알림 전송", async () => {
+      const mockRes = {
+        setHeader: jest.fn(),
+        write: jest.fn(),
+        end: jest.fn(),
+      } as any;
+      const mockReq = {
+        user: { userId: "user-1" },
+        on: jest.fn(),
+        query: { closeAfter: "100" },
       } as any;
 
-      await getNotificationsHandler(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        code: 400,
-        message: "요청 형식이 올바르지 않습니다.",
-        data: null,
-      });
-    });
-
-    it("정상 요청 시 서비스 호출 및 200 응답", async () => {
-      const mockNotifications = [
+      (getNotifications as jest.Mock).mockResolvedValue([
         {
           id: "n-1",
-          userId: "u-1",
+          content: "알림 내용",
           notificationType: NOTIFICATION_TYPE.공지_등록,
-          content: "공지입니다",
-          isChecked: false,
           notifiedAt: new Date(),
+          isChecked: false,
           complaintId: null,
-          noticeId: null,
+          noticeId: "notice-1",
           pollId: null,
         },
-      ];
+      ]);
 
-      (notificationService.getNotifications as jest.Mock).mockResolvedValue(
-        mockNotifications
+      await sseNotificationHandler(mockReq, mockRes);
+
+      expect(mockRes.setHeader).toHaveBeenCalledWith(
+        "Content-Type",
+        "text/event-stream"
       );
-
-      const req = { query: { userId: "u-1", isRead: "false" } } as any;
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
-      } as any;
-
-      await getNotificationsHandler(req, res);
-
-      expect(notificationService.getNotifications).toHaveBeenCalledWith(
-        "u-1",
-        false
+      expect(sseConnections.has("user-1")).toBe(true);
+      expect(mockRes.write).toHaveBeenCalledWith(
+        expect.stringContaining("data:")
       );
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalled();
     });
-  });
 
-  describe("getNotificationByIdHandler", () => {
-    it("없는 알림일 경우 404 응답", async () => {
-      (notificationService.getNotificationById as jest.Mock).mockResolvedValue(
-        null
-      );
-
-      const req = { params: { id: "n-x" } } as any;
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
+    it("연결 종료 시 cleanup 수행", async () => {
+      const mockRes = {
+        setHeader: jest.fn(),
+        write: jest.fn(),
+        end: jest.fn(),
+      } as any;
+      const mockReq = {
+        user: { userId: "user-1" },
+        on: jest.fn(),
+        query: { closeAfter: "1000" },
       } as any;
 
-      await getNotificationByIdHandler(req, res);
+      (getNotifications as jest.Mock).mockResolvedValue([]);
 
-      expect(res.status).toHaveBeenCalledWith(404);
+      await sseNotificationHandler(mockReq, mockRes);
+
+      const closeHandler = mockReq.on.mock.calls.find(
+        (c: string[]) => c[0] === "close"
+      )[1];
+
+      closeHandler();
+
+      expect(sseConnections.has("user-1")).toBe(false);
+      expect(mockRes.end).toHaveBeenCalled();
     });
   });
 
   describe("patchNotificationHandler", () => {
-    it("isRead가 boolean이 아니면 400 응답", async () => {
-      const req = {
-        params: { id: "n-1" },
-        body: { isRead: "true" },
-      } as any;
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
-      } as any;
-
-      await patchNotificationHandler(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-    });
-
-    it("정상 요청 시 서비스 호출 및 200 응답", async () => {
-      (notificationService.updateNotification as jest.Mock).mockResolvedValue({
+    it("알림 읽음 처리 성공 시 200 응답", async () => {
+      (updateNotification as jest.Mock).mockResolvedValue({
         id: "n-1",
         userId: "u-1",
         notificationType: NOTIFICATION_TYPE.공지_등록,
@@ -117,7 +101,7 @@ describe("notificationController", () => {
       });
 
       const req = {
-        params: { id: "n-1" },
+        params: { notificationId: "9b5c0b74-6a40-4e2b-a5c1-8d1f6f7d3d6b" },
         body: { isRead: true },
       } as any;
       const res = {
@@ -127,83 +111,65 @@ describe("notificationController", () => {
 
       await patchNotificationHandler(req, res);
 
-      expect(notificationService.updateNotification).toHaveBeenCalledWith(
-        "n-1",
+      expect(updateNotification).toHaveBeenCalledWith(
+        "9b5c0b74-6a40-4e2b-a5c1-8d1f6f7d3d6b",
         true
       );
       expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          code: 200,
+          message: "알림 상태가 업데이트되었습니다.",
+          data: expect.objectContaining({
+            id: expect.any(String), // ✅ 고정 UUID 대신 any String으로 체크
+            isRead: true,
+          }),
+        })
+      );
     });
   });
 
-  describe("createNotificationHandler", () => {
-    it("필수값 누락 시 400", async () => {
-      const req = {
-        body: { userId: "u-1", content: "내용만 있음" },
-      } as any;
+  describe("getUnreadNotificationCountHandler", () => {
+    it("읽지 않은 알림 개수 조회 성공", async () => {
+      (countUnreadNotifications as jest.Mock).mockResolvedValue(5);
+
+      const req = { user: { id: "u-123" } } as any;
       const res = {
         status: jest.fn().mockReturnThis(),
         json: jest.fn(),
       } as any;
 
-      await createNotificationHandler(req, res);
+      await getUnreadNotificationCountHandler(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-    });
-
-    it("유효하지 않은 enum 값일 경우 400", async () => {
-      const req = {
-        body: {
-          userId: "u-1",
-          type: "WRONG_ENUM",
-          content: "내용",
-        },
-      } as any;
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
-      } as any;
-
-      await createNotificationHandler(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-    });
-
-    it("정상 요청 시 201 응답", async () => {
-      (notificationService.createNotification as jest.Mock).mockResolvedValue({
-        id: "n-1",
-        userId: "u-1",
-        notificationType: NOTIFICATION_TYPE.공지_등록,
-        content: "공지입니다",
-        isChecked: false,
-        notifiedAt: new Date(),
-        complaintId: null,
-        noticeId: null,
-        pollId: null,
+      expect(countUnreadNotifications).toHaveBeenCalledWith("u-123");
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        code: 200,
+        message: "읽지 않은 알림 개수 조회에 성공했습니다.",
+        data: { count: 5 },
       });
+    });
+  });
 
-      const req = {
-        body: {
-          userId: "u-1",
-          type: NOTIFICATION_TYPE.공지_등록,
-          content: "공지입니다",
-        },
-      } as any;
+  describe("markAllNotificationsAsReadHandler", () => {
+    it("모든 알림 읽음 처리 성공", async () => {
+      (markAllNotificationsAsRead as jest.Mock).mockResolvedValue(undefined);
 
+      const req = { user: { id: "u-123" } } as any;
       const res = {
         status: jest.fn().mockReturnThis(),
         json: jest.fn(),
       } as any;
 
-      await createNotificationHandler(req, res);
+      await markAllNotificationsAsReadHandler(req, res);
 
-      expect(notificationService.createNotification).toHaveBeenCalledWith(
-        expect.objectContaining({
-          userId: "u-1",
-          type: NOTIFICATION_TYPE.공지_등록,
-          content: "공지입니다",
-        })
-      );
-      expect(res.status).toHaveBeenCalledWith(201);
+      expect(markAllNotificationsAsRead).toHaveBeenCalledWith("u-123");
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        code: 200,
+        message: "모든 알림이 읽음 처리되었습니다.",
+        data: null,
+      });
     });
   });
 });
