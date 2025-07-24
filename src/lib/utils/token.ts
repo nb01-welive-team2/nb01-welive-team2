@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import {
   JWT_ACCESS_TOKEN_SECRET,
   JWT_REFRESH_TOKEN_SECRET,
-} from "../constance";
+} from "@/lib/constance";
 import UnauthError from "../../errors/UnauthError";
 import { USER_ROLE } from "@prisma/client";
 import { v4 as uuid } from "uuid";
