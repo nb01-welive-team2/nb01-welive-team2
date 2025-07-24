@@ -103,21 +103,17 @@ export const sseNotificationHandler = async (req: Request, res: Response) => {
   // 클라이언트가 closeAfter 쿼리 파라미터를 보낸 경우 일정 시간 후 연결 종료
   if (
     process.env.NODE_ENV !== "production" ||
-    req.originalUrl.startsWith("/swagger")
+    req.originalUrl.startsWith("/swagger") ||
+    req.query.closeAfter
   ) {
-    setTimeout(() => {
-      clearInterval(intervalId);
-      sseConnections.delete(userId);
-      res.end();
-    }, 100);
-    if (req.query.closeAfter) {
-      setTimeout(
-        () => {
-          res.end();
-        },
-        parseInt(req.query.closeAfter as string, 10)
-      );
-    }
+    setTimeout(
+      () => {
+        clearInterval(intervalId);
+        sseConnections.delete(userId);
+        res.end();
+      },
+      parseInt(req.query.closeAfter as string, 10)
+    );
   }
 };
 
@@ -286,7 +282,7 @@ export const getUnreadNotificationCountHandler = async (
 /**
  * @openapi
  * /api/notifications/mark-all-read:
- *   patch:
+ *   post:
  *     summary: 모든 알림 읽음 처리
  *     description: 현재 로그인한 사용자의 모든 알림을 읽음 처리합니다. (테스트는 관리자 계정)
  *     tags:

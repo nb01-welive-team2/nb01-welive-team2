@@ -47,11 +47,9 @@ describe("Notification API Integration Test", () => {
    */
   describe("GET /api/notifications/sse", () => {
     it("SSE 연결 성공", async () => {
-      console.log("token", token);
       const res = await agent.get(
         `/api/notifications/sse?token=${token}&closeAfter=1000`
       );
-      console.log("res header", res.headers);
       expect(res.status).toBe(200);
       expect(res.headers["content-type"]).toContain("text/event-stream");
     });
