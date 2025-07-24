@@ -65,7 +65,7 @@ export async function createComment(req: Request, res: Response) {
 /**
  * @swagger
  * /api/comments/{commentId}:
- *   patch:
+ *   put:
  *     summary: 댓글 수정
  *     description: 기존 댓글을 수정합니다.
  *     tags:
@@ -77,7 +77,7 @@ export async function createComment(req: Request, res: Response) {
  *         schema:
  *           type: string
  *         description: 수정할 댓글의 ID
- *         example: "25693b94-f02a-4034-8e14-c01df1760b20"
+ *         example: "8970c938-0a68-4da1-9dc0-31c63ce1cb44"
  *     requestBody:
  *       required: true
  *       content:
@@ -91,9 +91,9 @@ export async function createComment(req: Request, res: Response) {
  *                 example: 사실 안 시끄러워요
  *               boardType:
  *                 type: string
- *                 enum: [NOTICE, VOTE, COMPLAINT]
+ *                 enum: NOTICE
  *                 description: 게시판 유형 (CommentCategoryEnum)
- *                 example: COMPLAINT
+ *                 example: NOTICE
  *               boardId:
  *                 type: string
  *                 description: 관련 게시글 ID (complaintId, noticeId, pollId 중 하나)
@@ -134,17 +134,18 @@ export async function editComment(req: Request, res: Response) {
 
 /**
  * @swagger
- * /comments/{commentId}:
+ * /api/comments/{commentId}:
  *   delete:
  *     summary: 댓글 삭제
  *     description: 특정 댓글을 삭제합니다. 로그인된 사용자만 가능.
  *     tags:
- *       - Comment
+ *       - Comments
  *     parameters:
  *       - name: commentId
  *         in: path
  *         required: true
  *         description: 삭제할 댓글의 ID
+ *         example: "8970c938-0a68-4da1-9dc0-31c63ce1cb44"
  *         schema:
  *           type: string
  *           format: uuid
@@ -158,7 +159,7 @@ export async function editComment(req: Request, res: Response) {
  *               properties:
  *                 message:
  *                   type: string
- *                   example: 댓글 삭제 완료
+ *                   example: "정상적으로 삭제 처리 되었습니다"
  *       401:
  *         description: 인증 실패
  *       403:

@@ -7,7 +7,7 @@ import { ResponseOptionDTO, ResponseWinnerOptionDTO } from "@/dto/optionDTO";
 
 /**
  * @openapi
- * /api/options/{optionId}/vote:
+ * /api/options/:optionId/vote:
  *   post:
  *     summary: 투표 옵션에 투표하기
  *     description: 인증된 사용자가 특정 투표 옵션에 투표를 합니다. 중복 투표는 허용되지 않습니다.(테스트용 투표id는 관리자 기준)
@@ -22,20 +22,28 @@ import { ResponseOptionDTO, ResponseWinnerOptionDTO } from "@/dto/optionDTO";
  *         schema:
  *           type: string
  *           example: "33ec83f9-fd3c-4596-9825-65774f4b06fe"
- *         description: 투표할 옵션 ID
+ *         description: 선택된 투표 항목의 ID
  *     responses:
  *       201:
- *         description: 투표 생성 성공
+ *         description: 투표 성공
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ResponseWinnerOptionDTO'
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 201
+ *                 message:
+ *                   type: string
+ *                   example: Vote created successfully
+ *                 data:
+ *                   type: object
+ *                   description: 선택된 투표 옵션 객체
  *       400:
- *         description: 잘못된 요청 예 optionId 형식 오류
+ *         description: 잘못된 요청
  *       401:
  *         description: 인증 실패
- *       409:
- *         description: 이미 투표한 경우 중복 투표 오류
  */
 export async function voteOption(req: Request, res: Response) {
   const reqWithPayload = req as AuthenticatedRequest;
@@ -52,11 +60,11 @@ export async function voteOption(req: Request, res: Response) {
 }
 
 /**
- * @openapi
- * /api/options/{optionId}/vote:
+ * @swagger
+ * /api/options/:optionId/vote:
  *   delete:
- *     summary: 투표 옵션에 대한 투표 취소
- *     description: 인증된 사용자가 특정 투표 옵션에 대해 이미 한 투표를 취소합니다.(테스트용 취소id는 입주민 기준)
+ *     summary: 투표 취소
+ *     description: 사용자가 특정 옵션에 대해 했던 투표를 취소합니다.(테스트용 취소id는 입주민 기준)
  *     tags:
  *       - Pollsvote
  *     security:
