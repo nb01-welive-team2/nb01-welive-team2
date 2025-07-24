@@ -123,7 +123,7 @@ export const sseNotificationHandler = async (req: Request, res: Response) => {
  * /api/notifications/{notificationId}/read:
  *   patch:
  *     summary: 알림 읽음 상태 업데이트
- *     description: 특정 알림의 읽음 상태(`isRead`)를 true 또는 false로 변경합니다.
+ *     description: 특정 알림의 읽음 상태(`isRead`)를 true 또는 false로 변경합니다.(테스트용 알림id는 입주민기준)
  *     tags:
  *       - Notifications
  *     security:
@@ -135,6 +135,7 @@ export const sseNotificationHandler = async (req: Request, res: Response) => {
  *         schema:
  *           type: string
  *           format: uuid
+ *           example: "58d3088a-ff7d-4987-8966-2d97867107ab"
  *         description: 업데이트할 알림의 ID
  *     requestBody:
  *       required: true
@@ -234,7 +235,7 @@ export const patchNotificationHandler = async (
  * /api/notifications/me/unread-count:
  *   get:
  *     summary: 읽지 않은 알림 개수 조회
- *     description: 로그인된 사용자의 읽지 않은 알림 개수를 반환합니다.
+ *     description: 로그인된 사용자의 읽지 않은 알림 개수를 반환합니다.(테스트는 입주민계정)
  *     tags:
  *       - Notifications
  *     security:
@@ -284,7 +285,7 @@ export const getUnreadNotificationCountHandler = async (
  * /api/notifications/mark-all-read:
  *   patch:
  *     summary: 모든 알림 읽음 처리
- *     description: 현재 로그인한 사용자의 모든 알림을 읽음 처리합니다.
+ *     description: 현재 로그인한 사용자의 모든 알림을 읽음 처리합니다. (테스트는 관리자 계정)
  *     tags:
  *       - Notifications
  *     security:
