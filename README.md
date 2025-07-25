@@ -68,34 +68,34 @@
 │   ├── userController.ts
 │   └── authController.ts
 ├── 📂 dto
-│   └── user.dto.ts
+│   └── userDto.ts
 ├── 📂 errors
-│   └── errorHandler.ts
+│   └── UnauthError.ts
+│   └── ForbiddenError.ts
 ├── 📂 lib
-│   └── prismaClient.ts
+│   └── prisma.ts
+│   └── withAsync.ts
 ├── 📂 middlewares
-│   ├── authMiddleware.ts
-│   └── errorMiddleware.ts
+│   ├── authenticate.ts
+│   └── multer.ts
 ├── 📂 repositories
 │   ├── userRepository.ts
-│   └── groupRepository.ts
-├── 📂 request
-│   └── userRequest.ts
+│   └── pollRepository.ts
 ├── 📂 routes
-│   ├── userRoute.ts
-│   └── groupRoute.ts
+│   ├── optionRouter.ts
+│   └── eventRouter.ts
 ├── 📂 services
 │   ├── userService.ts
 │   └── authService.ts
-├── 📂 sockets
-│   └── socketHandler.ts
 ├── 📂 structs
 │   └── commonStruct.ts
+│   └── noticeStruct.ts
 ├── 📂 types
-│   └── index.d.ts
+│   └── express.d.ts
 ├── 📂 utils
-│   └── jwt.ts
-└── main.ts
+│   └── residentsQuery.ts
+└── app.ts
+└── server.ts
 📂 test
 ├── 📂 integrationTest
 │   ├── PollController.int.test.ts
@@ -104,17 +104,18 @@
 │   └── 📂 pollTest
 │        ├── pollController.unit.test.ts
 │        ├── pollRepository.unit.test.ts
-│        └── pollService.unit.test.ts 
+│        └── pollService.unit.test.ts
 ```
 
 ### 🚀 배포 AWS EC2
 
-http://ec2-13-125-152-161.ap-northeast-2.compute.amazonaws.com/swagger/
+http://codeit-nb1-2-welive.duckdns.org/
 
 ### 📊 ERD
 
 ![ERD](./erd.png)
 
-#### 프로젝트 회고록
+#### 결과자료
 
-[발표자료 링크 or 첨부파일]
+https://www.miricanvas.com/v/14wpzjs
+https://drive.google.com/file/d/1xEkPBEsTiaZPHbvLxNq3_cEaXILtxs1m/view
