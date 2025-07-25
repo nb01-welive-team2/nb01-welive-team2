@@ -117,5 +117,5 @@ http://codeit-nb1-2-welive.duckdns.org/
 
 #### 결과자료
 
-https://www.miricanvas.com/v/14wpzjs
+https://www.miricanvas.com/v/14wpzjs  
 https://drive.google.com/file/d/1xEkPBEsTiaZPHbvLxNq3_cEaXILtxs1m/view
